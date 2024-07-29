@@ -1,0 +1,382 @@
+<!-- 
+# The root configuration node is called <opencms> for all OpenCms configurations.
+-->
+<!ELEMENT opencms (ldap)>
+
+<!--
+# <ldap> configuration:
+# In this node the ldap specific options are configured.
+-->
+<!ELEMENT ldap (
+	ldap-group,
+	password,
+	enabled-cmsusers,
+	lookup-defaultusers?,
+	update-storage?, 
+	group-consistency,
+	sync-interval,
+	cache-live,
+	page-size?,
+	providers,
+	ou-definitions?,
+	group-definitions,
+	group-role-mappings?,
+	user-definitions
+)>
+
+<!--
+# The class of the driver
+-->
+<!ATTLIST ldap class CDATA #REQUIRED>
+
+<!--
+# A flag to configure if NO ldap users are enabled or not.
+# possible values are: true or false
+# default value: false
+-->
+<!ELEMENT lookup-defaultusers (#PCDATA)>
+
+<!--
+# A flag to configure if NO ldap users are enabled or not.
+# possible values are: true or false
+# default value: false
+-->
+<!ELEMENT enabled-cmsusers (#PCDATA)>
+
+<!--
+# A flag to indicate if the old (pre-1.0.0) ldap users and groups should be updated during the startup.
+# possible values are: true or false
+# default value: false
+# deprecated, this value is not longer used
+-->
+<!ELEMENT update-storage (#PCDATA)>
+
+<!--
+# A flag to indicate if the user names should be updated to LDAP case.
+# possible values are: true or false
+# This flag SHOULD be always true.
+# default value: true
+-->
+<!ELEMENT ensure-username-case (#PCDATA)>
+
+<!--
+# Indicates the group consistency level.
+# possible values are: 
+# none: No groups are synchronized at all
+# membership: Just the membership of the user to already synchronized groups is assured.
+# all: The same as membership and all missing groups will be created.
+# default value: all
+-->
+<!ELEMENT group-consistency (#PCDATA)>
+
+<!--
+# The name for the group of all LDAP users.
+# default value: Ldap Group
+-->
+<!ELEMENT ldap-group (#PCDATA)>
+
+<!--
+# If the default ldap group is enabled or not.
+-->
+<!ATTLIST ldap-group enabled (true|false) "true">
+
+<!--
+# A number representing the minimal time interval, in milliseconds, 
+# for ldap removed entries removal. 
+# If the parameter is missing or does not parse to a number, 
+# the feature will be disabled.
+-->
+<!ELEMENT sync-interval (#PCDATA)>
+
+<!--
+# A number representing the time to live, in milliseconds, of cached 
+# LDAP data. 
+# If the parameter is missing or does not parse to a number, the feature 
+# will be disabled. 
+# Following data is cached: all users, all groups, all users of a given 
+# group, and all groups of a given user.
+-->
+<!ELEMENT cache-live (#PCDATA)>
+
+<!--
+# A number representing the size of a page that will be returned for
+# search results. If the number is -1 then the paging is disabled. If the
+# number is positive then paging is activated with the given size and
+# a LdapContext instead of a DirContext will be used to bind
+# to the server. For that feature Java Version 1.5 is required.
+# default value: -1
+-->
+<!ELEMENT page-size (#PCDATA)>
+
+<!--
+# The configuration parameters to handle LDAP passwords. 
+-->	
+<!ELEMENT password (digest-encoding,digest-type,editable,pwd-mapping?)>
+
+<!--
+# Encoding used with passwords.
+# default value: UTF-8
+-->
+<!ELEMENT digest-encoding (#PCDATA)>
+
+<!--
+# Encryption method used for passwords.
+# possible values: SSHA, SHA, MD5, PLAIN
+# default value: SSHA
+-->
+<!ELEMENT digest-type (#PCDATA)>
+
+<!--
+# This mapping defines the user password attribute.
+# Use only with editable=true
+# The default value is: userPassword
+-->
+<!ELEMENT pwd-mapping (#PCDATA)>
+
+<!--
+# The configuration of at least one ldap provider. 
+-->	
+<!ELEMENT providers (provider+)>
+
+<!--
+# The configuration of a single ldap provider used to specify the connection properties.
+# All specified parameters are passed directly to the jndi layer.
+-->
+<!ELEMENT provider (param*)>
+<!ATTLIST provider url CDATA #REQUIRED>
+<!ATTLIST provider default (true|false) "false">
+
+<!--
+# The generic param configuration of the driver or of a specific aspect.
+# The name given as attribute is the param key, the body contains the value.
+-->
+<!ELEMENT param (#PCDATA)>
+<!ATTLIST param name CDATA #REQUIRED>
+
+<!--
+# The configuration for mapping groups and users to OpenCms OUs.
+-->
+<!ELEMENT ou-definitions (ou-definition+) >
+
+<!--
+# The configuration of a single OU definition.
+# For each ou definition, the group, role and user mappings are defined.
+-->
+<!ELEMENT ou-definition (ou-name,group-definitions,group-role-mappings?,user-definitions) >
+<!--
+# The name of the ou
+-->
+<!ELEMENT ou-name (#PCDATA)>
+
+<!--
+# The configuration for retrieving opencms group data structures from an ldap server.
+-->
+<!ELEMENT group-definitions (group-definition+)>
+
+<!--
+# The configuration of a single group type.
+# For each group type, the possible search contexts and the attribute mappings are defined.
+-->
+<!ELEMENT group-definition (group-access, group-mappings, editable)>
+
+<!--
+# This attribute indicates the group member format, that is, 
+# how the data of the group attribute "member" is stored by the ldap provider.
+# possible values:
+# userid: only the id of the user will be expected. see Ldap Class: groupsofnames
+# fulldn: the full ldap distinguished name for the user is expected. see Ldap Class: groupsofuniquenames
+# mburl: the members are get dynamically through sub queries. see Ldap Class: groupsofurls
+-->
+<!ATTLIST group-definition membersformat (userid|fulldn|mburl|nested-fulldn) "fulldn">
+
+<!--
+# This node tells OpenCms how to access to the defining group.
+-->
+<!ELEMENT group-access (group-filters, contexts)>
+
+<!--
+# Filters are required to search the Ldap directory for useful group data, like SQL queries.
+-->
+<!ELEMENT group-filters (all, by-name, by-member?, search?)>
+
+<!--
+# This filter is used to get all objects of the given type.
+# for example:
+# for groups: (objectClass=groupOfUniqueNames)
+# for users: (objectClass=organizationalPerson)
+-->
+<!ELEMENT all (#PCDATA)>
+
+<!--
+# This filter is used to get a single object of the given type, given its unique id (name).
+# for example:
+# for groups: (&amp;(objectclass=groupOfUrls)(cn=?))
+# for users: (&amp;(objectclass=organizationalPerson)(uid=?))
+-->
+<!ELEMENT by-name (#PCDATA)>
+
+<!--
+# This filter is used to get all users in a group, given its unique id (name).
+# It is only a filter for groups, and it is only used if the membersformat is not mburl.
+# for example: (&amp;(objectclass=groupofuniquenames)(uniquemember=?))
+-->
+<!ELEMENT by-member (#PCDATA)>
+
+<!--
+# This filter, if set, allows a direct search on the ldap server in the synchronized 
+# user/group view.
+# for example: (&amp;(objectclass=groupofuniquenames)(cn=*?*))
+-->
+<!ELEMENT search (#PCDATA)>
+
+<!--
+# Defines where root directories to look for usefull data structures.
+-->
+<!ELEMENT contexts (context+)>
+<!--
+# Each context defines the relativ DN of a context in the directory information tree.
+-->
+<!ELEMENT context (#PCDATA)>
+
+<!--
+# A group mapping defines which ldap attributes are used to retrieve the data of a cms group.
+-->
+<!ELEMENT group-mappings (groupid, groupname, member)>
+
+<!--
+# This mapping defines the unique group id or name.
+# for instance: cn
+-->
+<!ELEMENT groupid (#PCDATA)>
+
+<!--
+# This mapping defines the nice name for a group.
+# for instance: description
+-->
+<!ELEMENT groupname (#PCDATA)>
+
+<!--
+# This mapping defines the member attribute.
+# for instance: uniquemember or memberurl
+-->
+<!ELEMENT member (#PCDATA)>
+
+<!--
+# Flag to indicate if the objects are editable or not.
+# In the case of passwords, the new password will be written to the LDAP server.
+# All other attributes will remain untouched in the LDAP server.
+# possible values: true or false
+# default value: false
+-->
+<!ELEMENT editable (#PCDATA)>
+
+<!--
+# User defined group-role mappings.
+# Here you can define a list of group to role mappings.
+-->
+<!ELEMENT group-role-mappings (group-role-mapping+)>
+
+<!--
+# User defined group-role mapping.
+# Here you can define a role for all users of a group.
+-->
+<!ELEMENT group-role-mapping (group,role)>
+
+<!--
+# The name of the group to map.
+-->
+<!ELEMENT group (#PCDATA)>
+
+<!--
+# The name of the role to map.
+-->
+<!ELEMENT role (#PCDATA)>
+
+<!--
+# The configuration for retrieving opencms user data structures from an ldap server.
+-->
+<!ELEMENT user-definitions (user-definition+)>
+
+<!--
+# The configuration of a single user type.
+# For each user type, the possible search contexts and the attribute mappings are defined.
+-->
+<!ELEMENT user-definition (user-access, user-mappings, editable)>
+
+<!--
+# This node tells OpenCms how to access to the defining user.
+-->
+<!ELEMENT user-access (user-filters, contexts)>
+
+<!--
+# Filters are required to search the Ldap directory for useful user data, like SQL queries.
+-->
+<!ELEMENT user-filters (all, by-name, search?)>
+
+<!--
+# A user mapping defines which ldap attributes are used to retrieve the data of a cms user.
+-->
+<!ELEMENT user-mappings (userid, firstname, lastname, mail, description, address, additional-mappings)>
+
+<!--
+# This mapping defines the unique user id or name.
+# for instance: uid
+-->
+<!ELEMENT userid (#PCDATA)>
+
+<!--
+# This mapping defines the user's first name.
+# for instance: givenname
+#
+# Optionally, a default value can be provided.
+-->
+<!ELEMENT firstname (#PCDATA)>
+<!ATTLIST firstname default CDATA #IMPLIED>
+
+<!--
+# This mapping defines the user's last name.
+# for instance: sn
+#
+# Optionally, a default value can be provided.
+-->
+<!ELEMENT lastname (#PCDATA)>
+<!ATTLIST lastname default CDATA #IMPLIED>
+
+<!--
+# This mapping defines the user's mail address.
+# for instance: mail
+#
+# Optionally, a default value can be provided.
+-->
+<!ELEMENT mail (#PCDATA)>
+<!ATTLIST mail default CDATA #IMPLIED>
+
+<!--
+# This mapping defines the unique user id or name.
+# for instance: cn
+#
+# Optionally, a default value can be provided.
+-->
+<!ELEMENT description (#PCDATA)>
+<!ATTLIST description default CDATA #IMPLIED>
+
+<!--
+# This mapping defines the user's address.
+# for instance: postalAddress
+#
+# Optionally, a default value can be provided.
+-->
+<!ELEMENT address (#PCDATA)>
+<!ATTLIST address default CDATA #IMPLIED>
+
+<!--
+# Additional mappings can be used to store some ldap info in the additional info field of a CmsUser.
+#
+# Optionally, default values can be provided.
+# If the write-back attribute is set to true, the value will be written back to the LDAP directory when the user is saved.
+-->
+<!ELEMENT additional-mappings (attribute*)>
+<!ELEMENT attribute (#PCDATA)>
+<!ATTLIST attribute name CDATA #REQUIRED>
+<!ATTLIST attribute write-back CDATA #IMPLIED>
+<!ATTLIST attribute default CDATA #IMPLIED>

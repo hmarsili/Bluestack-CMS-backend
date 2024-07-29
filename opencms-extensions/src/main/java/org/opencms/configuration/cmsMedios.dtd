@@ -1,0 +1,43 @@
+<!ELEMENT cmsMedios (
+	sites,
+	modules
+	)>
+
+<!ELEMENT sites (
+	site*
+)>
+
+<!ELEMENT site (
+	publications,
+	modules
+)>
+<!ATTLIST site 
+	name CDATA #REQUIRED
+>
+	
+<!ELEMENT publications (
+	publication*
+)>
+
+<!ELEMENT publication (
+	modules
+)>
+<!ATTLIST publication 
+	name CDATA #REQUIRED
+>
+
+<!ELEMENT modules (
+	module*
+)>
+
+<!ELEMENT module (
+	param*
+)>
+<!ATTLIST module 
+	name CDATA #REQUIRED
+>
+
+<!ELEMENT param (#PCDATA)>
+<!ATTLIST param 
+	name CDATA #REQUIRED
+>

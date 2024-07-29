@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!DOCTYPE taglib
+  PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.2//EN"
+  "http://java.sun.com/dtd/web-jsptaglibrary_1_2.dtd">
+
+<taglib>
+
+	<tlib-version>0.9.8</tlib-version>
+	<jsp-version>1.2</jsp-version>
+    <short-name>tfsStatistics</short-name>
+    <uri>http://www.tfsla.com/taglib/tfsStat</uri>
+    <display-name>Tfsla Statistics tags</display-name>
+    <description>Tags para la administracion de estadisticas de recursos</description>
+	
+    <tag>
+    	<name>countHit</name>
+        <tag-class>com.tfsla.rankViews.jsp.CountHitTag</tag-class>
+        <body-content>empty</body-content>
+        <description>Cuenta una visita a un recurso segun la url actual</description>
+    </tag>
+    <tag>
+    	<name>dynamicCountHit</name>
+        <tag-class>com.tfsla.rankViews.jsp.DynamicContHitTag</tag-class>
+        <body-content>empty</body-content>
+        <description>Cuenta una visita a un recurso del lado del cliente</description>
+    </tag>
+
+    <tag>
+	<name>elementCountHit</name>
+        <tag-class>com.tfsla.rankViews.jsp.StructuredHitTag</tag-class>
+        <body-content>empty</body-content>
+        <description>Cuenta una visita a un contenido estructurado</description>
+    </tag>
+    
+    <tag>
+        <description>Cuenta una visita a un elemento generico del vfs</description>
+	<name>manualCountHit</name>
+        <tag-class>com.tfsla.rankViews.jsp.GenericHitTag</tag-class>
+        <body-content>empty</body-content>
+	<attribute>
+	    <name>name</name>
+	    <rtexprvalue>true</rtexprvalue>
+	    <required>true</required>
+	</attribute>
+    </tag>
+
+    <tag>
+        <description>Cuenta una valoracion a un elemento generico del vfs</description>
+	<name>addValoration</name>
+        <tag-class>com.tfsla.rankViews.jsp.GenericAddValoracionTag</tag-class>
+        <body-content>empty</body-content>
+	<attribute>
+	    <name>name</name>
+	    <rtexprvalue>true</rtexprvalue>
+	    <required>true</required>
+	</attribute>
+	<attribute>
+	    <name>value</name>
+	    <rtexprvalue>true</rtexprvalue>
+	    <required>true</required>
+	</attribute>
+    </tag>
+
+    <tag>
+        <description>Cuenta un comentario  a un elemento generico del vfs</description>
+	<name>addComment</name>
+        <tag-class>com.tfsla.rankViews.jsp.GenericAddComentarioTag</tag-class>
+        <body-content>empty</body-content>
+	<attribute>
+	    <name>name</name>
+	    <rtexprvalue>true</rtexprvalue>
+	    <required>true</required>
+	</attribute>
+    </tag>
+
+    <tag>
+        <description>Cuenta una recomendacion a un elemento generico del vfs</description>
+	<name>addRecomendation</name>
+        <tag-class>com.tfsla.rankViews.jsp.GenericAddRecomendacionTag</tag-class>
+        <body-content>empty</body-content>
+	<attribute>
+	    <name>name</name>
+	    <rtexprvalue>true</rtexprvalue>
+	    <required>true</required>
+	</attribute>
+    </tag>
+    
+    <tag>
+        <description>Cuenta una recomendacion a un elemento generico del vfs</description>
+	<name>addCustomValue</name>
+        <tag-class>com.tfsla.rankViews.jsp.GenericAddCustomValueTag</tag-class>
+        <body-content>empty</body-content>
+	<attribute>
+	    <name>name</name>
+	    <rtexprvalue>true</rtexprvalue>
+	    <required>true</required>
+	</attribute>
+	<attribute>
+	    <name>counter</name>
+	    <rtexprvalue>true</rtexprvalue>
+	    <required>true</required>
+	</attribute>
+	<attribute>
+	    <name>value</name>
+	    <rtexprvalue>true</rtexprvalue>
+	    <required>true</required>
+	</attribute>
+    </tag>
+    
+    <tag>
+        <description>Cuenta dentro de un contador de usuario el valor indicado</description>
+	<name>addUserCounter</name>
+	<tag-class>com.tfsla.rankUsers.jsp.GenericUserHitTag</tag-class>
+	<body-content>empty</body-content>
+	<attribute>
+	    <name>userName</name>
+	    <rtexprvalue>true</rtexprvalue>
+	    <required>true</required>
+	</attribute>
+	<attribute>
+	    <name>counter</name>
+	    <rtexprvalue>true</rtexprvalue>
+	    <required>true</required>
+	</attribute>
+	<attribute>
+	    <name>value</name>
+	    <rtexprvalue>true</rtexprvalue>
+	    <required>true</required>
+	</attribute>
+    </tag>
+    <tag>
+        <description>Cuenta dentro de un contador al usuario creador del contenido el valor indicado</description>
+	<name>addContentAuthorCounter</name>
+	<tag-class>com.tfsla.rankUsers.jsp.GenericUserContentTag</tag-class>
+	<body-content>empty</body-content>
+	<attribute>
+	    <name>resourceName</name>
+	    <rtexprvalue>true</rtexprvalue>
+	    <required>true</required>
+	</attribute>
+	<attribute>
+	    <name>counter</name>
+	    <rtexprvalue>true</rtexprvalue>
+	    <required>true</required>
+	</attribute>
+	<attribute>
+	    <name>value</name>
+	    <rtexprvalue>true</rtexprvalue>
+	    <required>true</required>
+	</attribute>
+    </tag>
+
+    <tag>
+        <description>Cuenta una valoracion a un comentario del vfs</description>
+	<name>addCommentValoration</name>
+        <tag-class>com.tfsla.rankViews.jsp.CommentAddValoracionTag</tag-class>
+        <body-content>empty</body-content>
+	<attribute>
+	    <name>name</name>
+	    <rtexprvalue>true</rtexprvalue>
+	    <required>true</required>
+	</attribute>
+	<attribute>
+	    <name>commentid</name>
+	    <rtexprvalue>true</rtexprvalue>
+	    <required>true</required>
+	</attribute>
+	<attribute>
+	    <name>value</name>
+	    <rtexprvalue>true</rtexprvalue>
+	    <required>true</required>
+	</attribute>
+    </tag>
+    <tag>
+        <description>Cuenta una recomendacion a un comentario del vfs</description>
+	<name>addCommentRecomendation</name>
+        <tag-class>com.tfsla.rankViews.jsp.CommentAddRecomendacionTag</tag-class>
+        <body-content>empty</body-content>
+	<attribute>
+	    <name>name</name>
+	    <rtexprvalue>true</rtexprvalue>
+	    <required>true</required>
+	</attribute>
+	<attribute>
+	    <name>commentid</name>
+	    <rtexprvalue>true</rtexprvalue>
+	    <required>true</required>
+	</attribute>
+    </tag>
+
+    <tag>
+        <description>Cuenta un valor custom a un elemento generico del vfs</description>
+	<name>addCommentCustomValue</name>
+        <tag-class>com.tfsla.rankViews.jsp.CommentAddCustomValueTag</tag-class>
+        <body-content>empty</body-content>
+	<attribute>
+	    <name>name</name>
+	    <rtexprvalue>true</rtexprvalue>
+	    <required>true</required>
+	</attribute>
+	<attribute>
+	    <name>commentid</name>
+	    <rtexprvalue>true</rtexprvalue>
+	    <required>true</required>
+	</attribute>
+	<attribute>
+	    <name>counter</name>
+	    <rtexprvalue>true</rtexprvalue>
+	    <required>true</required>
+	</attribute>
+	<attribute>
+	    <name>value</name>
+	    <rtexprvalue>true</rtexprvalue>
+	    <required>true</required>
+	</attribute>
+    </tag>
+																    				    
+</taglib>

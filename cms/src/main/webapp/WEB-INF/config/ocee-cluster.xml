@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE opencms SYSTEM "http://www.alkacon.com/dtd/6.0/ocee-cluster.dtd">
+
+<opencms>
+    <cluster>
+        <timeout>15</timeout>
+        <passphrase>This is the secret cluster event passphrase!</passphrase>
+        <eventhandler>org.opencms.ocee.cluster.CmsClusterEventHandler</eventhandler>
+        <servers>
+            <server>
+                <name>dev-saas</name>
+                <url>http://172.31.37.117:8080/opencms/handleCluster</url>
+                <ip>172.31.37.117</ip>
+            </server>
+        </servers>
+        <wp-server>dev-saas</wp-server>
+    </cluster>
+</opencms> 
