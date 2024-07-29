@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE opencms SYSTEM "http://www.opencms.org/dtd/6.0/opencms-configuration.dtd">
+
+<opencms>
+    <configuration>
+                <config class="org.opencms.configuration.CmsSystemConfiguration"/>
+                <config class="org.opencms.configuration.CmsVfsConfiguration"/>
+                <config class="org.opencms.configuration.CmsWorkplaceConfiguration"/>
+                <config class="org.opencms.configuration.CmsImportExportConfiguration"/>
+                <config class="org.opencms.configuration.CmsSearchConfiguration"/>
+                <config class="org.opencms.configuration.CmsModuleConfiguration"/>
+                <config class="org.opencms.configuration.CmsMediosInit"/>
+                <config class="org.opencms.configuration.CmsMedios"/>
+		<config class="org.opencms.configuration.CmsSchedulerConfiguration"/>
+
+		<config class="org.opencms.ocee.license.CmsLicenseConfiguration"/>	
+		<config class="org.opencms.ocee.cache.CmsCacheConfiguration"/>	
+		<config class="org.opencms.ocee.vfsdoctor.CmsVfsDoctorConfiguration"/>	
+		<config class="org.opencms.ocee.cluster.CmsClusterConfiguration"/>	
+    </configuration>
+</opencms>

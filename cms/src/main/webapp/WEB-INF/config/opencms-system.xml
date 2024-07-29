@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE opencms SYSTEM "http://www.opencms.org/dtd/6.0/opencms-system.dtd">
+
+<opencms>
+    <system>
+        <internationalization>
+            <localehandler class="org.opencms.i18n.CmsDefaultLocaleHandler"/>
+            <localesconfigured>
+                <locale>en</locale>
+                <locale>es</locale>
+                <locale>pt</locale>
+            </localesconfigured>
+            <localesdefault>
+                <locale>en</locale>
+                <locale>es</locale>
+                <locale>pt</locale>
+            </localesdefault>
+        </internationalization>
+        <mail>
+            <mailfrom>info@tfsla.com</mailfrom>
+            <mailhost name="localhost" port="25" order="10" protocol="smtp" user="" password=""/>
+        </mail>
+        <events>
+            <eventmanager class="org.opencms.main.CmsEventManager"/>
+        </events>
+        <versionhistory enabled="true" count="50" deleted="50"/>
+        <resourceinit>
+            <resourceinithandler class="org.opencms.file.history.CmsHistoryResourceHandler"/>
+            <resourceinithandler class="org.opencms.main.CmsPermalinkResourceHandler"/>
+            <resourceinithandler class="org.opencms.workplace.CmsWorkplaceLoginHandler"/>
+        </resourceinit>
+        <requesthandlers>
+            <requesthandler class="org.opencms.ocee.cluster.CmsClusterRequestHandler"/>
+        </requesthandlers>
+        <passwordhandler class="org.opencms.security.CmsDefaultPasswordHandler">
+            <encoding>UTF-8</encoding>
+            <digest-type>SHA-512</digest-type>
+            <param name="compatibility.convert.digestencoding">false</param>
+        </passwordhandler>
+        <validationhandler class="org.opencms.security.CmsDefaultValidationHandler"/>
+        <loginmanager>
+            <disableMinutes>5</disableMinutes>
+            <maxBadAttempts>3</maxBadAttempts>
+        </loginmanager>
+        <sites>
+            <workplace-server>https://dev-saas.cms-medios.com</workplace-server>
+            <default-uri>/sites/cmsmedios/</default-uri>
+            <site server="http://dosisfutbolera.com" uri="/sites/dosisfutbolera/">
+                <alias server="https://dosisfutbolera.cms-medios.com"/>
+                <alias server="http://dosisfutbolera.cms-medios.com"/>
+            </site>
+            <site server="http://rivernoticias.com" uri="/sites/rivernoticias/">
+                <alias server="https://rivernoticias.cms-medios.com"/>
+                <alias server="http://rivernoticias.cms-medios.com"/>
+            </site>
+            <site server="http://la10.com.co" uri="/sites/la10/">
+                <alias server="https://la10.cms-medios.com"/>
+                <alias server="http://la10.cms-medios.com"/>
+            </site>
+            <site server="http://bocanoticias.com" uri="/sites/bocanoticias/">
+                <alias server="https://bocanoticias.cms-medios.com"/>
+                <alias server="http://bocanoticias.cms-medios.com"/>
+            </site>
+            <site server="http://elcrackdeportivo.com.ar" uri="/sites/elcrackdeportivo/">
+                <alias server="https://elcrackdeportivo.cms-medios.com"/>
+                <alias server="http://elcrackdeportivo.cms-medios.com"/>
+            </site>
+            <site server="http://xoxo.news" uri="/sites/xoxo/"/>
+            <site server="http://acidadeon.cms-medios.com" uri="/sites/acidadeon/">
+                <alias server="https://acidadeon.cms-medios.com"/>
+            </site>
+            <site server="http://koko.cms-medios.com" uri="/sites/koko/">
+                <alias server="https://koko.cms-medios.com"/>
+            </site>
+            <site server="http://huru.life" uri="/sites/huru/"/>
+            <site server="http://tork.news" uri="/sites/tork/">
+                <alias server="https://tork.cms-medios.com"/>
+                <alias server="http://tork.cms-medios.com"/>
+            </site>
+            <site server="http://yaay.today" uri="/sites/yaay/"/>
+            <site server="http://kihi.news" uri="/sites/kihi/"/>
+            <site server="http://travel.cms-medios.com" uri="/sites/travel/"/>
+            <site server="http://vader.cms-medios.com" uri="/sites/gadgets/"/>
+            <site server="http://strikers.futbol" uri="/sites/strikers/"/>
+            <site server="http://thewallet.today" uri="/sites/thewallet/"/>
+            <site server="http://eldinamo.cms-medios.com" uri="/sites/eldinamo/">
+                <alias server="https://eldinamo.cms-medios.com"/>
+            </site>
+            <site server="http://koko.news" uri="/sites/koko/"/>
+            <site server="http://vader.news" uri="/sites/gadgets/"/>
+            <site server="http://dechilena.news" uri="/sites/dechilena/"/>
+            <site server="http://www.panorama.com.ve" uri="/sites/panorama/">
+                <alias server="http://beta.panorama.com.ve"/>
+                <alias server="http://hls.panorama.com.ve"/>
+                <alias server="http://iframe.panorama.com.ve"/>
+            </site>
+            <site server="http://lahora.cms-medios.com" uri="/sites/lahora/">
+                <alias server="https://lahora.cms-medios.com"/>
+            </site>
+            <site server="http://eltiempo.cms-medios.com" uri="/sites/eltiempo/"/>
+            <site server="http://izquierdazo.cms-medios.com" uri="/sites/izquierdazo/">
+                <alias server="https://izquierdazo.cms-medios.com"/>
+            </site>
+            <site server="http://dechilena.cms-medios.com" uri="/sites/dechilena/">
+                <alias server="https://dechilena.cms-medios.com"/>
+            </site>
+            <site server="http://mui.today" uri="/sites/mui/"/>
+            <site server="http://gammers.today" uri="/sites/gammers/"/>
+            <site server="http://dev-saas.cms-medios.com" uri="/sites/gadgets/"/>
+            <site server="http://mialma.live" uri="/sites/mialma/"/>
+        </sites>
+        <runtimeproperties>
+            <param name="compatibility.support.oldlocales">false</param>
+            <param name="compatibility.support.webAppNames">/opencms/opencms/</param>
+        </runtimeproperties>
+        <runtimeclasses>
+            <runtimeinfo class="org.opencms.db.CmsDbContextFactory"/>
+        </runtimeclasses>
+	<onetimepassword>
+		<hotp-enabled>false</hotp-enabled>
+		<totp-enabled>false</totp-enabled>
+		<otc-enabled>false</otc-enabled>
+		<hotp-digits>8</hotp-digits>
+		<totp-digits>6</totp-digits>
+		<totp-duration>30</totp-duration>
+		<hotp-validtime>15</hotp-validtime>
+		<totp-label>Saas - CmsMedios Login 2FA</totp-label>
+		<otp-algorithm>SHA1</otp-algorithm>
+		<sms-hotpsendenabled>true</sms-hotpsendenabled>
+		<email-hotpsendenabled>true</email-hotpsendenabled>
+		<sms-endpoint>[configurar]</sms-endpoint>
+		<rsa-publickey-token>MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQD615gs1E3o+XtakaoBkNOsX123VOGYCUKSIm1uFNubjS86YpVuApulKH92JndwScdxE5JoL/BUFJJTkvr76Dolnpnu6dce7wo0OmCJ1TNyXdMNg0iMZOil35q0XO0F64EJiNwAFYMBsoiLyVEgh781Ap9LFXOuITgiXpgRB/JguwIDAQAB</rsa-publickey-token>
+		<rsa-privatekey-token>MIICXQIBAAKBgQD615gs1E3o+XtakaoBkNOsX123VOGYCUKSIm1uFNubjS86YpVuApulKH92JndwScdxE5JoL/BUFJJTkvr76Dolnpnu6dce7wo0OmCJ1TNyXdMNg0iMZOil35q0XO0F64EJiNwAFYMBsoiLyVEgh781Ap9LFXOuITgiXpgRB/JguwIDAQABAoGBAO8qHGexzM7zAA/sjqGLiqbxDpO8FJQ3UAexV5D7xh9bz8nlMQCA8BHauRzXtE2Vqtk/hfpcqtIgAxw4KaGBW92bS/THBL2ZZeGoYgoRlyyXa4/4aYDHLqgeHM80mMBoKIbJyC16UdTml0k+y9LfDnm1WRFgfqv5lx9TJ+fyLLkRAkEA/uehCfa/nelmJVcWyS5AppOM8JR57dctfdUslFDOuxkTEDDg3CEfljgm5V1SCmEsn/s6MQP1uJYP8XbKwRsD1QJBAPvrfzKJr+1i/6l4L+7JrGZRITJpX0u/765W1aCkD6iGHtMh87Z9GSFm0kDTOrGjcqKwXKmavodIH98JH23uak8CQEE6/y/wj/qWFsipb7BOAMdf7OpH5Kfjr8WKvty5jR29/e3fxDsw0sd7WSDK78quMWBDRxHyBHiXFj9heeNOyX0CQAtEPf0RoVeZjNuUb3hbdqVgzX5GridiHyMJ6SX1EGo2DVzd8NthfuU6hv61M7PMHo1eG9bN/+Vm+V3tN4WgGwsCQQDwgQOJtpE4gC63RtrEgYsKKE9LwjlDT8IX8/3mgXnqtOaIFnPAw+mgl+goo/JOKDtJwonPZc+2jbP0xUD7pZe5</rsa-privatekey-token>
+		<rsa-key-channel>MIICXAIBAAKBgQDZV7aZRaLcfYFyE9x+tbOVH07+XRvn6/nuW7E/kSSqXhiSZjn6owhsfC0W+jDZLLY1XAAJg4WYDmH9DKx3wK5O9Q2TFDKkuZqhu0aStneQ6BIe6UYeqi9XNKIbu/pywZx3USn8MvLKt/d12qPUJEpYr+7uDGmw8WP4supZD7T5oQIDAQABAoGAIyBqApuelsQyB53uJQx42cEVo0apG/Knkj5/hyaOJnrOvdqHxFpVIjNvlicZfgAb8sPLvb3j+Y9Zhuxlc3VQtmXk7uMNxG3YPWJHep5p3v0Ofz683mOwUV7jXwPbYHdDg4bO5qiS372HfiBrm2KYKrDzgsbJz2wMU+iruBklAAECQQDtwBaW7syA9kFnPrHLWA4jjPAiCsecmoJV7PRyxdDY29lLzBJvQ6Vh+eEB1tIBCw3KcMbSbuUTaBUUJy0QQCiBAkEA6gaadZybOkT5mL9Areo1QkLCLjCU6aYcbg+xjWbMxRRFmjC6ys0bqJIukKNYarPByCWB2oupTwFN2AEGwadBIQJADkHImQB07v7VaTWPP9xl7KfU9pWi5rc1PaXZ+s/1+Csm2q7AJD/wOPHdFlkler6I8yzUH2ZbAlDpgq3eu+y9AQJBAJGlaG23+HeMQ9aHeKaEM384cwcyHwtG4TyyMasyBlDFLAgpOadLfWItECPeNQG7O+fnR+iOsOFFi3/aK61L/WECQFoqRvxo1pErHPXCYWxaQAOq1djkasOATog97h3v4kA71kNTI4KT+gteOixBwkAo0yrc9EZjK5s2STt6dOTNXA4=</rsa-key-channel>
+		<token-duration>10080</token-duration>
+	</onetimepassword>
+        <defaultusers>
+            <user-admin>Admin</user-admin>
+            <user-guest>Guest</user-guest>
+            <user-export>Export</user-export>
+            <group-administrators>Administrators</group-administrators>
+            <group-projectmanagers>Projectmanagers</group-projectmanagers>
+            <group-users>Users</group-users>
+            <group-guests>Guests</group-guests>
+        </defaultusers>
+        <defaultcontentencoding>UTF-8</defaultcontentencoding>
+        <memorymonitor class="org.opencms.ocee.cluster.CmsClusterMemoryMonitor">
+            <maxusagepercent>90</maxusagepercent>
+            <log-interval>600</log-interval>
+            <email-interval>43200</email-interval>
+            <warning-interval>43200</warning-interval>
+        </memorymonitor>
+        <flexcache>
+            <cache-enabled>true</cache-enabled>
+            <cache-offline>false</cache-offline>
+            <maxcachebytes>8000000</maxcachebytes>
+            <avgcachebytes>6000000</avgcachebytes>
+            <maxentrybytes>400000</maxentrybytes>
+            <maxkeys>2000</maxkeys>
+        </flexcache>
+        <http-authentication>
+            <browser-based>true</browser-based>
+        </http-authentication>
+        <resultcache>
+            <keygenerator>org.opencms.db.CmsCacheKey</keygenerator>
+            <size-users>64</size-users>
+            <size-groups>64</size-groups>
+            <size-orgunits>64</size-orgunits>
+            <size-usergroups>256</size-usergroups>
+            <size-projects>32</size-projects>
+            <size-projectresources>64</size-projectresources>
+            <size-resources>8192</size-resources>
+            <size-resourcelists>256</size-resourcelists>
+            <size-properties>1024</size-properties>
+            <size-propertylists>1024</size-propertylists>
+            <size-accesscontrollists>1024</size-accesscontrollists>
+            <size-permissions>1024</size-permissions>
+        </resultcache>
+        <content-notification>
+            <notification-time>365</notification-time>
+            <notification-project>Offline</notification-project>
+        </content-notification>
+        <authorizationhandler class="org.opencms.security.CmsDefaultAuthorizationHandler"/>
+        <publishmanager>
+            <history-size>2000</history-size>
+            <queue-persistance>true</queue-persistance>
+            <queue-shutdowntime>1</queue-shutdowntime>
+        </publishmanager>
+        <session-storageprovider class="org.opencms.main.CmsDefaultSessionStorageProvider"/>
+        <permissionhandler class="org.opencms.security.CmsDefaultPermissionHandler"/>
+        <servletcontainer-settings mode="auto"/>
+    </system>
+</opencms>

@@ -1,0 +1,587 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+<!DOCTYPE taglib
+  PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.2//EN"
+  "http://java.sun.com/dtd/web-jsptaglibrary_1_2.dtd">
+
+<taglib>
+
+	<tlib-version>0.9.8</tlib-version>
+	<jsp-version>1.2</jsp-version>
+	<short-name>tfs</short-name>
+	<uri>http://www.tfsla.com/taguero</uri>
+	<display-name>OpenCms JSP Tags</display-name>
+	<description>
+		Tags para ser utilizados en el proyecto Desarrolllado por
+		Leonardo Gassman / Matías Potel Feola
+	</description>
+
+	<tag>
+		<name>if</name>
+		<tag-class>
+			org.opencms.jsp.OpenCmsBooleanTrueEvaluator
+		</tag-class>
+		<body-content>JSP</body-content>
+		<description>
+			Evalua el que contenido de un OpenCMSBoolean sea true
+		</description>
+		<attribute>
+			<name>element</name>
+			<required>true</required>
+		</attribute>
+		<attribute>
+			<name>locale</name>
+		</attribute>
+	</tag>
+
+	<tag>
+		<name>isModified</name>
+		<tag-class>
+			org.opencms.jsp.IsModifiedTag
+		</tag-class>
+		<body-content>JSP</body-content>
+		<description>
+			Evalua si el resource abierto en el contentLoad esta modificado con respecto al online
+		</description>
+		<attribute>
+			<name>locale</name>
+		</attribute>
+	</tag>
+	
+	<tag>
+		<name>ifnot</name>
+		<tag-class>
+			org.opencms.jsp.OpenCmsBooleanFalseEvaluator
+		</tag-class>
+		<body-content>JSP</body-content>
+		<description>
+			Evalua el que contenido de un OpenCMSBoolean sea true
+		</description>
+		<attribute>
+			<name>element</name>
+			<required>true</required>
+		</attribute>
+		<attribute>
+			<name>locale</name>
+		</attribute>
+	</tag>
+	
+	<tag>
+		<name>ifelse</name>
+		<tag-class>org.opencms.jsp.OpenCmsIfElseEvaluator</tag-class>
+		<body-content>JSP</body-content>
+		<description>
+			Evalua el que contenido de un OpenCMSBoolean. El el body
+			estarán los tags then y else
+		</description>
+		<attribute>
+			<name>element</name>
+			<required>true</required>
+		</attribute>
+		<attribute>
+			<name>locale</name>
+		</attribute>
+	</tag>
+	
+	<tag>
+		<name>then</name>
+		<tag-class>org.opencms.jsp.OpenCmsThenBooleanTag</tag-class>
+		<body-content>JSP</body-content>
+		<description>
+			entra en accion si la evaluacion del ifthen es true
+		</description>
+	</tag>
+	
+	<tag>
+		<name>else</name>
+		<tag-class>org.opencms.jsp.OpenCMSElseBooleanTag</tag-class>
+		<body-content>JSP</body-content>
+		<description>
+			entra en accion si la evaluacion del ifthen es false
+		</description>
+	</tag>
+	
+	<tag>
+		<name>first</name>
+		<tag-class>org.opencms.jsp.FirstTag</tag-class>
+		<body-content>JSP</body-content>
+		<description>
+			Muestra el primer elemento de un contenido con múltiples
+			ocurrencias
+		</description>
+		<attribute>
+			<name>element</name>
+		</attribute>
+		<attribute>
+			<name>locale</name>
+		</attribute>
+	</tag>
+	
+	<tag>
+		<name>seek</name>
+		<tag-class>org.opencms.jsp.FirstTag</tag-class>
+		<body-content>JSP</body-content>
+		<description>
+			Posiciona el content en el elemento que está en la posición, que dice entre corchete
+		</description>
+		<attribute>
+			<name>element</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>
+				El nombre de la collection que se quiere obtener el valor, 
+				seguido de la posicion entre corchetes.
+				ejemplo "imagenes[1]"
+				Empieza a contar de 1.
+			</description>
+		</attribute>
+		<attribute>
+			<name>locale</name>
+		</attribute>
+	</tag>
+	
+	<tag>
+		<name>size</name>
+		<tag-class>org.opencms.jsp.SizeTag</tag-class>
+		<body-content>JSP</body-content>
+		<description>
+			Dice el tamaño de la collection
+		</description>
+		<attribute>
+			<name>element</name>
+		</attribute>
+		<attribute>
+			<name>locale</name>
+		</attribute>
+	</tag>
+
+	<tag>
+		<name>lastModified</name>
+		<tag-class>org.opencms.jsp.LastModifiedDateTag</tag-class>
+		<body-content>JSP</body-content>
+		<description>
+			Muestra la fecha de la ultima modificacion del elemento
+			actual
+		</description>
+		<attribute>
+			<name>dateFormat</name>
+		</attribute>
+		<attribute>
+			<name>language</name>
+		</attribute>
+		<attribute>
+			<name>country</name>
+		</attribute>				
+		<attribute>
+			<name>locale</name>
+		</attribute>
+	</tag>
+	
+	<tag>
+		<name>creationDate</name>
+		<tag-class>org.opencms.jsp.CreationDateTag</tag-class>
+		<body-content>JSP</body-content>
+		<description>
+			Muestra la fecha de creación del elemento
+			actual
+		</description>
+		<attribute>
+			<name>dateFormat</name>
+		</attribute>
+		<attribute>
+			<name>locale</name>
+		</attribute>
+	</tag>
+
+	<tag>
+		<name>fileName</name>
+		<tag-class>org.opencms.jsp.FileNameTag</tag-class>
+		<body-content>JSP</body-content>
+		<description>
+			Muestra el nombre del archivo del elemento
+			actual
+		</description>
+		<attribute>
+			<name>locale</name>
+		</attribute>
+	</tag>
+	
+	<tag>
+		<name>urlFriendly</name>
+		<tag-class>org.opencms.jsp.UrlFriendlyTag</tag-class>
+		<body-content>JSP</body-content>
+		<description>
+			Muestra el link amigable del archivo del elemento
+			actual
+		</description>
+		<attribute>
+			<name>locale</name>
+		</attribute>
+	</tag>
+
+	<tag>
+		<name>bannerSplit</name>
+		<tag-class>
+			org.opencms.jsp.OpenCmsCuerpoNoticiaTag
+		</tag-class>
+		<body-content>JSP</body-content>
+		<description>
+			Separa el contenido en dos partes insertando un banner en el medio. 
+			Si el contenido es menor que una determinada cantidad de párrafos (pasada
+			por parámetro), el banner se muestra al final. Si es mayor se muestra esa 
+			cantidad de párrafos, luego el banner entre separadores y luego se termina 
+			de imprimir el cuerpo. Se utiliza para mostrar el cuerpo del artículo en las 
+			noticias.
+		</description>
+		<attribute>
+			<name>element</name>
+			<required>true</required>
+		</attribute>
+		<attribute>
+			<name>cantParrafos</name>
+			<required>true</required>
+		</attribute>
+		<attribute>
+			<name>espacio</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>locale</name>
+		</attribute>
+	</tag>
+	
+	<tag>
+		<name>equals</name>
+		<tag-class>
+			org.opencms.jsp.OpenCmsEqualsEvaluator
+		</tag-class>
+		<body-content>JSP</body-content>
+		<description>
+			Evalua el que contenido de un OpenCMSBoolean sea igual a un valor
+		</description>
+		<attribute>
+			<name>element</name>
+			<required>true</required>
+		</attribute>
+		<attribute>
+			<name>value</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>locale</name>
+		</attribute>
+	</tag>
+	
+	<tag>
+		<name>notEquals</name>
+		<tag-class>
+			org.opencms.jsp.OpenCmsNotEqualsEvaluator
+		</tag-class>
+		<body-content>JSP</body-content>
+		<description>
+			Evalua el que contenido de un OpenCMSBoolean sea distinto a un valor
+		</description>
+		<attribute>
+			<name>element</name>
+			<required>false</required>
+		</attribute>
+		<attribute>
+			<name>value</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>locale</name>
+		</attribute>
+	</tag>
+	
+	<tag>
+		<name>equalsOrElse</name>
+		<tag-class>org.opencms.jsp.OpenCmsEqualsOrElseEvaluator</tag-class>
+		<body-content>JSP</body-content>
+		<description>
+			Evalua el que contenido de un OpenCMSBoolean sea igual a un valor. 
+			En caso de que sea igual ejecuta un tag, si son distintos ejecuta el otro.
+		</description>
+		<attribute>
+			<name>element</name>
+			<required>true</required>
+		</attribute>
+		<attribute>
+			<name>value</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>			
+		</attribute>
+		<attribute>
+			<name>locale</name>
+		</attribute>
+	</tag>
+	
+	<tag>
+		<name>equalsThen</name>
+		<tag-class>org.opencms.jsp.OpenCmsEqualsThenTag</tag-class>
+		<body-content>JSP</body-content>
+		<description>
+			Se ejecuta si el elemento del equalsOrElse es igual al valor
+		</description>
+	</tag>
+	
+	<tag>
+		<name>equalsElse</name>
+		<tag-class>org.opencms.jsp.OpenCmsEqualsElseTag</tag-class>
+		<body-content>JSP</body-content>
+		<description>
+			Se ejecuta si el elemento del equalsOrElse es distinto al valor
+		</description>
+	</tag>
+	
+	<tag>
+		<name>capitalize</name>
+		<tag-class>org.opencms.jsp.CapitalizeTag</tag-class>
+		<body-content>JSP</body-content>
+		<description>
+			Contentshow que pone en mayúsculas el primer caracter de la palabra a mostrar.
+		</description>
+		<attribute>
+			<name>element</name>
+		</attribute>
+		<attribute>
+			<name>locale</name>
+		</attribute>
+	</tag>
+
+	<tag>
+		<name>uppercase</name>
+		<tag-class>org.opencms.jsp.UpperCaseTag</tag-class>
+		<body-content>JSP</body-content>
+		<description>
+			Contentshow que pone en mayúsculas la palabra a mostrar.
+		</description>
+		<attribute>
+			<name>element</name>
+		</attribute>
+		<attribute>
+			<name>locale</name>
+		</attribute>
+	</tag>
+	
+	<tag>
+		<name>sectionPage</name>
+		<tag-class>org.opencms.jsp.SectionPageTag</tag-class>
+		<body-content>JSP</body-content>
+		<description>
+			Devuelve el nombre de la página dado el nombre de la sección
+		</description>
+		<attribute>
+			<name>projectName</name>
+		</attribute>				
+		<attribute>
+			<name>locale</name>
+		</attribute>
+	</tag>
+
+	<tag>
+		<name>sectionName</name>
+		<tag-class>org.opencms.jsp.SectionNameTag</tag-class>
+		<body-content>JSP</body-content>
+		<description>
+			Devuelve la descripción de la sección formateada para HTML.
+		</description>
+		<attribute>
+			<name>capitalize</name>
+		</attribute>
+		<attribute>
+			<name>uppercase</name>
+		</attribute>	
+		<attribute>
+			<name>projectName</name>
+		</attribute>					
+		<attribute>
+			<name>locale</name>
+		</attribute>
+	</tag>
+
+	<tag>
+		<name>copete</name>
+		<tag-class>org.opencms.jsp.ShowCopeteTag</tag-class>
+		<body-content>JSP</body-content>
+		<description>
+			Imprime el campo copete y remueve el tag p que aparece al copiar de Word o Notepad, si el mismo existe.
+		</description>
+		<attribute>
+			<name>locale</name>
+		</attribute>
+	</tag>
+
+	<tag>
+		<name>buttonVisibility</name>
+		<tag-class>org.opencms.jsp.ShowButtonsTag</tag-class>
+		<body-content>empty</body-content>
+		<description>
+			agrega un boton para ocultar o mostrar los botones de opencms
+		</description>
+		<attribute>
+			<name>image</name>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>newButtonSource</name>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+	</tag>
+	
+	<tag>
+		<name>buttonFloat</name>
+		<tag-class>org.opencms.jsp.ShowButtonFloat</tag-class>
+		<body-content>empty</body-content>
+		<description>
+			agrega un boton flotante
+		</description>
+		<attribute>
+			<name>image</name>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>functionJS</name>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+	</tag>
+
+	<tag>
+		<name>property</name>
+		<tag-class>org.opencms.jsp.TfsPropertyTag</tag-class>
+		<body-content>empty</body-content>
+		<description>
+			imprime el valor de una property del resource que esta procesando un contentLoad
+		</description>
+		<attribute>
+			<name>property</name>
+			<required>true</required>
+		</attribute>
+		<attribute>
+			<name>search</name>
+		</attribute>		
+	</tag>
+
+	<tag>
+		<name>taskId</name>
+		<tag-class>org.opencms.jsp.TaskIdTag</tag-class>
+		<body-content>empty</body-content>
+		<description>
+			imprime el id de la tarea que corresponde con la noticia que se esta procesando
+		</description>
+	</tag>
+	
+	<tag>
+		<name>isLocked</name>
+		<tag-class>org.opencms.jsp.IsLockedTag</tag-class>
+		<body-content>JSP</body-content>
+		<description>
+			evalua el contenido si el archivo esta lockeado
+		</description>
+	</tag>
+	
+	<tag>
+		<name>userLocker</name>
+		<tag-class>org.opencms.jsp.LockerUserTag</tag-class>
+		<body-content>empty</body-content>
+		<description>
+			imprime el nombre del usuario que lockea el archivo
+		</description>
+	</tag>
+	
+	<tag>
+		<name>escapeToUnicode</name>
+		<tag-class>
+			org.opencms.jsp.EscapeToUnicodeTag
+		</tag-class>
+		<body-content>JSP</body-content>
+		<description>
+			Escapa el cuerpo del tag para que utilice caracteres Unicode.
+		</description>
+	</tag>
+	
+	<tag>
+		<name>parseForWAP</name>
+		<tag-class>
+			org.opencms.jsp.ParseForWAPTag
+		</tag-class>
+		<body-content>JSP</body-content>
+		<description>
+			Escapa el cuerpo del tag para que utilice caracteres Unicode y elimina todos los tags span.
+		</description>
+	</tag>
+	
+	<tag>
+		<name>noTodayDate</name>
+		<tag-class>
+			org.opencms.jsp.NoTodayDateTag
+		</tag-class>
+		<body-content>empty</body-content>
+		<description>
+			Usado como el contentshow de una fecha, pero la misma se muestra solo si no es la fecha de hoy
+		</description>
+		<attribute>
+			<name>element</name>
+			<required>true</required>
+		</attribute>
+		<attribute>
+			<name>locale</name>
+		</attribute>
+		<attribute>
+			<name>pattern</name>
+		</attribute>
+	</tag>
+
+	<tag>
+		<name>ifNotToday</name>
+		<tag-class>
+			org.opencms.jsp.NoTodayContentTag
+		</tag-class>
+		<body-content>JSP</body-content>
+		<description>
+			Muestra el contenido si el element no es la fecha de hoy
+		</description>
+		<attribute>
+			<name>element</name>
+			<required>true</required>
+		</attribute>
+		<attribute>
+			<name>locale</name>
+		</attribute>
+	</tag>
+
+	<tag>
+		<name>ifToday</name>
+		<tag-class>
+			org.opencms.jsp.TodayContentTag
+		</tag-class>
+		<body-content>JSP</body-content>
+		<description>
+			Muestra el contenido si el element es la fecha de hoy
+		</description>
+		<attribute>
+			<name>element</name>
+			<required>true</required>
+		</attribute>
+		<attribute>
+			<name>locale</name>
+		</attribute>
+	
+	</tag>
+	<tag>
+		<name>contentProperty</name>
+		<tag-class>org.opencms.jsp.ContentPropertyForceCacheTag</tag-class>
+		<body-content>empty</body-content>
+		<description>
+			muestra una property del objeto
+		</description>
+		<attribute>
+			<name>name</name>
+		</attribute>
+	</tag>
+	
+	
+</taglib>

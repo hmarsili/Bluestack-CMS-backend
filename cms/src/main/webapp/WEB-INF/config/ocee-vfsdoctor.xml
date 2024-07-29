@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE opencms SYSTEM "http://www.alkacon.com/dtd/6.0/ocee-vfsdoctor.dtd">
+
+<opencms>
+    <vfsdoctor pool="default">
+        <plugins>
+            <plugin class="org.opencms.ocee.vfsdoctor.plugins.CmsVfsAccessControlPlugin"/>
+            <plugin class="org.opencms.ocee.vfsdoctor.plugins.CmsVfsBrokenStructurePlugin"/>
+            <plugin class="org.opencms.ocee.vfsdoctor.plugins.CmsVfsDifferentIdsPlugin"/>
+            <plugin class="org.opencms.ocee.vfsdoctor.plugins.CmsVfsDuplicateStructurePlugin"/>
+            <plugin class="org.opencms.ocee.vfsdoctor.plugins.CmsVfsDuplicateUserPlugin"/>
+            <plugin class="org.opencms.ocee.vfsdoctor.plugins.CmsVfsInterBrokenStructurePlugin"/>
+            <plugin class="org.opencms.ocee.vfsdoctor.plugins.CmsVfsNoResourceForStructurePlugin"/>
+            <plugin class="org.opencms.ocee.vfsdoctor.plugins.CmsVfsOnlineTrashPlugin"/>
+            <plugin class="org.opencms.ocee.vfsdoctor.plugins.CmsVfsSiblingsPlugin"/>
+            <plugin class="org.opencms.ocee.vfsdoctor.plugins.CmsVfsStateConsistency2Plugin"/>
+            <plugin class="org.opencms.ocee.vfsdoctor.plugins.CmsVfsStateConsistencyPlugin"/>
+            <plugin class="org.opencms.ocee.vfsdoctor.plugins.CmsVfsTempFlagPlugin"/>
+        </plugins>
+        <sqlconsole>
+            <allowedsentences>
+                <sentence name="SELECT"/>
+                <sentence name="UPDATE"/>
+                <sentence name="DELETE"/>
+                <sentence name="SHOW"/>
+                <sentence name="INSERT"/>
+            </allowedsentences>
+            <disallowedsentences/>
+        </sqlconsole>
+        <rfsbrowser read-only="false">
+            <initial-dir>/var/lib/tomcat9/webapps/ROOT/WEB-INF/config/</initial-dir>
+            <restrict-paths whitelist="true">
+                <path>/var/lib/tomcat9/webapps/ROOT/</path>
+            </restrict-paths>
+            <command-interpreter enabled="true" maxtime="30">
+                <command>/bin/sh</command>
+                <exe-param>-c</exe-param>
+            </command-interpreter>
+            <forbidden-drives/>
+        </rfsbrowser>
+    </vfsdoctor>
+</opencms>

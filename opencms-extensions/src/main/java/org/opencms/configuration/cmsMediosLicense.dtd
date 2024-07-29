@@ -1,0 +1,24 @@
+<!ELEMENT cmsMediosLicense (
+	licenses
+	)>
+
+
+<!ELEMENT licenses (
+	license*
+)>
+
+<!ELEMENT license (
+	sitename,
+	name,
+	mail,
+	views,
+	expiration,
+	key
+)>
+
+<!ELEMENT sitename (#PCDATA)>
+<!ELEMENT name (#PCDATA)>
+<!ELEMENT mail (#PCDATA)>
+<!ELEMENT views (#PCDATA)>
+<!ELEMENT key (#PCDATA)>
+<!ELEMENT expiration (#PCDATA)>

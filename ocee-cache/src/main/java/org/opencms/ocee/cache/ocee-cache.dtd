@@ -1,0 +1,94 @@
+<!-- 
+# The root configuration node is called <opencms> for all OpenCms configurations.
+-->
+<!ELEMENT opencms (cache)>
+
+<!--
+# <cache> configuration:
+# The configuration of the OpenCms cache is done here.
+-->
+<!ELEMENT cache (online-flush-resource-limit?, drivers)>
+
+<!--
+# If more than this number of resources are published then all online caches are flushed,
+# If not only every relevant cache entry is removed from the cache (which might be too slow when this parameter is too high)
+# Optional parameter, default is 50.
+-->
+<!ELEMENT online-flush-resource-limit (#PCDATA)>
+
+<!--
+# The list of drivers to use and their capabilities.
+-->
+<!ELEMENT drivers (vfs, project, user, workflow?)>
+
+<!--
+# The project driver.
+-->
+<!ELEMENT project (capacities?)>
+
+<!--
+# The classname for the project driver.
+-->
+<!ATTLIST project class CDATA #REQUIRED>
+
+<!--
+# The user driver.
+-->
+<!ELEMENT user (capacities?)>
+
+<!--
+# The classname for the user driver.
+-->
+<!ATTLIST user class CDATA #REQUIRED>
+
+<!--
+# The workflow driver.
+# Deprecated, will be ignored. 
+-->
+<!ELEMENT workflow (capacities?)>
+
+<!--
+# The classname for the workflow driver.
+# Deprecated, will be ignored. 
+-->
+<!ATTLIST workflow class CDATA #REQUIRED>
+    
+<!--
+# The vfs driver.
+-->
+<!ELEMENT vfs (capacities?)>
+
+<!--
+# The classname for the vfs driver.
+-->
+<!ATTLIST vfs class CDATA #REQUIRED>
+
+<!--
+# The list of cache capacities.
+-->
+<!ELEMENT capacities (capacity*)>
+    
+<!--
+# The cache capacity.
+-->
+<!ELEMENT capacity (class, offline?, online, params?)>
+
+<!--
+# The cache instance class name, must be an implementation of I_CmsCacheInstance.
+-->
+<!ELEMENT class (#PCDATA)>
+
+<!--
+# The cache capacity for offline projects.
+-->
+<!ELEMENT offline (#PCDATA)>
+
+<!--
+# The cache capacity for online projects.
+-->
+<!ELEMENT online (#PCDATA)>
+
+<!--
+# The special parameters.
+-->
+<!ELEMENT params (#PCDATA)>

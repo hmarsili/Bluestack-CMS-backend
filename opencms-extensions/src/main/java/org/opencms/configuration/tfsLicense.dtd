@@ -1,0 +1,19 @@
+<!--
+# The root configuration node is called <opencms> for all OpenCms configurations.
+-->
+<!ELEMENT opencms (licenseData)>
+
+<!--
+# In this node the global search options are configured.
+-->
+<!ELEMENT licenseData (
+	name,
+	mail,
+	views,
+	license
+)>
+
+<!ELEMENT name (#PCDATA)>
+<!ELEMENT mail (#PCDATA)>
+<!ELEMENT views (#PCDATA)>
+<!ELEMENT license (#PCDATA)>

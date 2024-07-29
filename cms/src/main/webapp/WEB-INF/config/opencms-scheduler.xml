@@ -1,0 +1,909 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE opencms SYSTEM "http://www.opencms.org/dtd/6.0/opencms-scheduler.dtd">
+
+<opencms>
+    <scheduler>
+        <job>
+            <name>(panorama) INDICES: Eliminar Contenido SITENEWS_OFFLINE</name>
+            <class>org.opencms.search.TfsShrinkIndexJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 55 23 28 * ?]]></cronexpression>
+            <context>
+                <user>Admin</user>
+                <project>Offline</project>
+                <siteroot>/sites/panorama/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="commit">true</param>
+                <param name="condition">enPortada:false</param>
+                <param name="index">PANORAMA_SITENEWS_OFFLINE</param>
+                <param name="merge">true</param>
+                <param name="range">2M</param>
+            </parameters>
+        </job>
+        <job>
+            <name>(panorama) INDICES: Eliminar Contenido SITENEWS_ONLINE</name>
+            <class>org.opencms.search.TfsShrinkIndexJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 55 23 28 * ?]]></cronexpression>
+            <context>
+                <user>Admin</user>
+                <project>Offline</project>
+                <siteroot>/sites/panorama/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="commit">true</param>
+                <param name="condition">enPortada:false</param>
+                <param name="index">PANORAMA_SITENEWS_ONLINE</param>
+                <param name="merge">true</param>
+                <param name="range">2M</param>
+            </parameters>
+        </job>
+        <job>
+            <name>(panorama) INDICES: Actualizar Index Source</name>
+            <class>org.opencms.search.TfsUpdateIndexSourceJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 55 23 28 * ?]]></cronexpression>
+            <context>
+                <user>Admin</user>
+                <project>Offline</project>
+                <siteroot>/sites/panorama/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="config_default_action">forward</param>
+                <param name="config_default_range">2</param>
+                <param name="config_default_subFolderFormat">yyyy/MM/</param>
+                <param name="config_default_unit">M</param>
+                <param name="indexSource">PANORAMA_SITENEWS</param>
+                <param name="listas_basePath">listas</param>
+                <param name="listas_configuration">default</param>
+                <param name="news_basePath">contenidos</param>
+                <param name="news_configuration">default</param>
+                <param name="typeNews">news;listas</param>
+            </parameters>
+        </job>
+        <job>
+            <name>(travel) INDICES: Eliminar Contenido SITENEWS_OFFLINE</name>
+            <class>org.opencms.search.TfsShrinkIndexJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 55 23 28 * ?]]></cronexpression>
+            <context>
+                <user>Admin</user>
+                <project>Offline</project>
+                <siteroot>/sites/travel/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="commit">true</param>
+                <param name="condition">enPortada:false</param>
+                <param name="index">TRAVEL_SITENEWS_OFFLINE</param>
+                <param name="merge">true</param>
+                <param name="range">2M</param>
+            </parameters>
+        </job>
+        <job>
+            <name>(travel) INDICES: Eliminar Contenido SITENEWS_ONLINE</name>
+            <class>org.opencms.search.TfsShrinkIndexJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 55 23 28 * ?]]></cronexpression>
+            <context>
+                <user>Admin</user>
+                <project>Offline</project>
+                <siteroot>/sites/travel/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="commit">true</param>
+                <param name="condition">enPortada:false</param>
+                <param name="index">TRAVEL_SITENEWS_ONLINE</param>
+                <param name="merge">true</param>
+                <param name="range">2M</param>
+            </parameters>
+        </job>
+        <job>
+            <name>(travel) INDICES: Actualizar Index Source</name>
+            <class>org.opencms.search.TfsUpdateIndexSourceJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 55 23 28 * ?]]></cronexpression>
+            <context>
+                <user>Admin</user>
+                <project>Offline</project>
+                <siteroot>/sites/travel/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="config_default_action">forward</param>
+                <param name="config_default_range">2</param>
+                <param name="config_default_subFolderFormat">yyyy/MM/</param>
+                <param name="config_default_unit">M</param>
+                <param name="indexSource">TRAVEL_SITENEWS</param>
+                <param name="listas_basePath">listas</param>
+                <param name="listas_configuration">default</param>
+                <param name="news_basePath">contenidos</param>
+                <param name="news_configuration">default</param>
+                <param name="typeNews">news;listas</param>
+            </parameters>
+        </job>
+        <job>
+            <name>(GADGETS) INDICES: Eliminar Contenido SITENEWS_OFFLINE</name>
+            <class>org.opencms.search.TfsShrinkIndexJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 55 23 28 * ?]]></cronexpression>
+            <context>
+                <user>Admin</user>
+                <project>Offline</project>
+                <siteroot>/sites/gadgets/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="commit">true</param>
+                <param name="condition">enPortada:false</param>
+                <param name="index">GADGETS_SITENEWS_OFFLINE</param>
+                <param name="merge">true</param>
+                <param name="range">2M</param>
+            </parameters>
+        </job>
+        <job>
+            <name>(GADGETS) INDICES: Eliminar Contenido SITENEWS_ONLINE</name>
+            <class>org.opencms.search.TfsShrinkIndexJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 55 23 28 * ?]]></cronexpression>
+            <context>
+                <user>Admin</user>
+                <project>Offline</project>
+                <siteroot>/sites/gadgets/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="commit">true</param>
+                <param name="condition">enPortada:false</param>
+                <param name="index">GADGETS_SITENEWS_ONLINE</param>
+                <param name="merge">true</param>
+                <param name="range">2M</param>
+            </parameters>
+        </job>
+        <job>
+            <name>(GADGETS) INDICES: Actualizar Index Source</name>
+            <class>org.opencms.search.TfsUpdateIndexSourceJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 55 23 28 * ?]]></cronexpression>
+            <context>
+                <user>Admin</user>
+                <project>Offline</project>
+                <siteroot>/sites/gadgets/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="config_default_action">forward</param>
+                <param name="config_default_range">2</param>
+                <param name="config_default_subFolderFormat">yyyy/MM/</param>
+                <param name="config_default_unit">M</param>
+                <param name="indexSource">GADGETS_SITENEWS</param>
+                <param name="listas_basePath">listas</param>
+                <param name="listas_configuration">default</param>
+                <param name="news_basePath">contenidos</param>
+                <param name="news_configuration">default</param>
+                <param name="typeNews">news;listas</param>
+            </parameters>
+        </job>
+        <job>
+            <name>(mui) INDICES: Eliminar Contenido SITENEWS_OFFLINE</name>
+            <class>org.opencms.search.TfsShrinkIndexJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 55 23 28 * ?]]></cronexpression>
+            <context>
+                <user>Admin</user>
+                <project>Offline</project>
+                <siteroot>/sites/mui/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="commit">true</param>
+                <param name="condition">enPortada:false</param>
+                <param name="index">MUI_SITENEWS_OFFLINE</param>
+                <param name="merge">true</param>
+                <param name="range">2M</param>
+            </parameters>
+        </job>
+        <job>
+            <name>(mui) INDICES: Eliminar Contenido SITENEWS_ONLINE</name>
+            <class>org.opencms.search.TfsShrinkIndexJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 55 23 28 * ?]]></cronexpression>
+            <context>
+                <user>Admin</user>
+                <project>Offline</project>
+                <siteroot>/sites/mui/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="commit">true</param>
+                <param name="condition">enPortada:false</param>
+                <param name="index">MUI_SITENEWS_ONLINE</param>
+                <param name="merge">true</param>
+                <param name="range">2M</param>
+            </parameters>
+        </job>
+        <job>
+            <name>(XOXO) INDICES: Actualizar Index Source</name>
+            <class>org.opencms.search.TfsUpdateIndexSourceJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 55 23 28 * ?]]></cronexpression>
+            <context>
+                <user>Admin</user>
+                <project>Offline</project>
+                <siteroot>/sites/xoxo/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="config_default_action">forward</param>
+                <param name="config_default_range">1</param>
+                <param name="config_default_subFolderFormat">yyyy/MM/</param>
+                <param name="config_default_unit">M</param>
+                <param name="indexSource">XOXO_SITENEWS</param>
+                <param name="listas_basePath">listas</param>
+                <param name="listas_configuration">default</param>
+                <param name="news_basePath">contenidos</param>
+                <param name="news_configuration">default</param>
+                <param name="typeNews">news;listas</param>
+            </parameters>
+        </job>
+        <job>
+            <name>(XOXO) INDICES: Eliminar Contenido SITENEWS_OFFLINE</name>
+            <class>org.opencms.search.TfsShrinkIndexJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 55 23 28 * ?]]></cronexpression>
+            <context>
+                <user>Admin</user>
+                <project>Offline</project>
+                <siteroot>/sites/xoxo/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="commit">true</param>
+                <param name="condition">enPortada:false</param>
+                <param name="index">XOXO_SITENEWS_OFFLINE</param>
+                <param name="merge">true</param>
+                <param name="range">2M</param>
+            </parameters>
+        </job>
+        <job>
+            <name>(XOXO) INDICES: Eliminar Contenido SITENEWS_ONLINE</name>
+            <class>org.opencms.search.TfsShrinkIndexJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 55 23 28 * ?]]></cronexpression>
+            <context>
+                <user>Admin</user>
+                <project>Offline</project>
+                <siteroot>/sites/xoxo/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="commit">true</param>
+                <param name="condition">enPortada:false</param>
+                <param name="index">XOXO_SITENEWS_ONLINE</param>
+                <param name="merge">true</param>
+                <param name="range">2M</param>
+            </parameters>
+        </job>
+        <job>
+            <name>(kihi) INDICES: Actualizar Index Source</name>
+            <class>org.opencms.search.TfsUpdateIndexSourceJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 55 23 28 * ?]]></cronexpression>
+            <context>
+                <user>Admin</user>
+                <project>Offline</project>
+                <siteroot>/sites/kihi/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="config_default_action">forward</param>
+                <param name="config_default_range">2</param>
+                <param name="config_default_subFolderFormat">yyyy/MM/</param>
+                <param name="config_default_unit">M</param>
+                <param name="indexSource">KIHI_SITENEWS</param>
+                <param name="listas_basePath">listas</param>
+                <param name="listas_configuration">default</param>
+                <param name="news_basePath">contenidos</param>
+                <param name="news_configuration">default</param>
+                <param name="typeNews">news;listas</param>
+            </parameters>
+        </job>
+        <job>
+            <name>(kihi) INDICES: Eliminar Contenido SITENEWS_OFFLINE</name>
+            <class>org.opencms.search.TfsShrinkIndexJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 55 23 28 * ?]]></cronexpression>
+            <context>
+                <user>Admin</user>
+                <project>Offline</project>
+                <siteroot>/sites/kihi/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="commit">true</param>
+                <param name="condition">enPortada:false</param>
+                <param name="index">KIHI_SITENEWS_OFFLINE</param>
+                <param name="merge">true</param>
+                <param name="range">2M</param>
+            </parameters>
+        </job>
+        <job>
+            <name>(koko) INDICES: Actualizar Index Source</name>
+            <class>org.opencms.search.TfsUpdateIndexSourceJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 55 23 28 * ?]]></cronexpression>
+            <context>
+                <user>Admin</user>
+                <project>Offline</project>
+                <siteroot>/sites/koko/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="config_default_action">forward</param>
+                <param name="config_default_range">2</param>
+                <param name="config_default_subFolderFormat">yyyy/MM/</param>
+                <param name="config_default_unit">M</param>
+                <param name="indexSource">KOKO_SITENEWS</param>
+                <param name="listas_basePath">listas</param>
+                <param name="listas_configuration">default</param>
+                <param name="news_basePath">contenidos</param>
+                <param name="news_configuration">default</param>
+                <param name="typeNews">news;listas</param>
+            </parameters>
+        </job>
+        <job>
+            <name>(koko) INDICES: Eliminar Contenido SITENEWS_OFFLINE</name>
+            <class>org.opencms.search.TfsShrinkIndexJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 55 23 28 * ?]]></cronexpression>
+            <context>
+                <user>Admin</user>
+                <project>Offline</project>
+                <siteroot>/sites/koko/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="commit">true</param>
+                <param name="condition">enPortada:false</param>
+                <param name="index">KOKO_SITENEWS_OFFLINE</param>
+                <param name="merge">true</param>
+                <param name="range">2M</param>
+            </parameters>
+        </job>
+        <job>
+            <name>(koko) INDICES: Eliminar Contenido SITENEWS_ONLINE</name>
+            <class>org.opencms.search.TfsShrinkIndexJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 55 23 28 * ?]]></cronexpression>
+            <context>
+                <user>Admin</user>
+                <project>Offline</project>
+                <siteroot>/sites/koko/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="commit">true</param>
+                <param name="condition">enPortada:false</param>
+                <param name="index">KOKO_SITENEWS_ONLINE</param>
+                <param name="merge">true</param>
+                <param name="range">2M</param>
+            </parameters>
+        </job>
+        <job>
+            <name>(kihi) INDICES: Eliminar Contenido SITENEWS_ONLINE</name>
+            <class>org.opencms.search.TfsShrinkIndexJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 55 23 28 * ?]]></cronexpression>
+            <context>
+                <user>Admin</user>
+                <project>Offline</project>
+                <siteroot>/sites/kihi/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="commit">true</param>
+                <param name="condition">enPortada:false</param>
+                <param name="index">KIHI_SITENEWS_ONLINE</param>
+                <param name="merge">true</param>
+                <param name="range">2M</param>
+            </parameters>
+        </job>
+        <job>
+            <name>(yaay) INDICES: Actualizar Index Source</name>
+            <class>org.opencms.search.TfsUpdateIndexSourceJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 55 23 28 * ?]]></cronexpression>
+            <context>
+                <user>Admin</user>
+                <project>Offline</project>
+                <siteroot>/sites/yaay/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="config_default_action">forward</param>
+                <param name="config_default_range">2</param>
+                <param name="config_default_subFolderFormat">yyyy/MM/</param>
+                <param name="config_default_unit">M</param>
+                <param name="indexSource">YAAY_SITENEWS</param>
+                <param name="listas_basePath">listas</param>
+                <param name="listas_configuration">default</param>
+                <param name="news_basePath">contenidos</param>
+                <param name="news_configuration">default</param>
+                <param name="typeNews">news;listas</param>
+            </parameters>
+        </job>
+        <job>
+            <name>(yaay) INDICES: Eliminar Contenido SITENEWS_OFFLINE</name>
+            <class>org.opencms.search.TfsShrinkIndexJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 55 23 28 * ?]]></cronexpression>
+            <context>
+                <user>Admin</user>
+                <project>Offline</project>
+                <siteroot>/sites/yaay/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="commit">true</param>
+                <param name="condition">enPortada:false</param>
+                <param name="index">YAAY_SITENEWS_OFFLINE</param>
+                <param name="merge">true</param>
+                <param name="range">2M</param>
+            </parameters>
+        </job>
+        <job>
+            <name>(yaay) INDICES: Eliminar Contenido SITENEWS_ONLINE</name>
+            <class>org.opencms.search.TfsShrinkIndexJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 55 23 28 * ?]]></cronexpression>
+            <context>
+                <user>Admin</user>
+                <project>Offline</project>
+                <siteroot>/sites/yaay/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="commit">true</param>
+                <param name="condition">enPortada:false</param>
+                <param name="index">YAAY_SITENEWS_ONLINE</param>
+                <param name="merge">true</param>
+                <param name="range">2M</param>
+            </parameters>
+        </job>
+        <job>
+            <name>(thewallet) INDICES: Actualizar Index Source</name>
+            <class>org.opencms.search.TfsUpdateIndexSourceJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 55 23 28 * ?]]></cronexpression>
+            <context>
+                <user>Admin</user>
+                <project>Offline</project>
+                <siteroot>/sites/thewallet/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="config_default_action">forward</param>
+                <param name="config_default_range">1</param>
+                <param name="config_default_subFolderFormat">yyyy/MM/</param>
+                <param name="config_default_unit">M</param>
+                <param name="indexSource">THEWALLET_SITENEWS</param>
+                <param name="listas_basePath">listas</param>
+                <param name="listas_configuration">default</param>
+                <param name="news_basePath">contenidos</param>
+                <param name="news_configuration">default</param>
+                <param name="typeNews">news;listas</param>
+            </parameters>
+        </job>
+        <job>
+            <name>(thewallet) INDICES: Eliminar Contenido SITENEWS_OFFLINE</name>
+            <class>org.opencms.search.TfsShrinkIndexJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 55 23 28 * ?]]></cronexpression>
+            <context>
+                <user>Admin</user>
+                <project>Offline</project>
+                <siteroot>/sites/thewallet/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="commit">true</param>
+                <param name="condition">enPortada:false</param>
+                <param name="index">THEWALLET_SITENEWS_OFFLINE</param>
+                <param name="merge">true</param>
+                <param name="range">2M</param>
+            </parameters>
+        </job>
+        <job>
+            <name>(thewallet) INDICES: Eliminar Contenido SITENEWS_ONLINE</name>
+            <class>org.opencms.search.TfsShrinkIndexJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 55 23 28 * ?]]></cronexpression>
+            <context>
+                <user>Admin</user>
+                <project>Offline</project>
+                <siteroot>/sites/thewallet/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="commit">true</param>
+                <param name="condition">enPortada:false</param>
+                <param name="index">THEWALLET_SITENEWS_ONLINE</param>
+                <param name="merge">true</param>
+                <param name="range">2M</param>
+            </parameters>
+        </job>
+        <job>
+            <name>(mui) INDICES: Actualizar Index Source</name>
+            <class>org.opencms.search.TfsUpdateIndexSourceJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 55 23 28 * ?]]></cronexpression>
+            <context>
+                <user>Admin</user>
+                <project>Offline</project>
+                <siteroot>/sites/mui/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="config_default_action">forward</param>
+                <param name="config_default_range">2</param>
+                <param name="config_default_subFolderFormat">yyyy/MM/</param>
+                <param name="config_default_unit">M</param>
+                <param name="indexSource">MUI_SITENEWS</param>
+                <param name="mui_listas_basePath">listas</param>
+                <param name="mui_listas_configuration">default</param>
+                <param name="mui_news_basePath">contenidos</param>
+                <param name="mui_news_configuration">default</param>
+                <param name="rnow_news_basePath">rnow/contenidos</param>
+                <param name="rnow_news_configuration">default</param>
+                <param name="series_listas_basePath">muiseries/listas</param>
+                <param name="series_listas_configuration">default</param>
+                <param name="series_news_basePath">muiseries/contenidos</param>
+                <param name="series_news_configuration">default</param>
+                <param name="typeNews">mui_news;mui_listas;series_news;series_listas;rnow_news;muiibr_news;muiibr_listas;</param>
+            </parameters>
+        </job>
+        <job>
+            <name>Creación y publicación de carpetas</name>
+            <class>com.tfsla.publishFolders.jobs.CreatePublishFolders</class>
+            <reuseinstance>false</reuseinstance>
+            <active>false</active>
+            <cronexpression><![CDATA[0 45/45 * 1/1 * ? *]]></cronexpression>
+            <context>
+                <user>Admin</user>
+                <project>Offline</project>
+                <siteroot>/sites/gadgets/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="folder">/img</param>
+                <param name="nextDay">true</param>
+                <param name="publication">1</param>
+            </parameters>
+        </job>
+        <job>
+            <name>(GADGETS) Procesar Frescuras</name>
+            <class>com.tfsla.diario.admin.jobs.ProcesarFrescuras</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 45/45 * 1/1 * ? *]]></cronexpression>
+            <context>
+                <user>Admin</user>
+                <project>Offline</project>
+                <siteroot>/sites/gadgets/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="hoursAfter">1</param>
+                <param name="publication">1</param>
+                <param name="sitename">/sites/gadgets/</param>
+            </parameters>
+        </job>
+        <job>
+            <name>Publish &amp;#47;contenidos&amp;#47;2024&amp;#47;06&amp;#47;28&amp;#47;noticia_0001.html at 30&amp;#47;7&amp;#47;2024 on 10:110 in &amp;#47;sites&amp;#47;tork</name>
+            <class>org.opencms.scheduler.jobs.CmsPublishScheduledJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 11 10 30 7 ? 2024]]></cronexpression>
+            <context>
+                <user>dnavarro</user>
+                <project>Publish &amp;#47;contenidos&amp;#47;2024&amp;#47;06&amp;#47;28&amp;#47;noticia_0001.html at 30&amp;#47;7&amp;#47;2024 on 10:110 in &amp;#47;sites&amp;#47;tork</project>
+                <siteroot>/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="jobname">Publish &amp;#47;contenidos&amp;#47;2024&amp;#47;06&amp;#47;28&amp;#47;noticia_0001.html at 30&amp;#47;7&amp;#47;2024 on 10:110 in &amp;#47;sites&amp;#47;tork</param>
+                <param name="linkcheck">true</param>
+                <param name="mail-to-user">dnavarro</param>
+            </parameters>
+        </job>
+        <job>
+            <name>Importa datos de Analytics</name>
+            <class>com.tfsla.diario.admin.jobs.MigrarDatosDeAnalytics</class>
+            <reuseinstance>false</reuseinstance>
+            <active>false</active>
+            <cronexpression><![CDATA[0 30/30 * 1/1 * ? *]]></cronexpression>
+            <context>
+                <user>Admin</user>
+                <project>Offline</project>
+                <siteroot>/sites/gadgets/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="publication">1</param>
+                <param name="siteName">/sites/gadgets/</param>
+            </parameters>
+        </job>
+        <job>
+            <name>Limpia datos de Analytics de la BD</name>
+            <class>com.tfsla.diario.admin.jobs.LimpiarTablaAnalytics</class>
+            <reuseinstance>false</reuseinstance>
+            <active>false</active>
+            <cronexpression><![CDATA[0 40/40 * 1/1 * ? *]]></cronexpression>
+            <context>
+                <user>Admin</user>
+                <project>Offline</project>
+                <siteroot>/sites/gadgets/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="hoursEnable">2</param>
+                <param name="publication">1</param>
+                <param name="siteName">/sites/gadgets/</param>
+            </parameters>
+        </job>
+        <job>
+            <name>Publish &amp;#47;contenidos&amp;#47;2024&amp;#47;01&amp;#47;24&amp;#47;noticia_0002.html at 27&amp;#47;7&amp;#47;2024 on 0:081 in &amp;#47;sites&amp;#47;gadgets</name>
+            <class>org.opencms.scheduler.jobs.CmsPublishScheduledJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 8 12 27 7 ? 2024]]></cronexpression>
+            <context>
+                <user>vtarletta</user>
+                <project>Publish &amp;#47;contenidos&amp;#47;2024&amp;#47;01&amp;#47;24&amp;#47;noticia_0002.html at 27&amp;#47;7&amp;#47;2024 on 0:081 in &amp;#47;sites&amp;#47;gadgets</project>
+                <siteroot>/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="jobname">Publish &amp;#47;contenidos&amp;#47;2024&amp;#47;01&amp;#47;24&amp;#47;noticia_0002.html at 27&amp;#47;7&amp;#47;2024 on 0:081 in &amp;#47;sites&amp;#47;gadgets</param>
+                <param name="linkcheck">true</param>
+                <param name="mail-to-user">vtarletta</param>
+            </parameters>
+        </job>
+        <job>
+            <name>Publish &amp;#47;contenidos&amp;#47;2024&amp;#47;07&amp;#47;18&amp;#47;noticia_0001.html at 15&amp;#47;8&amp;#47;2024 on 3:511 in &amp;#47;sites&amp;#47;gadgets</name>
+            <class>org.opencms.scheduler.jobs.CmsPublishScheduledJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 51 15 15 8 ? 2024]]></cronexpression>
+            <context>
+                <user>dnavarro</user>
+                <project>Publish &amp;#47;contenidos&amp;#47;2024&amp;#47;07&amp;#47;18&amp;#47;noticia_0001.html at 15&amp;#47;8&amp;#47;2024 on 3:511 in &amp;#47;sites&amp;#47;gadgets</project>
+                <siteroot>/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="jobname">Publish &amp;#47;contenidos&amp;#47;2024&amp;#47;07&amp;#47;18&amp;#47;noticia_0001.html at 15&amp;#47;8&amp;#47;2024 on 3:511 in &amp;#47;sites&amp;#47;gadgets</param>
+                <param name="linkcheck">true</param>
+                <param name="mail-to-user">dnavarro</param>
+            </parameters>
+        </job>
+        <job>
+            <name>Publish &amp;#47;contenidos&amp;#47;2023&amp;#47;12&amp;#47;20&amp;#47;noticia_0004.html at 27&amp;#47;7&amp;#47;2024 on 0:010 in &amp;#47;sites&amp;#47;gadgets</name>
+            <class>org.opencms.scheduler.jobs.CmsPublishScheduledJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 1 0 27 7 ? 2024]]></cronexpression>
+            <context>
+                <user>robertogalarza</user>
+                <project>Publish &amp;#47;contenidos&amp;#47;2023&amp;#47;12&amp;#47;20&amp;#47;noticia_0004.html at 27&amp;#47;7&amp;#47;2024 on 0:010 in &amp;#47;sites&amp;#47;gadgets</project>
+                <siteroot>/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="jobname">Publish &amp;#47;contenidos&amp;#47;2023&amp;#47;12&amp;#47;20&amp;#47;noticia_0004.html at 27&amp;#47;7&amp;#47;2024 on 0:010 in &amp;#47;sites&amp;#47;gadgets</param>
+                <param name="linkcheck">true</param>
+                <param name="mail-to-user">robertogalarza</param>
+            </parameters>
+        </job>
+        <job>
+            <name>Publish &amp;#47;contenidos&amp;#47;2024&amp;#47;07&amp;#47;12&amp;#47;noticia_0002.html at 26&amp;#47;7&amp;#47;2024 on 2:191 in &amp;#47;sites&amp;#47;gadgets</name>
+            <class>org.opencms.scheduler.jobs.CmsPublishScheduledJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 19 14 26 7 ? 2024]]></cronexpression>
+            <context>
+                <user>robertogalarza</user>
+                <project>Publish &amp;#47;contenidos&amp;#47;2024&amp;#47;07&amp;#47;12&amp;#47;noticia_0002.html at 26&amp;#47;7&amp;#47;2024 on 2:191 in &amp;#47;sites&amp;#47;gadgets</project>
+                <siteroot>/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="jobname">Publish &amp;#47;contenidos&amp;#47;2024&amp;#47;07&amp;#47;12&amp;#47;noticia_0002.html at 26&amp;#47;7&amp;#47;2024 on 2:191 in &amp;#47;sites&amp;#47;gadgets</param>
+                <param name="linkcheck">true</param>
+                <param name="mail-to-user">robertogalarza</param>
+            </parameters>
+        </job>
+        <job>
+            <name>Publish &amp;#47;contenidos&amp;#47;2023&amp;#47;11&amp;#47;16&amp;#47;noticia_0001.html at 25&amp;#47;7&amp;#47;2024 on 4:441 in &amp;#47;sites&amp;#47;gadgets</name>
+            <class>org.opencms.scheduler.jobs.CmsPublishScheduledJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 44 16 25 7 ? 2024]]></cronexpression>
+            <context>
+                <user>mjuzefiszyn</user>
+                <project>Publish &amp;#47;contenidos&amp;#47;2023&amp;#47;11&amp;#47;16&amp;#47;noticia_0001.html at 25&amp;#47;7&amp;#47;2024 on 4:441 in &amp;#47;sites&amp;#47;gadgets</project>
+                <siteroot>/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="jobname">Publish &amp;#47;contenidos&amp;#47;2023&amp;#47;11&amp;#47;16&amp;#47;noticia_0001.html at 25&amp;#47;7&amp;#47;2024 on 4:441 in &amp;#47;sites&amp;#47;gadgets</param>
+                <param name="linkcheck">true</param>
+                <param name="mail-to-user">mjuzefiszyn</param>
+            </parameters>
+        </job>
+        <job>
+            <name>Publish &amp;#47;contenidos&amp;#47;2023&amp;#47;12&amp;#47;20&amp;#47;noticia_0005.html at 25&amp;#47;7&amp;#47;2024 on 4:261 in &amp;#47;sites&amp;#47;gadgets</name>
+            <class>org.opencms.scheduler.jobs.CmsPublishScheduledJob</class>
+            <reuseinstance>false</reuseinstance>
+            <active>true</active>
+            <cronexpression><![CDATA[0 26 16 25 7 ? 2024]]></cronexpression>
+            <context>
+                <user>ctobares</user>
+                <project>Publish &amp;#47;contenidos&amp;#47;2023&amp;#47;12&amp;#47;20&amp;#47;noticia_0005.html at 25&amp;#47;7&amp;#47;2024 on 4:261 in &amp;#47;sites&amp;#47;gadgets</project>
+                <siteroot>/</siteroot>
+                <requesteduri>/</requesteduri>
+                <locale>en</locale>
+                <encoding>UTF-8</encoding>
+                <remoteaddr>127.0.0.1</remoteaddr>
+            </context>
+            <parameters>
+                <param name="jobname">Publish &amp;#47;contenidos&amp;#47;2023&amp;#47;12&amp;#47;20&amp;#47;noticia_0005.html at 25&amp;#47;7&amp;#47;2024 on 4:261 in &amp;#47;sites&amp;#47;gadgets</param>
+                <param name="linkcheck">true</param>
+                <param name="mail-to-user">ctobares</param>
+            </parameters>
+        </job>
+    </scheduler>
+</opencms>
