@@ -319,9 +319,7 @@ public class GoogleCloudAIService {
     	    	
     	String newsSubTitleFixed = newsSubTitle.replaceAll("\"", "'"); 
     	String newsContentFixed = newsContent.replaceAll("\"", "'"); 
-    	
-    	
-    	String contentResponse = "";
+    	    	
     	JSONArray jsonResponse = new JSONArray();
     		    		
     	String content = context + "\n" + prompt;
@@ -589,17 +587,26 @@ public class GoogleCloudAIService {
     
     public JSONObject getSummarySuggestionAI(String newsPath) throws Exception{
     	
-     	String content = extractNewsContent(newsPath);
+    	String resumen = "";
     	
-    	String prompt = getPromptResumen();
-
-    	String textPrompt = prompt.replaceAll("%1",content);
-    	String textFixed = textPrompt.replaceAll("\"", "'"); 
-    	
-    	String resumen = getPredictText(textFixed); 
-    	
-    	JSONObject response = new JSONObject();
-    	response.put("resumen",resumen); 
+    	try {
+	     	String content = extractNewsContent(newsPath);
+	    	String contentFixed = content.replace("$", "\\$");
+	     	
+	    	String prompt = getPromptResumen();
+	
+	    	String textPrompt = prompt.replaceAll("%1",contentFixed);
+	    	String textFixed = textPrompt.replaceAll("\"", "'"); 
+	    	
+	    	resumen = getPredictText(textFixed);
+	    	
+    	}catch (java.lang.IndexOutOfBoundsException e) {
+	    	resumen = "No se pudo procesar correctamente la solicitud";
+	      
+    	}
+	    
+	    JSONObject response = new JSONObject();
+	    response.put("resumen",resumen); 
     	
     	return response;
     }
