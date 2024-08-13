@@ -28,5 +28,6 @@
 	  <module>../templateManager</module>
 	  <module>../tfsUsers</module>
 	  <module>../tfsUsers-newsPublisher</module>
+	  <module>../cms</module>
   </modules>
 </project>
