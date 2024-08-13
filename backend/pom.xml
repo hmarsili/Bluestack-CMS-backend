@@ -1,0 +1,32 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>blueStack</groupId>
+  <artifactId>backend</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  
+  <modules>
+	  <module>../bitly-api-client</module>
+	  <module>../ahocorasick</module>
+	  <module>../otp</module>
+	  <module>../simapi</module>
+	  <module>../opencms-core</module>
+	  <module>../opencms-components</module>
+	  <module>../opencms-modules</module>
+	  <module>../opencms-extensions</module>
+	  <module>../searchExtensions</module>
+	  <module>../imageVariants</module>
+	  <module>../diario</module>
+	  <module>../diario-comentarios</module>
+	  <module>../diario-encuestas</module>
+	  <module>../diario-webservices</module>
+	  <module>../diario-genericImport</module>
+	  <module>../diario-newsTags</module>
+	  <module>../ocee-cache</module>
+	  <module>../ocee-ldap</module>
+	  <module>../statisticsClient</module>
+	  <module>../templateManager</module>
+	  <module>../tfsUsers</module>
+	  <module>../tfsUsers-newsPublisher</module>
+  </modules>
+</project>
