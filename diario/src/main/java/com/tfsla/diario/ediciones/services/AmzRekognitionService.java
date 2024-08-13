@@ -2,60 +2,49 @@ package com.tfsla.diario.ediciones.services;
 
 import org.apache.commons.logging.Log;
 import org.opencms.configuration.CmsMedios;
-import org.opencms.file.CmsFile;
 import org.opencms.file.CmsObject;
-import org.opencms.file.CmsProperty;
-import org.opencms.file.CmsPropertyDefinition;
 import org.opencms.main.CmsException;
 import org.opencms.main.CmsLog;
 import org.opencms.main.OpenCms;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.services.rekognition.AmazonRekognition;
-import com.amazonaws.services.rekognition.AmazonRekognitionClientBuilder;
-import com.amazonaws.services.rekognition.model.AmazonRekognitionException; 
-import com.amazonaws.services.rekognition.model.DetectLabelsRequest;
-import com.amazonaws.services.rekognition.model.DetectLabelsResult;
-import com.amazonaws.services.rekognition.model.DetectModerationLabelsRequest;
-import com.amazonaws.services.rekognition.model.DetectModerationLabelsResult;
-import com.amazonaws.services.rekognition.model.Image;
-import com.amazonaws.services.rekognition.model.IndexFacesRequest;
-import com.amazonaws.services.rekognition.model.IndexFacesResult;
-import com.amazonaws.services.rekognition.model.Label;
-import com.amazonaws.services.rekognition.model.ModerationLabel;
-import com.amazonaws.services.rekognition.model.RecognizeCelebritiesRequest;
-import com.amazonaws.services.rekognition.model.RecognizeCelebritiesResult;
-import com.amazonaws.services.rekognition.model.S3Object;
-import com.amazonaws.services.rekognition.model.SearchFacesByImageRequest;
-import com.amazonaws.services.rekognition.model.SearchFacesByImageResult;
-import com.amazonaws.util.IOUtils;
-import com.amazonaws.services.rekognition.model.AgeRange; 
-import com.amazonaws.services.rekognition.model.Attribute;
-import com.amazonaws.services.rekognition.model.BoundingBox;
-import com.amazonaws.services.rekognition.model.Celebrity;
-import com.amazonaws.services.rekognition.model.CreateCollectionRequest;
-import com.amazonaws.services.rekognition.model.CreateCollectionResult;
-import com.amazonaws.services.rekognition.model.DeleteCollectionRequest;
-import com.amazonaws.services.rekognition.model.DeleteCollectionResult;
-import com.amazonaws.services.rekognition.model.DeleteFacesRequest;
-import com.amazonaws.services.rekognition.model.DeleteFacesResult;
-import com.amazonaws.services.rekognition.model.DetectFacesRequest; 
-import com.amazonaws.services.rekognition.model.DetectFacesResult; 
-import com.amazonaws.services.rekognition.model.FaceDetail;
-import com.amazonaws.services.rekognition.model.FaceMatch;
-import com.amazonaws.services.rekognition.model.FaceRecord;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.core.SdkBytes;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.services.rekognition.RekognitionClient;
+import software.amazon.awssdk.services.rekognition.model.RekognitionException; 
+import software.amazon.awssdk.services.rekognition.model.DetectLabelsRequest;
+import software.amazon.awssdk.services.rekognition.model.DetectLabelsResponse;
+import software.amazon.awssdk.services.rekognition.model.DetectModerationLabelsRequest;
+import software.amazon.awssdk.services.rekognition.model.DetectModerationLabelsResponse;
+import software.amazon.awssdk.services.rekognition.model.Image;
+import software.amazon.awssdk.services.rekognition.model.IndexFacesRequest;
+import software.amazon.awssdk.services.rekognition.model.IndexFacesResponse;
+import software.amazon.awssdk.services.rekognition.model.RecognizeCelebritiesRequest;
+import software.amazon.awssdk.services.rekognition.model.RecognizeCelebritiesResponse;
+import software.amazon.awssdk.services.rekognition.model.S3Object;
+import software.amazon.awssdk.services.rekognition.model.SearchFacesByImageRequest;
+import software.amazon.awssdk.services.rekognition.model.SearchFacesByImageResponse;
+import software.amazon.awssdk.utils.IoUtils;
+import software.amazon.awssdk.services.rekognition.model.Attribute;
+import software.amazon.awssdk.services.rekognition.model.BoundingBox;
+import software.amazon.awssdk.services.rekognition.model.CreateCollectionRequest;
+import software.amazon.awssdk.services.rekognition.model.CreateCollectionResponse;
+import software.amazon.awssdk.services.rekognition.model.DeleteCollectionRequest;
+import software.amazon.awssdk.services.rekognition.model.DeleteCollectionResponse;
+import software.amazon.awssdk.services.rekognition.model.DeleteFacesRequest;
+import software.amazon.awssdk.services.rekognition.model.DeleteFacesResponse;
+import software.amazon.awssdk.services.rekognition.model.DetectFacesRequest; 
+import software.amazon.awssdk.services.rekognition.model.DetectFacesResponse; 
+import software.amazon.awssdk.services.rekognition.model.FaceDetail;
+import software.amazon.awssdk.services.rekognition.model.FaceMatch;
+import software.amazon.awssdk.services.rekognition.model.FaceRecord;
 
 public class AmzRekognitionService {
 
@@ -143,44 +132,44 @@ public class AmzRekognitionService {
 		float left;
 		float top;
 		if (rotation==null) {
-			left = imageWidth * (box.getLeft() + box.getWidth()/2);
-	    	 top = imageHeight * (box.getTop() + box.getHeight()/2);
+			left = imageWidth * (box.left() + box.width()/2);
+	    	 top = imageHeight * (box.top() + box.height()/2);
 		}
 		else {
 		switch (rotation) {
 	     case "ROTATE_0":
-	        left = imageWidth * (box.getLeft() + box.getWidth()/2);
-	        top = imageHeight * (box.getTop()+ box.getHeight()/2);
+	        left = imageWidth * (box.left() + box.width()/2);
+	        top = imageHeight * (box.top()+ box.height()/2);
 	        break;
 	     case "ROTATE_90":
-	        left = imageHeight * (1 - (box.getTop() + box.getHeight()));
-	        top = imageWidth * (box.getLeft() + box.getWidth()/2);
+	        left = imageHeight * (1 - (box.top() + box.height()));
+	        top = imageWidth * (box.left() + box.width()/2);
 	        break;
 	     case "ROTATE_180":
-	        left = imageWidth - (imageWidth * (box.getLeft() + box.getWidth()/2));
-	        top = imageHeight * (1 - (box.getTop() + box.getHeight()/2));
+	        left = imageWidth - (imageWidth * (box.left() + box.width()/2));
+	        top = imageHeight * (1 - (box.top() + box.height()/2));
 	        break;
 	     case "ROTATE_270":
-	        left = imageHeight * (box.getTop()+ box.getHeight()/2);
-	        top = imageWidth * (1 - box.getLeft() - box.getWidth()/2);
+	        left = imageHeight * (box.top()+ box.height()/2);
+	        top = imageWidth * (1 - box.left() - box.width()/2);
 	        break;
 	     default:
-	    	 left = imageWidth * (box.getLeft() + box.getWidth()/2);
-	    	 top = imageHeight * (box.getTop()+ box.getHeight()/2);;
+	    	 left = imageWidth * (box.left() + box.width()/2);
+	    	 top = imageHeight * (box.top()+ box.height()/2);;
 	  }
 		}
-		float[] result = new float[2];
-		result[0]= left;
-		result[1]=top;
+		float[] Response = new float[2];
+		Response[0]= left;
+		Response[1]=top;
 	
-		return result;
+		return Response;
 	}
 	
-	public float[] estimateFocalPoint(int imageWidth, int imageHeight, DetectFacesResult faces) throws CmsException {
+	public float[] estimateFocalPoint(int imageWidth, int imageHeight, DetectFacesResponse faces) throws CmsException {
 		float[] focalPosition=null;
 		
 		//https://docs.aws.amazon.com/es_es/rekognition/latest/dg/images-orientation.html
-		String orientation = faces.getOrientationCorrection();
+		String orientation = faces.orientationCorrectionAsString();
 		/*
 		CmsProperty p = cmsObject.readPropertyObject(cmsObject.getSitePath(imageVfsFile), CmsPropertyDefinition.PROPERTY_IMAGE_SIZE,false);
 		String size = p.getValue();
@@ -197,18 +186,18 @@ public class AmzRekognitionService {
 		float midHeight = height/2;
 				
 		
-		List<FaceDetail> faceDetails = faces.getFaceDetails();
+		List<FaceDetail> faceDetails = faces.faceDetails();
 		if (faceDetails.size()==0) { //Sin caras el punto focal en el medio de la imagen.
 			focalPosition=new float[2];
 			focalPosition[0] = midwidth;
 			focalPosition[1] = midHeight;
 		}
 		else if (faceDetails.size()==1) { //Una cara: el punto focal en la cara.
-			return getPosition(faceDetails.get(0).getBoundingBox(),width,height,orientation);
+			return getPosition(faceDetails.get(0).boundingBox(),width,height,orientation);
 		}
 		else if (faceDetails.size()==2) { //Dos caras: el punto focal en la mas cercana al medio.
-			float[] position1 = getPosition(faceDetails.get(0).getBoundingBox(),width,height,orientation);
-			float[] position2 = getPosition(faceDetails.get(1).getBoundingBox(),width,height,orientation);
+			float[] position1 = getPosition(faceDetails.get(0).boundingBox(),width,height,orientation);
+			float[] position2 = getPosition(faceDetails.get(1).boundingBox(),width,height,orientation);
 
 			float dist1 = (float) Math.sqrt(Math.pow(midwidth - position1[0],2)+Math.pow(midHeight - position1[1],2));
 			float dist2 = (float) Math.sqrt(Math.pow(midwidth - position2[0],2)+Math.pow(midHeight - position2[1],2));
@@ -219,7 +208,7 @@ public class AmzRekognitionService {
 		else { //mas de 2 caras: el punto focal en el medio de las caras.
 			focalPosition=new float[2];
 			 for (FaceDetail faceDetail : faceDetails) {
-				 BoundingBox box = faceDetail.getBoundingBox();
+				 BoundingBox box = faceDetail.boundingBox();
 				 
 				 //Todo: terminar getPosition...
 				 float[] position = getPosition(box,width,height,orientation); 
@@ -234,41 +223,58 @@ public class AmzRekognitionService {
 		 return focalPosition;
 	}
 	
-	public DetectFacesResult detectFaces(String photo) {
-		AmazonRekognition rekognitionClient = getRekognitionClient();
+	public DetectFacesResponse detectFaces(String photo) {
+		RekognitionClient rekognitionClient = getRekognitionClient();
 		
-		 DetectFacesRequest request = new DetectFacesRequest()
-				 .withImage(new Image()
-				 .withS3Object(new S3Object()
-						 .withName(photo)
-						 .withBucket(getAmzBucket())))
-				 .withAttributes(Attribute.ALL);      
-		 // Replace Attribute.ALL with Attribute.DEFAULT to get default values.
-	     
+		 DetectFacesRequest request = 
+				 DetectFacesRequest.builder()
+				 .image(
+						 Image.builder()
+						 	.s3Object(
+								 S3Object.builder()
+								 .name(photo)
+								 .bucket(getAmzBucket())
+								 .build()
+								 )
+						 	.build()
+				 )
+				 .attributes(Attribute.ALL)
+				 .build();
+			// Replace Attribute.ALL with Attribute.DEFAULT to get default values.
 		 try {         
-			 DetectFacesResult result = rekognitionClient.detectFaces(request);         
-			 return result;
-	      } catch (AmazonRekognitionException e) {
+			 DetectFacesResponse Response = rekognitionClient.detectFaces(request);         
+			 return Response;
+	      } catch (RekognitionException e) {
 	    	  e.printStackTrace();      
 	   
 	      }
 		 return null;
 	}
 	
-	public DetectModerationLabelsResult detectUnsafeContent(String photo) {
-		 AmazonRekognition rekognitionClient = getRekognitionClient();
+	public DetectModerationLabelsResponse detectUnsafeContent(String photo) {
+		RekognitionClient rekognitionClient = getRekognitionClient();
 	      
-	      DetectModerationLabelsRequest request = new DetectModerationLabelsRequest()
-	        .withImage(new Image().withS3Object(new S3Object().withName(photo).withBucket(getAmzBucket())))
-	        .withMinConfidence(60F);
+	      DetectModerationLabelsRequest request = DetectModerationLabelsRequest.builder()
+	    		  .image(
+	    				  Image.builder()
+	    				  .s3Object(
+									 S3Object.builder()
+									 .name(photo)
+									 .bucket(getAmzBucket())
+									 .build()
+									 )
+							 	.build()
+					 )
+	    		  .minConfidence(60F)
+	    		  .build();
 	      try
 	      {
-	           DetectModerationLabelsResult result = rekognitionClient.detectModerationLabels(request);
+	           DetectModerationLabelsResponse Response = rekognitionClient.detectModerationLabels(request);
 	           
-	           return result;
+	           return Response;
 
 /*	           
- 		List<ModerationLabel> labels = result.getModerationLabels();
+ 		List<ModerationLabel> labels = Response.getModerationLabels();
  		System.out.println("Detected labels for " + photo);
 	           for (ModerationLabel label : labels)
 	           {
@@ -278,60 +284,76 @@ public class AmzRekognitionService {
 	          }
 */	
 	       }
-	       catch (AmazonRekognitionException e)
+	       catch (RekognitionException e)
 	       {
 	         e.printStackTrace();
 	       }
 	      return null;
 	}
 
-	public DetectLabelsResult getLabels(String photo) {	
+	public DetectLabelsResponse getLabels(String photo) {	
 
-		AmazonRekognition rekognitionClient = getRekognitionClient();
+		RekognitionClient rekognitionClient = getRekognitionClient();
 
-		DetectLabelsRequest request = new DetectLabelsRequest()
-				.withImage(new Image()
-						.withS3Object(new S3Object()        
-								.withName(photo).withBucket(getAmzBucket())))        
-				.withMaxLabels(10)        
-				.withMinConfidence(77F);
+		DetectLabelsRequest request = DetectLabelsRequest.builder()
+	    		  .image(
+	    				  Image.builder()
+	    				  .s3Object(
+									 S3Object.builder()
+									 .name(photo)
+									 .bucket(getAmzBucket())
+									 .build()
+									 )
+							 	.build()
+					 )      
+				.maxLabels(10)        
+				.minConfidence(77F)
+				.build();
 		try {         
 
-			DetectLabelsResult result = rekognitionClient.detectLabels(request);
-			return result;
+			DetectLabelsResponse Response = rekognitionClient.detectLabels(request);
+			return Response;
 
-		} catch(AmazonRekognitionException e) {
+		} catch(RekognitionException e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
 
-	public RecognizeCelebritiesResult RecognizeCelebrities(String photo) {
+	public RecognizeCelebritiesResponse RecognizeCelebrities(String photo) {
 		
-		AmazonRekognition rekognitionClient = getRekognitionClient();
+		RekognitionClient rekognitionClient = getRekognitionClient();
 		
-		RecognizeCelebritiesRequest request = new RecognizeCelebritiesRequest()
-	            .withImage(new Image()
-						.withS3Object(new S3Object()        
-						.withName(photo).withBucket(getAmzBucket())));
+		RecognizeCelebritiesRequest request = RecognizeCelebritiesRequest.builder()
+	    		  .image(
+	    				  Image.builder()
+	    				  .s3Object(
+									 S3Object.builder()
+									 .name(photo)
+									 .bucket(getAmzBucket())
+									 .build()
+									 )
+							 	.build()
+					 )
+	    		  	.build();
+		
+		RecognizeCelebritiesResponse Response=rekognitionClient.recognizeCelebrities(request);
 
-		RecognizeCelebritiesResult result=rekognitionClient.recognizeCelebrities(request);
-
-		return result;
+		return Response;
 	}
 	
 	public String removeFaceFromCollection(String collectionId, String faceId) {
 		
 		String deletedFace = null;
-		AmazonRekognition rekognitionClient = getRekognitionClient();
+		RekognitionClient rekognitionClient = getRekognitionClient();
 		
-		DeleteFacesRequest deleteFacesRequest = new DeleteFacesRequest()
-				.withFaceIds(faceId)
-				.withCollectionId(collectionId);
+		DeleteFacesRequest deleteFacesRequest = DeleteFacesRequest.builder()
+				.faceIds(faceId)
+				.collectionId(collectionId).build();
 		
-		DeleteFacesResult result = rekognitionClient.deleteFaces(deleteFacesRequest);
+		DeleteFacesResponse Response = rekognitionClient.deleteFaces(deleteFacesRequest);
 		
-		for (String deletedFaceItem : result.getDeletedFaces()){
+		for (String deletedFaceItem : Response.deletedFaces()){
 			deletedFace = deletedFaceItem;
 		}
 		
@@ -342,29 +364,33 @@ public class AmzRekognitionService {
 		
 		String faceId = null;
 		
-		AmazonRekognition rekognitionClient = getRekognitionClient();
+		RekognitionClient rekognitionClient = getRekognitionClient();
 		
-		Image image =  new Image()
-				.withS3Object(new S3Object()
-				.withBucket(getAmzBucket())
-				.withName(photo)); 
+		Image image =  Image.builder()
+				.s3Object(
+						S3Object.builder()
+						.bucket(getAmzBucket())
+						.name(photo)
+						.build())
+				.build(); 
 		
-		 IndexFacesRequest indexFacesRequest = new IndexFacesRequest()
-				 .withImage(image)
-				 .withCollectionId(collectionId)
-				 .withExternalImageId(faceName)
-				 .withDetectionAttributes("ALL");
+		 IndexFacesRequest indexFacesRequest = IndexFacesRequest.builder()
+				 .image(image)
+				 .collectionId(collectionId)
+				 .externalImageId(faceName)
+				 .detectionAttributes(Attribute.ALL)
+				 .build();
 		 
-		 IndexFacesResult indexFacesResult = rekognitionClient.indexFaces(indexFacesRequest);
+		 IndexFacesResponse indexFacesResponse = rekognitionClient.indexFaces(indexFacesRequest);
 		 
 		System.out.println(photo + " added");      
 		
-		List < FaceRecord > faceRecords = indexFacesResult.getFaceRecords();      
+		List < FaceRecord > faceRecords = indexFacesResponse.faceRecords();      
 		
 		for (FaceRecord faceRecord: faceRecords) {
-			faceId = faceRecord.getFace().getFaceId();
+			faceId = faceRecord.face().faceId();
 			System.out.println("Face detected: Faceid is " +
-					faceRecord.getFace().getFaceId());
+					faceRecord.face().faceId());
 			}
 		
 		 return faceId;
@@ -373,54 +399,59 @@ public class AmzRekognitionService {
 	
 	public int deleteFaceCollection(String collectionId) {
 		
-		AmazonRekognition rekognitionClient = getRekognitionClient();
+		RekognitionClient rekognitionClient = getRekognitionClient();
 		
-		 DeleteCollectionRequest request = new DeleteCollectionRequest()
-				 .withCollectionId(collectionId);      
-		 DeleteCollectionResult  result = rekognitionClient.deleteCollection(request); 
+		 DeleteCollectionRequest request = DeleteCollectionRequest.builder()
+				 .collectionId(collectionId)
+				 .build();      
 		 
-		 return result.getStatusCode();
+		 DeleteCollectionResponse  Response = rekognitionClient.deleteCollection(request); 
+		 
+		 return Response.statusCode();
 	}
 	
 	public String createFaceCollection(String collectionId) {
-		AmazonRekognition rekognitionClient = getRekognitionClient();
+		RekognitionClient rekognitionClient = getRekognitionClient();
 		
 		System.out.println("Creating collection: " 
 		+         collectionId);
 		
-		CreateCollectionRequest request = new CreateCollectionRequest()         
-				.withCollectionId(collectionId);     
+		CreateCollectionRequest request = CreateCollectionRequest.builder()         
+				.collectionId(collectionId)
+				.build();     
 		
-		CreateCollectionResult createCollectionResult =  
+		CreateCollectionResponse createCollectionResponse =  
 				rekognitionClient.createCollection(request);
 		
 		System.out.println("Statis code: " +
-				createCollectionResult.getStatusCode() +
+				createCollectionResponse.statusCode() +
 				" - CollectionArn : " +
-				createCollectionResult.getCollectionArn());
+				createCollectionResponse.collectionArn());
 		
-		return createCollectionResult.getCollectionArn();
+		return createCollectionResponse.collectionArn();
 	}
 
 	public void searchFace(String collectionId, InputStream inputStream ) {
 		 Float threshold = 70F;
 		 int maxFaces = 2;
 
-		AmazonRekognition rekognitionClient = getRekognitionClient();
+		RekognitionClient rekognitionClient = getRekognitionClient();
 
 		try {
-			ByteBuffer imageBytes = ByteBuffer.wrap(IOUtils.toByteArray(inputStream));
-		
-			Image image =  new Image()
-					.withBytes(imageBytes); 
+			SdkBytes bytesImage = SdkBytes.fromByteArray(IoUtils.toByteArray(inputStream));
+			
+			
+			Image image =  Image.builder()
+					.bytes(bytesImage)
+					.build(); 
 
-			 SearchFacesByImageResult searchFacesByImageResult = searchFace(collectionId, threshold, maxFaces,
+			 SearchFacesByImageResponse searchFacesByImageResponse = searchFace(collectionId, threshold, maxFaces,
 						rekognitionClient, image); 
 				
 				 System.out.println("Faces matching largest face in image  ");
-				 List < FaceMatch > faceImageMatches = searchFacesByImageResult.getFaceMatches();
+				 List < FaceMatch > faceImageMatches = searchFacesByImageResponse.faceMatches();
 				 for (FaceMatch face: faceImageMatches) {
-					 System.out.println(face.getFace().toString());
+					 System.out.println(face.face().toString());
 					 System.out.println();
 				 }
 
@@ -436,45 +467,50 @@ public class AmzRekognitionService {
 		 Float threshold = 70F;
 		 int maxFaces = 2;
 		 
-		AmazonRekognition rekognitionClient = getRekognitionClient();
+		RekognitionClient rekognitionClient = getRekognitionClient();
 		
-		Image image =  new Image()
-				.withS3Object(new S3Object()
-				.withBucket(getAmzBucket())
-				.withName(photo)); 
-		
-		 SearchFacesByImageResult searchFacesByImageResult = searchFace(collectionId, threshold, maxFaces,
+		Image image =  Image.builder()
+	    				  .s3Object(
+							 S3Object.builder()
+							 .name(photo)
+							 .bucket(getAmzBucket())
+							 .build()
+							 )
+					 .build();
+				
+		 SearchFacesByImageResponse searchFacesByImageResponse = searchFace(collectionId, threshold, maxFaces,
 				rekognitionClient, image); 
 		
 		 System.out.println("Faces matching largest face in image  " + photo);
-		 List < FaceMatch > faceImageMatches = searchFacesByImageResult.getFaceMatches();
+		 List < FaceMatch > faceImageMatches = searchFacesByImageResponse.faceMatches();
 		 for (FaceMatch face: faceImageMatches) {
-			 System.out.println(face.getFace().toString());
+			 System.out.println(face.face().toString());
 			 System.out.println();
 		 }
 		 
 	}
 
 
-	private SearchFacesByImageResult searchFace(String collectionId, Float threshold, int maxFaces,
-			AmazonRekognition rekognitionClient, Image image) {
-		SearchFacesByImageRequest searchFacesByImageRequest = new SearchFacesByImageRequest()
-				 .withCollectionId(collectionId)
-				 .withImage(image)
-				 .withFaceMatchThreshold(threshold)
-				 .withMaxFaces(maxFaces);      
+	private SearchFacesByImageResponse searchFace(String collectionId, Float threshold, int maxFaces,
+			RekognitionClient rekognitionClient, Image image) {
+		SearchFacesByImageRequest searchFacesByImageRequest = SearchFacesByImageRequest.builder()
+				 .collectionId(collectionId)
+				 .image(image)
+				 .faceMatchThreshold(threshold)
+				 .maxFaces(maxFaces)
+				 .build();      
 		 
-		 SearchFacesByImageResult searchFacesByImageResult = rekognitionClient.searchFacesByImage(searchFacesByImageRequest);
-		return searchFacesByImageResult;
+		 SearchFacesByImageResponse searchFacesByImageResponse = rekognitionClient.searchFacesByImage(searchFacesByImageRequest);
+		return searchFacesByImageResponse;
 	}
 	
-	private AmazonRekognition getRekognitionClient() {
-		AWSCredentials awsCreds = new BasicAWSCredentials(getAmzAccessID(), getAmzAccessKey());
+	private RekognitionClient getRekognitionClient() {
+		
+		AwsBasicCredentials awsCreds = AwsBasicCredentials.create(getAmzAccessID(), getAmzAccessKey());
 
-		AmazonRekognition rekognitionClient = AmazonRekognitionClientBuilder
-				.standard()
-				.withRegion(Regions.fromName(getAmzRegion()))
-				.withCredentials(new AWSStaticCredentialsProvider(awsCreds))
+		RekognitionClient rekognitionClient = RekognitionClient.builder()
+				.region(Region.of(getAmzRegion()))
+				.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
 				.build();
 		return rekognitionClient;
 	}
@@ -490,9 +526,9 @@ public class AmzRekognitionService {
 		rekService.amzAccessKey = "";
 		rekService.amzRegion = "US_EAST_1".toLowerCase().replaceAll("_","-");
 		
-		//DetectLabelsResult resultLabel = rekService.getLabels("images/2016/10/20/lighthouse.jpg");
+		//DetectLabelsResponse ResponseLabel = rekService.getLabels("images/2016/10/20/lighthouse.jpg");
 		
-		//List <Label> labels = resultLabel.getLabels();
+		//List <Label> labels = ResponseLabel.getLabels();
 		
 		//System.out.println("Detected labels for " + "images/2016/10/20/lighthouse.jpg");         
 		//for (Label label: labels) {            
@@ -500,7 +536,7 @@ public class AmzRekognitionService {
 		//}
 		
 		
-		//resultLabel = rekService.getLabels("images/2017/04/03/noe_0755_jpg_285432573.jpg"); //images/2017/05/22/img_3887.jpg");
+		//ResponseLabel = rekService.getLabels("images/2017/04/03/noe_0755_jpg_285432573.jpg"); //images/2017/05/22/img_3887.jpg");
 		
 		//System.out.println("Detected labels for " + "images/2017/04/03/noe_0755_jpg_285432573.jpg");         
 		//for (Label label: labels) {            
@@ -508,12 +544,12 @@ public class AmzRekognitionService {
 		//}
 		
 		
-		DetectFacesResult resultFaces = rekService.detectFaces("images/2017/04/03/noe_0755_jpg_285432573.jpg");
+		DetectFacesResponse ResponseFaces = rekService.detectFaces("images/2017/04/03/noe_0755_jpg_285432573.jpg");
  
-		 List < FaceDetail > faceDetails = resultFaces.getFaceDetails();
+		 List < FaceDetail > faceDetails = ResponseFaces.faceDetails();
 		 
 		 try {
-			 float[] focalPoint = rekService.estimateFocalPoint(373, 554, resultFaces);
+			 float[] focalPoint = rekService.estimateFocalPoint(373, 554, ResponseFaces);
 			System.out.println(focalPoint[0] + "," + focalPoint[1]);
 		} catch (CmsException e) {
 			// TODO Auto-generated catch block
@@ -521,17 +557,17 @@ public class AmzRekognitionService {
 		}
 	 
 		 for (FaceDetail face: faceDetails) {
-			 System.out.println("cara -->" + face.getBoundingBox().getLeft() + "," + face.getBoundingBox().getTop());
+			 System.out.println("cara -->" + face.boundingBox().left() + "," + face.boundingBox().top());
 			 
 		 
 		 }
 		 
-		 resultFaces = rekService.detectFaces( "images/2016/10/07/cr7.jpg");
+		 ResponseFaces = rekService.detectFaces( "images/2016/10/07/cr7.jpg");
 		 
-		faceDetails = resultFaces.getFaceDetails();
+		faceDetails = ResponseFaces.faceDetails();
 		 
 		 try {
-			 float[] focalPoint = rekService.estimateFocalPoint(620, 444, resultFaces);
+			 float[] focalPoint = rekService.estimateFocalPoint(620, 444, ResponseFaces);
 			System.out.println(focalPoint[0] + "," + focalPoint[1]);
 		} catch (CmsException e) {
 			// TODO Auto-generated catch block
@@ -539,7 +575,7 @@ public class AmzRekognitionService {
 		}
 	 
 		 for (FaceDetail face: faceDetails) {
-			 System.out.println("cara -->" + face.getBoundingBox().getLeft() + "," + face.getBoundingBox().getTop());
+			 System.out.println("cara -->" + face.boundingBox().left() + "," + face.boundingBox().top());
 			 
 		 
 		 }
@@ -565,27 +601,27 @@ public class AmzRekognitionService {
         
 
 /*		
-		RecognizeCelebritiesResult result = rekService.RecognizeCelebrities("images/2016/10/07/cr7.jpg");
-		List<Celebrity> celebs=result.getCelebrityFaces();
+		RecognizeCelebritiesResponse Response = rekService.RecognizeCelebrities("images/2016/10/07/cr7.jpg");
+		List<Celebrity> celebs=Response.getCelebrityFaces();
 		
 		for (Celebrity celebrity: celebs) {
             System.out.println("Celebrity recognized: " + celebrity.getName());
             System.out.println("Celebrity ID: " + celebrity.getId());
-            BoundingBox boundingBox=celebrity.getFace().getBoundingBox();
+            BoundingBox boundingBox=celebrity.getFace().boundingBox();
             System.out.println("position: " +
-               boundingBox.getLeft().toString() + " " +
-               boundingBox.getTop().toString());
+               boundingBox.left().toString() + " " +
+               boundingBox.top().toString());
             System.out.println("Further information (if available):");
             for (String url: celebrity.getUrls()){
                System.out.println(url);
             }
             System.out.println();
          }
-         System.out.println(result.getUnrecognizedFaces().size() + " face(s) were unrecognized.");
+         System.out.println(Response.getUnrecognizedFaces().size() + " face(s) were unrecognized.");
 
          
-         DetectModerationLabelsResult resultUnsafeContent = rekService.detectUnsafeContent("images/2016/10/07/cr7.jpg");
-         List<ModerationLabel> labelsUnsafe = resultUnsafeContent.getModerationLabels();
+         DetectModerationLabelsResponse ResponseUnsafeContent = rekService.detectUnsafeContent("images/2016/10/07/cr7.jpg");
+         List<ModerationLabel> labelsUnsafe = ResponseUnsafeContent.getModerationLabels();
   		
  	           for (ModerationLabel label : labelsUnsafe)
  	           {

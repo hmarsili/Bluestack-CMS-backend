@@ -9,8 +9,8 @@ import org.apache.commons.logging.Log;
 import org.opencms.file.CmsObject;
 import org.opencms.main.CmsLog;
 
-import com.amazonaws.services.rekognition.model.Label;
-import com.amazonaws.services.rekognition.model.ModerationLabel;
+import software.amazon.awssdk.services.rekognition.model.Label;
+import software.amazon.awssdk.services.rekognition.model.ModerationLabel;
 import com.tfsla.diario.ediciones.services.GoogleCloudTranslatorService;
 
 public class ImageLabelsTranslator {
@@ -62,7 +62,7 @@ public class ImageLabelsTranslator {
 		if (!mustTranslate) {
 			for (ModerationLabel label: labels) {  
 					if (result.length() >0) result+= ", ";
-					result+=label.getName();
+					result+=label.name();
 			}
 			return result;
 		}
@@ -72,11 +72,11 @@ public class ImageLabelsTranslator {
 		String toTranslateText = "";
 		String targetLang = translateService.getLanguage();
 		for (ModerationLabel label: labels) {  				
-			String meaning = getStoredLabelTranslation(label.getName(), targetLang);
-			LOG.debug("Etiqueta detectada: " + label.getName() + ", buscando en diccionario (" + targetLang +  ") : " + meaning);
+			String meaning = getStoredLabelTranslation(label.name(), targetLang);
+			LOG.debug("Etiqueta detectada: " + label.name() + ", buscando en diccionario (" + targetLang +  ") : " + meaning);
 			if (meaning==null) {
 				if (toTranslateText.length() >0) toTranslateText+= ". ";
-				toTranslateText+=label.getName();
+				toTranslateText+=label.name();
 			}
 		                  
 		}
@@ -91,15 +91,15 @@ public class ImageLabelsTranslator {
 		String[] newTerms = translatedText.toLowerCase().split("\\. ");
 		int newTermIdx = 0;
 		for (ModerationLabel label: labels) {  
-			if (label.getConfidence()>70F) {
+			if (label.confidence()>70F) {
 				if (result.length() >0) result+= ", ";
 				
-				String meaning = getStoredLabelTranslation(label.getName(), targetLang);
+				String meaning = getStoredLabelTranslation(label.name(), targetLang);
 				
-				LOG.debug( label.getName() + " - " + meaning);
+				LOG.debug( label.name() + " - " + meaning);
 				if (meaning==null) { 
 					LOG.debug( "Agregando significado " + newTerms[newTermIdx]);
-					addLabelTranslation(label.getName(), targetLang, newTerms[newTermIdx]);	
+					addLabelTranslation(label.name(), targetLang, newTerms[newTermIdx]);	
 					result+=newTerms[newTermIdx];
 					newTermIdx++;
 				}
@@ -124,9 +124,9 @@ public class ImageLabelsTranslator {
 
 		if (!mustTranslate) {
 			for (Label label: labels) {  
-				if (label.getConfidence()>70F) {
+				if (label.confidence()>70F) {
 					if (result.length() >0) result+= ", ";
-					result+=label.getName();
+					result+=label.name();
 				}                  
 			}
 			return result;
@@ -137,13 +137,13 @@ public class ImageLabelsTranslator {
 		String toTranslateText = "";
 		String targetLang = translateService.getLanguage();
 		for (Label label: labels) {  
-			if (label.getConfidence()>70F) {
+			if (label.confidence()>70F) {
 				
-				String meaning = getStoredLabelTranslation(label.getName(), targetLang);
-				LOG.debug("Etiqueta detectada: " + label.getName() + ", buscando en diccionario (" + targetLang +  ") : " + meaning);
+				String meaning = getStoredLabelTranslation(label.name(), targetLang);
+				LOG.debug("Etiqueta detectada: " + label.name() + ", buscando en diccionario (" + targetLang +  ") : " + meaning);
 				if (meaning==null) {
 					if (toTranslateText.length() >0) toTranslateText+= ". ";
-					toTranslateText+=label.getName();
+					toTranslateText+=label.name();
 				}
 			}                  
 		}
@@ -158,15 +158,15 @@ public class ImageLabelsTranslator {
 		String[] newTerms = translatedText.toLowerCase().split("\\. ");
 		int newTermIdx = 0;
 		for (Label label: labels) {  
-			if (label.getConfidence()>70F) {
+			if (label.confidence()>70F) {
 				if (result.length() >0) result+= ", ";
 				
-				String meaning = getStoredLabelTranslation(label.getName(), targetLang);
+				String meaning = getStoredLabelTranslation(label.name(), targetLang);
 				
-				LOG.debug( label.getName() + " - " + meaning);
+				LOG.debug( label.name() + " - " + meaning);
 				if (meaning==null) { 
 					LOG.debug( "Agregando significado " + newTerms[newTermIdx]);
-					addLabelTranslation(label.getName(), targetLang, newTerms[newTermIdx]);	
+					addLabelTranslation(label.name(), targetLang, newTerms[newTermIdx]);	
 					result+=newTerms[newTermIdx];
 					newTermIdx++;
 				}

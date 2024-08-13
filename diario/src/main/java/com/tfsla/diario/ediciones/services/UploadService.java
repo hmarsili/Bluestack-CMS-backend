@@ -36,23 +36,24 @@ import org.opencms.main.OpenCms;
 import org.opencms.security.CmsSecurityException;
 import org.opencms.util.CmsFileUtil;
 
-import com.amazonaws.AmazonClientException;
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.event.ProgressEvent;
-import com.amazonaws.event.ProgressListener;
-import com.amazonaws.services.s3.transfer.*;
-import com.amazonaws.services.s3.transfer.Transfer.TransferState;
-
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.core.async.AsyncRequestBody;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest.Builder;
+import software.amazon.awssdk.transfer.s3.S3TransferManager;
+import software.amazon.awssdk.transfer.s3.model.CompletedUpload;
+import software.amazon.awssdk.transfer.s3.model.Upload;
+import software.amazon.awssdk.transfer.s3.model.UploadRequest;
+import software.amazon.awssdk.transfer.s3.progress.LoggingTransferListener;
+import software.amazon.awssdk.services.s3.S3AsyncClient;
 
 import com.tfsla.diario.file.types.TfsResourceTypeVideoVodLink;
+import com.google.gdata.model.Path;
 import com.tfsla.diario.file.types.TfsResourceTypeVideoLinkProcessing;
 
 public abstract class UploadService {
@@ -282,24 +283,36 @@ public abstract class UploadService {
 		LOG.debug("S3 url: " + amzUrl);
 		try {
 			LOG.debug("S3 credentials: " + amzAccessID + " : " + amzAccessKey);
-			AWSCredentials awsCreds = new BasicAWSCredentials(amzAccessID, amzAccessKey);
-			AmazonS3 s3 = new AmazonS3Client(awsCreds);
+			AwsBasicCredentials awsCreds = AwsBasicCredentials.create(amzAccessID, amzAccessKey);
+
+			S3Client s3 = null;
+			
 			if(amzRegion != null && !amzRegion.equals("")) {
-				com.amazonaws.regions.Region region = com.amazonaws.regions.Region.getRegion(com.amazonaws.regions.Regions.valueOf(amzRegion));
-				s3.setRegion(region);
+				
+				s3 = S3Client.builder()
+					.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+					.region(Region.of(amzRegion))
+					.build();
+			}else {
+				
+				s3 = S3Client.builder()
+						.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+						.build();
 			}
 			
-			ObjectMetadata metadata = new ObjectMetadata();
 			long contentLength = 0;
 			contentLength = content.available();
-			metadata.setContentLength(contentLength);
+			
+			Builder putObjectRequestBuilder = PutObjectRequest.builder();
+			putObjectRequestBuilder.bucket(amzBucket.replace("/", ""));
 			if(parameters.containsKey("ContentType")) {
-				metadata.setContentType(parameters.get("ContentType"));
+				putObjectRequestBuilder.contentType(parameters.get("ContentType"));
 			}
-			//PutObjectResult result = s3.putObject(amzBucket, fullPath, content, metadata);
-			s3.putObject(
-				new PutObjectRequest(amzBucket.replace("/", ""), fullPath, content, metadata).withCannedAcl(CannedAccessControlList.Private)
-			);
+			putObjectRequestBuilder.contentLength(contentLength);
+			putObjectRequestBuilder.acl(ObjectCannedACL.PRIVATE);
+			putObjectRequestBuilder.key(fullPath);
+			s3.putObject( putObjectRequestBuilder.build(), RequestBody.fromInputStream(content, contentLength));
+
 		} catch (Exception e1) {
 			LOG.error("Error al intentar subir el archivo " + fullPath,e1);
 			throw e1;
@@ -332,7 +345,7 @@ public abstract class UploadService {
 	private static long transferredBytes = 0;
 	
 	// Upload con Transfer Manager para manejar avance y cancelacion
-	public String uploadAmzFileTM(String fullPath, Map<String,String> parameters, InputStream content) throws Exception {
+	public String uploadAmzFileTM(String fullPath, Map<String,String> parameters, InputStream content) throws IOException, Exception {
 		/*fileName = getValidFileName(fileName);
 
 		LOG.debug("Nombre corregido del archivo a subir al s3 de amazon: " + fileName);
@@ -351,66 +364,53 @@ public abstract class UploadService {
 		
 		
 		LOG.debug("S3 credentials: " + amzAccessID + " : " + amzAccessKey);
-		AWSCredentials awsCreds = new BasicAWSCredentials(amzAccessID, amzAccessKey);
+		AwsBasicCredentials awsCreds = AwsBasicCredentials.create(amzAccessID, amzAccessKey);
+
+		S3TransferManager transferManager  = S3TransferManager.builder()
+				.s3Client(
+						S3AsyncClient.builder()
+							.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+							.build()
+						)
+				.build();
 		
-		TransferManager xfer_mgr = TransferManagerBuilder.standard()
-					.withS3Client(AmazonS3ClientBuilder.standard()
-			        .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
-			        .build()).build();
-		
-		String status = null;
-		
+		long contentLength = 0;
 		try {
-			
-			ObjectMetadata metadata = new ObjectMetadata();
-			long contentLength = 0;
 			contentLength = content.available();
-			metadata.setContentLength(contentLength);
-			if(parameters.containsKey("ContentType")) {
-				metadata.setContentType(parameters.get("ContentType"));
-			}
-			
-			// Crea un ProgressListener para mostrar el avance del upload
-			ProgressListener progressListener = new ProgressListener() {
-					@Override
-					public void progressChanged(ProgressEvent progressEvent) {
-						transferredBytes = progressEvent.getBytesTransferred();
-						System.out.println("Progress: " + progressEvent.getBytesTransferred() + " bytes transferred");
-					
-					}
-			};
-			
-			PutObjectRequest request = new PutObjectRequest(amzBucket.replace("/", ""), fullPath, content, metadata)
-					.withCannedAcl(CannedAccessControlList.Private)
-					.withGeneralProgressListener(progressListener);
-			
-			 Upload upload = xfer_mgr.upload(request);
-			 
-		     try {
-		    	    // Bblock and wait for the upload to finish
-		    	    upload.waitForCompletion();
-		    	    
-		    	    TransferState xfer_state = upload.getState();
-		            System.out.println(": " + xfer_state);
-		            
-		            status = xfer_state.name();
-		    	    
-		     } catch (AmazonClientException amazonClientException) {
-		        	System.out.println("Unable to upload file, upload aborted.");
-		        	amazonClientException.printStackTrace();
-		        	status = "Error";
-		     }
-		     
-		     xfer_mgr.shutdownNow();
-			   
-		} catch (Exception e1) {
-			status = "Error";
-			LOG.error("Error al intentar subir el archivo " + fullPath,e1);
-			throw e1;
+		} catch (IOException e) {
+			LOG.error("Error al intentar subir el archivo " + fullPath,e);
+			throw e;
 		}
 		
-		return status;
+		Builder putObjectRequestBuilder = PutObjectRequest.builder();
+		putObjectRequestBuilder.bucket(amzBucket.replace("/", ""));
+		if(parameters.containsKey("ContentType")) {
+			putObjectRequestBuilder.contentType(parameters.get("ContentType"));
+		}
+			
+		putObjectRequestBuilder.contentLength(contentLength);
+		putObjectRequestBuilder.acl(ObjectCannedACL.PRIVATE);
+		putObjectRequestBuilder.key(fullPath);
 
+		//s3.putObject( putObjectRequestBuilder.build(), RequestBody.fromInputStream(content, contentLength));
+
+		
+		LoggingTransferListener listener = LoggingTransferListener.create();
+		
+		UploadRequest uploaRequest = UploadRequest.builder()
+	            .putObjectRequest(putObjectRequestBuilder.build())
+	            .requestBody(AsyncRequestBody.fromInputStream(content, contentLength, null))
+	            .addTransferListener(listener)
+	            .build();
+		
+		
+		Upload fileUpload = transferManager.upload(uploaRequest);
+	
+		software.amazon.awssdk.transfer.s3.model.CompletedFileUpload a;
+		 CompletedUpload uploadResult = fileUpload.completionFuture().join();
+		
+		return uploadResult.response().eTag();
+		
 	}
 	
 	

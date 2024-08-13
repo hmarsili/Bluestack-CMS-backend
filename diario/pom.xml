@@ -103,12 +103,62 @@
 	    <version>1.8.3</version>
 	</dependency>
 
-	<!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk -->
-	<dependency>
-	    <groupId>com.amazonaws</groupId>
-	    <artifactId>aws-java-sdk</artifactId>
-	    <version>1.11.243</version>
-	</dependency>
+
+<!-- https://mvnrepository.com/artifact/software.amazon.awssdk/comprehend -->
+<dependency>
+    <groupId>software.amazon.awssdk</groupId>
+    <artifactId>comprehend</artifactId>
+    <version>2.27.2</version>
+</dependency>
+
+<!-- https://mvnrepository.com/artifact/software.amazon.awssdk/cloudfront -->
+<dependency>
+    <groupId>software.amazon.awssdk</groupId>
+    <artifactId>cloudfront</artifactId>
+    <version>2.27.2</version>
+</dependency>
+
+<!-- https://mvnrepository.com/artifact/software.amazon.awssdk/rekognition -->
+<dependency>
+    <groupId>software.amazon.awssdk</groupId>
+    <artifactId>rekognition</artifactId>
+    <version>2.27.2</version>
+</dependency>
+
+<!-- https://mvnrepository.com/artifact/software.amazon.awssdk/utils -->
+<dependency>
+    <groupId>software.amazon.awssdk</groupId>
+    <artifactId>utils</artifactId>
+    <version>2.27.2</version>
+</dependency>
+
+<!-- https://mvnrepository.com/artifact/software.amazon.awssdk/utils -->
+<dependency>
+    <groupId>software.amazon.awssdk</groupId>
+    <artifactId>s3</artifactId>
+    <version>2.27.2</version>
+</dependency>
+
+<dependency>
+    <groupId>software.amazon.awssdk</groupId>
+    <artifactId>s3-transfer-manager</artifactId>
+    <version>2.27.2</version>
+</dependency>
+
+<dependency>
+    <groupId>software.amazon.awssdk</groupId>
+    <artifactId>sqs</artifactId>
+    <version>2.27.2</version>
+</dependency>
+
+<dependency>
+    <groupId>software.amazon.awssdk</groupId>
+    <artifactId>sns</artifactId>
+    <version>2.27.2</version>
+</dependency>
+
+
+
 	
 	<!-- https://mvnrepository.com/artifact/org.apache.tika/tika-core -->
 	<dependency>

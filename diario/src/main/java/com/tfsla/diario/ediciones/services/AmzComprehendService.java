@@ -23,18 +23,20 @@ import org.opencms.xml.CmsXmlException;
 import org.opencms.xml.I_CmsXmlDocument;
 import org.opencms.xml.content.CmsXmlContentFactory;
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.comprehend.AmazonComprehend;
-import com.amazonaws.services.comprehend.AmazonComprehendClientBuilder;
-import com.amazonaws.services.comprehend.model.DetectEntitiesRequest;
-import com.amazonaws.services.comprehend.model.DetectEntitiesResult;
-import com.amazonaws.services.comprehend.model.DetectKeyPhrasesRequest;
-import com.amazonaws.services.comprehend.model.DetectKeyPhrasesResult;
-import com.amazonaws.services.comprehend.model.DetectSentimentRequest;
-import com.amazonaws.services.comprehend.model.DetectSentimentResult;
-import com.amazonaws.services.comprehend.model.Entity;
-import com.amazonaws.services.comprehend.model.KeyPhrase;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.services.comprehend.ComprehendClient;
+import software.amazon.awssdk.services.comprehend.model.DetectKeyPhrasesRequest;
+import software.amazon.awssdk.services.comprehend.model.DetectKeyPhrasesResponse;
+
+import software.amazon.awssdk.services.comprehend.model.DetectEntitiesRequest;
+import software.amazon.awssdk.services.comprehend.model.DetectEntitiesResponse;
+import software.amazon.awssdk.services.comprehend.model.DetectSentimentRequest;
+import software.amazon.awssdk.services.comprehend.model.DetectSentimentResponse;
+import software.amazon.awssdk.services.comprehend.model.Entity;
+import software.amazon.awssdk.services.comprehend.model.EntityType;
+import software.amazon.awssdk.services.comprehend.model.KeyPhrase;
 import com.tfsla.diario.terminos.data.PersonsDAO;
 import com.tfsla.diario.terminos.data.TermsDAO;
 import com.tfsla.diario.terminos.data.TermsTypesDAO;
@@ -67,7 +69,7 @@ public class AmzComprehendService {
 	private String text;
 	private static long termType;
 	
-	private AmazonComprehend comprehendClient;
+	private ComprehendClient comprehendClient;
 	
 	public static AmzComprehendService getInstance(CmsObject cms) {
     	String siteName = OpenCms.getSiteManager().getCurrentSite(cms).getSiteRoot();
@@ -198,31 +200,39 @@ public class AmzComprehendService {
 	
 
 	public List<Entity> dectecEntities() {
-        DetectEntitiesRequest detectEntitiesRequest = new DetectEntitiesRequest().withText(text)
-                .withLanguageCode(getLanguage());
-        DetectEntitiesResult detectEntitiesResult  = getComprehendClient().detectEntities(detectEntitiesRequest);
+        DetectEntitiesRequest detectEntitiesRequest = DetectEntitiesRequest.builder()
+        		.text(text)
+                .languageCode(getLanguage())
+                .build();
+        
+        DetectEntitiesResponse detectEntitiesResult  = getComprehendClient().detectEntities(detectEntitiesRequest);
 
-        detectEntitiesResult.getEntities().sort((Entity e1, Entity e2) -> e2.getScore().compareTo(e1.getScore()));
+        detectEntitiesResult.entities().sort((Entity e1, Entity e2) -> e2.score().compareTo(e1.score()));
         //detectEntitiesResult.getEntities().forEach(System.out::println);
 
-        return detectEntitiesResult.getEntities();
+        return detectEntitiesResult.entities();
         
 	}
 
 	public List<KeyPhrase> detectKeyPhrases() {
-        DetectKeyPhrasesRequest detectKeyPhrasesRequest = new DetectKeyPhrasesRequest().withText(text)
-                .withLanguageCode(getLanguage());
-		DetectKeyPhrasesResult detectKeyPhrasesResult = getComprehendClient().detectKeyPhrases(detectKeyPhrasesRequest);
-		detectKeyPhrasesResult.getKeyPhrases().sort((KeyPhrase k1, KeyPhrase k2) -> k2.getScore().compareTo(k1.getScore()));
-		//detectKeyPhrasesResult.getKeyPhrases().forEach(System.out::println);
-		
-		return detectKeyPhrasesResult.getKeyPhrases();
+		DetectKeyPhrasesRequest detectKeyPhrasesRequest = DetectKeyPhrasesRequest.builder()
+                .text(text)
+                .languageCode("en")
+                .build();
+
+        DetectKeyPhrasesResponse detectKeyPhrasesResult = getComprehendClient().detectKeyPhrases(detectKeyPhrasesRequest);
+        List<KeyPhrase> phraseList = detectKeyPhrasesResult.keyPhrases();
+        phraseList.sort((KeyPhrase k1, KeyPhrase k2) -> k2.score().compareTo(k1.score()));
+   
+		return phraseList;
 
 	}
 	
-	public DetectSentimentResult dectedSentiment() {
-        DetectSentimentRequest detectSentimentRequest = new DetectSentimentRequest().withText(text)
-                .withLanguageCode(getLanguage());
+	public DetectSentimentResponse dectedSentiment() {
+        DetectSentimentRequest detectSentimentRequest = DetectSentimentRequest.builder()
+        		.text(text)
+                .languageCode(getLanguage())
+                .build();
 
         return getComprehendClient().detectSentiment(detectSentimentRequest);
 
@@ -230,49 +240,59 @@ public class AmzComprehendService {
 	
 	
 	public List<Entity> dectecEntities(String text) {
-        DetectEntitiesRequest detectEntitiesRequest = new DetectEntitiesRequest().withText(text)
-                .withLanguageCode(getLanguage());
-        DetectEntitiesResult detectEntitiesResult  = getComprehendClient().detectEntities(detectEntitiesRequest);
+        DetectEntitiesRequest detectEntitiesRequest = DetectEntitiesRequest.builder()
+        		.text(text)
+                .languageCode(getLanguage())
+                .build();
+        
+        DetectEntitiesResponse detectEntitiesResult  = getComprehendClient().detectEntities(detectEntitiesRequest);
 
-        detectEntitiesResult.getEntities().sort((Entity e1, Entity e2) -> e2.getScore().compareTo(e1.getScore()));
+        detectEntitiesResult.entities().sort((Entity e1, Entity e2) -> e2.score().compareTo(e1.score()));
         //detectEntitiesResult.getEntities().forEach(System.out::println);
 
-        return detectEntitiesResult.getEntities();
+        return detectEntitiesResult.entities();
         
 	}
 
 	public List<KeyPhrase> detectKeyPhrases(String text) {
-        DetectKeyPhrasesRequest detectKeyPhrasesRequest = new DetectKeyPhrasesRequest().withText(text)
-                .withLanguageCode(getLanguage());
-		DetectKeyPhrasesResult detectKeyPhrasesResult = getComprehendClient().detectKeyPhrases(detectKeyPhrasesRequest);
-		detectKeyPhrasesResult.getKeyPhrases().sort((KeyPhrase k1, KeyPhrase k2) -> k2.getScore().compareTo(k1.getScore()));
+        DetectKeyPhrasesRequest detectKeyPhrasesRequest = DetectKeyPhrasesRequest.builder()
+        		.text(text)
+                .languageCode(getLanguage())
+                .build();
+		DetectKeyPhrasesResponse detectKeyPhrasesResult = getComprehendClient().detectKeyPhrases(detectKeyPhrasesRequest);
+		detectKeyPhrasesResult.keyPhrases().sort((KeyPhrase k1, KeyPhrase k2) -> k2.score().compareTo(k1.score()));
 		//detectKeyPhrasesResult.getKeyPhrases().forEach(System.out::println);
 		
-		return detectKeyPhrasesResult.getKeyPhrases();
+		return detectKeyPhrasesResult.keyPhrases();
 
 	}
 	
-	public DetectSentimentResult dectedSentiment(String text) {
-        DetectSentimentRequest detectSentimentRequest = new DetectSentimentRequest().withText(text)
-                .withLanguageCode(getLanguage());
+	public DetectSentimentResponse dectedSentiment(String text) {
+        DetectSentimentRequest detectSentimentRequest = DetectSentimentRequest.builder()
+        		.text(text)
+                .languageCode(getLanguage())
+                .build();
 
         return getComprehendClient().detectSentiment(detectSentimentRequest);
 
 	}
 
-	private AmazonComprehend getComprehendClient() {
+	private ComprehendClient  getComprehendClient() {
 		
 		if (comprehendClient!=null)
 			return comprehendClient;
 		
-		BasicAWSCredentials awsCreds = new BasicAWSCredentials(getAmzAccessID(), getAmzAccessKey());
+		AwsBasicCredentials awsCreds = AwsBasicCredentials.create(getAmzAccessID(), getAmzAccessKey());
 
-        comprehendClient = 
-            AmazonComprehendClientBuilder.standard()
-                                         .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
-                                         .withRegion(getAmzRegion())
-                                         .build();
-        
+		
+		ComprehendClient comClient = ComprehendClient.builder()
+                .region(Region.of(getAmzRegion()))
+                .build();
+		
+        comprehendClient = ComprehendClient.builder().credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+        		.region(Region.of(getAmzRegion()))
+        		.build();
+            
         return comprehendClient;
 	}
 	
@@ -431,16 +451,16 @@ public class AmzComprehendService {
 		
 		public void addEntityAparition(String stemm, Entity entity) {
 			count++;
-			sumScore +=entity.getScore();
-			sumPosition += entity.getBeginOffset();
+			sumScore +=entity.score();
+			sumPosition += entity.beginOffset();
 			
-			if (entity.getScore()>maxScore) {
-				maxScore = entity.getScore();
-				name = entity.getText();
+			if (entity.score()>maxScore) {
+				maxScore = entity.score();
+				name = entity.text();
 			}
-			if (entity.getBeginOffset()<minPosition) minPosition = entity.getBeginOffset();
+			if (entity.beginOffset()<minPosition) minPosition = entity.beginOffset();
 			
-			type = entity.getType();
+			type = entity.typeAsString();
 		} 
 		
 		public int getCont() {
@@ -595,17 +615,18 @@ public class AmzComprehendService {
 	
 	
 	private boolean isTag(Entity entity) {
-		return entity.getType().equals("ORGANIZATION") 
-				|| entity.getType().equals("EVENT") 
-				|| entity.getType().equals("OTHER") 
-				|| entity.getType().equals("TITLE");
+		
+		return entity.type().equals(EntityType.ORGANIZATION) 
+				|| entity.type().equals(EntityType.EVENT) 
+				|| entity.type().equals(EntityType.OTHER) 
+				|| entity.type().equals(EntityType.TITLE);
 	}
 	
 	public List<DocEntity> processEntities(List<Entity> entities) {
 		LinkedHashMap<String, DocEntity> docEntities = new LinkedHashMap<String, DocEntity>();
 		
 		for (Entity entity : entities) {
-			String stemm = stemm(entity.getText());
+			String stemm = stemm(entity.text());
 			DocEntityImpl docEntity = (DocEntityImpl)docEntities.get(stemm);
 			if (docEntity== null) {
 				docEntity = new DocEntityImpl();
@@ -613,7 +634,7 @@ public class AmzComprehendService {
 			docEntity.addEntityAparition(stemm,entity);
 			
 			if (analizeResult) {
-				//LOG.error("analizando " + entity.getText());
+				//LOG.error("analizando " + entity.text());
 				processEntityIfPerson(entity, docEntity);				
 				processEntityIfTag(entity, docEntity);
 			}
@@ -661,18 +682,19 @@ public class AmzComprehendService {
 		
 		int maxOffset = 0;
 		for (Entity entity : entities) {
-			if (maxOffset<entity.getBeginOffset())
-				maxOffset =entity.getBeginOffset();
+			if (maxOffset<entity.beginOffset())
+				maxOffset =entity.beginOffset();
 		}
 		
 		List<Entity> entitiesList = new ArrayList<>(entities);
+		
 		//entitiesList.removeIf(e -> e.getScore() < Float.parseFloat(enableEntitiesScore));
-		entitiesList.removeIf(e -> enableEntitiesType.indexOf(e.getType()) < 0);
+		entitiesList.removeIf(e -> enableEntitiesType.indexOf(e.typeAsString()) < 0);
 		
 		LOG.debug("processEntitiesCMS entities HABILITADAS " + entitiesList );
 		
 		for (Entity entity : entitiesList) {
-			String stemm = stemm(entity.getText());
+			String stemm = stemm(entity.text());
 			DocEntityImpl docEntity = (DocEntityImpl)docEntities.get(stemm);
 			if (docEntity== null) {
 				docEntity = new DocEntityImpl();
@@ -733,21 +755,21 @@ public class AmzComprehendService {
 	}
 
 	private void processEntityIfPerson(Entity entity, DocEntityImpl docEntity) {
-		if (entity.getType().equals("PERSON")) {
-			boolean personExists = personExists(entity.getText());
+		if (entity.type().equals(EntityType.PERSON)) {
+			boolean personExists = personExists(entity.text());
 			if (personExists) {
 				docEntity.setExists(true);
 			}
 			else {
-				String synon = getSynonymousPersonOf(entity.getText());
+				String synon = getSynonymousPersonOf(entity.text());
 				if (synon!=null) {
 					docEntity.setSynonymous(synon);
 				}
 				else {
-				List<Persons> people = getPeopleCandidates(entity.getText());
+				List<Persons> people = getPeopleCandidates(entity.text());
 				List<String> candidates = new ArrayList<String>();
 				people.forEach(p -> candidates.add(p.getName())); 
-				docEntity.addCandidate(candidates,entity.getText());
+				docEntity.addCandidate(candidates,entity.text());
 				}
 			}
 		}
@@ -755,7 +777,7 @@ public class AmzComprehendService {
 	
 	private void processEntityIfExitTag(Entity entity, DocEntityImpl docEntity) {
 		
-		Terms tag = tagExist(entity.getText());
+		Terms tag = tagExist(entity.text());
 	
 		//LOG.debug("extiste tag para esa entidad" + entity );
 		
@@ -767,15 +789,15 @@ public class AmzComprehendService {
 			//LOG.debug("EXISTE" + docEntity + " TAG " + tag);
 		}
 		else {
-			String synon = getSynonymousTagOf(entity.getText());
+			String synon = getSynonymousTagOf(entity.text());
 			if (synon!=null) {
 				docEntity.setSynonymous(synon);
 				//LOG.debug("EXISTE synon" + synon );
 			} else {
-				List<Terms> terms = getTagsCandidates(entity.getText());
+				List<Terms> terms = getTagsCandidates(entity.text());
 				List<String> candidates = new ArrayList<String>();
 				terms.forEach(t -> candidates.add(t.getName())); 
-				docEntity.addCandidate(candidates,entity.getText());
+				docEntity.addCandidate(candidates,entity.text());
 			}
 		}
 		
@@ -785,22 +807,22 @@ public class AmzComprehendService {
 	
 	private void processEntityIfTag(Entity entity, DocEntityImpl docEntity) {
 		if (isTag(entity)) {
-			String tagExists = tagExists(entity.getText());
+			String tagExists = tagExists(entity.text());
 			
 			if (tagExists!=null) {
 				docEntity.setExists(true);
 				docEntity.name = tagExists;
 			}
 			else {
-				String synon = getSynonymousTagOf(entity.getText());
+				String synon = getSynonymousTagOf(entity.text());
 				if (synon!=null) {
 					docEntity.setSynonymous(synon);
 				}
 				else {
-					List<Terms> terms = getTagsCandidates(entity.getText());
+					List<Terms> terms = getTagsCandidates(entity.text());
 					List<String> candidates = new ArrayList<String>();
 					terms.forEach(t -> candidates.add(t.getName())); 
-					docEntity.addCandidate(candidates,entity.getText());
+					docEntity.addCandidate(candidates,entity.text());
 				}
 			}
 			

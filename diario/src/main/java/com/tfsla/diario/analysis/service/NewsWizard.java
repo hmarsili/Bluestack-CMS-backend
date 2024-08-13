@@ -14,9 +14,9 @@ import org.opencms.file.CmsObject;
 import org.opencms.main.CmsLog;
 import org.opencms.main.OpenCms;
 
-import com.amazonaws.services.comprehend.model.DetectSentimentResult;
-import com.amazonaws.services.comprehend.model.Entity;
-import com.amazonaws.services.comprehend.model.TextSizeLimitExceededException;
+import software.amazon.awssdk.services.comprehend.model.DetectSentimentResponse;
+import software.amazon.awssdk.services.comprehend.model.Entity;
+import software.amazon.awssdk.services.comprehend.model.TextSizeLimitExceededException;
 import com.tfsla.diario.analysis.model.NewsSuggestion;
 import com.tfsla.diario.analysis.model.NewsSuggestion.Term;
 import com.tfsla.diario.ediciones.model.TipoEdicion;
@@ -262,8 +262,8 @@ public class NewsWizard {
 
 		comprehend.getPlaces(docEntities).forEach(p -> enrichedSugg.addLugar(p.getName(), p.getScore()));
 		
-		DetectSentimentResult sentiment = comprehend.dectedSentiment();
-		enrichedSugg.setSentiment(sentiment.getSentiment());
+		DetectSentimentResponse sentiment = comprehend.dectedSentiment();
+		enrichedSugg.setSentiment(sentiment.sentimentAsString());
 		return enrichedSugg;
 	}
 

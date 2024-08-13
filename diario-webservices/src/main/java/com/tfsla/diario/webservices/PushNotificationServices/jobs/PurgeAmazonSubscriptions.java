@@ -7,20 +7,20 @@ import org.opencms.file.CmsObject;
 import org.opencms.main.CmsLog;
 import org.opencms.scheduler.I_CmsScheduledJob;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.sns.AmazonSNS;
-import com.amazonaws.services.sns.AmazonSNSClient;
-import com.amazonaws.services.sns.model.DeleteEndpointRequest;
-import com.amazonaws.services.sns.model.GetEndpointAttributesRequest;
-import com.amazonaws.services.sns.model.GetEndpointAttributesResult;
-import com.amazonaws.services.sns.model.ListSubscriptionsByTopicRequest;
-import com.amazonaws.services.sns.model.ListSubscriptionsByTopicResult;
-import com.amazonaws.services.sns.model.SubscribeRequest;
-import com.amazonaws.services.sns.model.SubscribeResult;
-import com.amazonaws.services.sns.model.Subscription;
-import com.amazonaws.services.sns.model.UnsubscribeRequest;
+import software.amazon.awssdk.services.sns.SnsClient;
+import software.amazon.awssdk.services.sns.model.DeleteEndpointRequest;
+import software.amazon.awssdk.services.sns.model.GetEndpointAttributesRequest;
+import software.amazon.awssdk.services.sns.model.GetEndpointAttributesResponse;
+import software.amazon.awssdk.services.sns.model.ListSubscriptionsByTopicRequest;
+import software.amazon.awssdk.services.sns.model.ListSubscriptionsByTopicResponse;
+import software.amazon.awssdk.services.sns.model.SubscribeRequest;
+import software.amazon.awssdk.services.sns.model.SubscribeResponse;
+import software.amazon.awssdk.services.sns.model.Subscription;
+import software.amazon.awssdk.services.sns.model.UnsubscribeRequest;
+
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
 
 public class PurgeAmazonSubscriptions implements I_CmsScheduledJob {
 	
@@ -32,10 +32,11 @@ public class PurgeAmazonSubscriptions implements I_CmsScheduledJob {
 		String amzAccessKey = parameters.get("accessKey").toString();
 		String amzRegion = parameters.get("region").toString();
 		
-		AWSCredentials awsCreds = new BasicAWSCredentials(amzAccessID, amzAccessKey);
-		AmazonSNS snsClient = AmazonSNSClient.builder()
-				.withCredentials(new AWSStaticCredentialsProvider(awsCreds))
-				.withRegion(amzRegion)
+		AwsBasicCredentials awsCreds = AwsBasicCredentials.create(amzAccessID, amzAccessKey);
+
+		SnsClient snsClient = SnsClient.builder()
+				.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+				.region(Region.of(amzRegion))
 				.build();
 		
 		LOG.info("Starting amazon push subscriptions purge");
@@ -46,55 +47,70 @@ public class PurgeAmazonSubscriptions implements I_CmsScheduledJob {
 		int orphan = 0;
 		
 		// Loop through all the subscriptions and purge invalids
-		ListSubscriptionsByTopicRequest listSubscriptionsByTopicRequest = new ListSubscriptionsByTopicRequest();
-		listSubscriptionsByTopicRequest.setTopicArn(amzPushTopicArn);
-		ListSubscriptionsByTopicResult subscriptionsResult = null;
+		ListSubscriptionsByTopicRequest listSubscriptionsByTopicRequest = ListSubscriptionsByTopicRequest.builder()
+				.topicArn(amzPushTopicArn)
+				.build();
+		
+		ListSubscriptionsByTopicResponse subscriptionsResult = null;
 		do {
 			// Get subscriptions chunk (max. 100 by amazon constraint)
 			subscriptionsResult = snsClient.listSubscriptionsByTopic(listSubscriptionsByTopicRequest);
-			for (Subscription subscription : subscriptionsResult.getSubscriptions()) {
+			for (Subscription subscription : subscriptionsResult.subscriptions()) {
 				count++;
-				String endpointArn = subscription.getEndpoint();
+				String endpointArn = subscription.endpoint();
 				try {
 					// Check if the endpoint is valid
-					GetEndpointAttributesRequest request = new GetEndpointAttributesRequest();
-					request.setEndpointArn(endpointArn);
-					GetEndpointAttributesResult attrs = snsClient.getEndpointAttributes(request);
-					if (attrs.getAttributes().get("Enabled") != null && attrs.getAttributes().get("Enabled").toLowerCase().equals("false")) {
+					GetEndpointAttributesRequest request = GetEndpointAttributesRequest.builder()
+							.endpointArn(endpointArn)
+							.build();
+					GetEndpointAttributesResponse attrs = snsClient.getEndpointAttributes(request);
+					if (attrs.attributes().get("Enabled") != null && attrs.attributes().get("Enabled").toLowerCase().equals("false")) {
 						// The endpoint is disabled, remove it with the subscription
 						disabled++;
 						
 						// Get endpoint subscription
-						SubscribeRequest subscribeRequest = new SubscribeRequest();
-						subscribeRequest.setTopicArn(amzPushTopicArn);
-						subscribeRequest.setEndpoint(endpointArn);
-						subscribeRequest.setProtocol("Application");
-						SubscribeResult subscribeResult = snsClient.subscribe(subscribeRequest);
+						SubscribeRequest subscribeRequest = SubscribeRequest.builder()
+							.topicArn(amzPushTopicArn)
+							.endpoint(endpointArn)
+							.protocol("Application")
+							.build();
+							
+						SubscribeResponse subscribeResult = snsClient.subscribe(subscribeRequest);
 						
-						if (subscribeResult != null && subscribeResult.getSubscriptionArn() != null) {
+						if (subscribeResult != null && subscribeResult.subscriptionArn() != null) {
 							// If there is a subscription, remove it
-							UnsubscribeRequest unsubscribeReq = new UnsubscribeRequest();
-							unsubscribeReq.setSubscriptionArn(subscribeResult.getSubscriptionArn());
+							UnsubscribeRequest unsubscribeReq = UnsubscribeRequest.builder()
+								.subscriptionArn(subscribeResult.subscriptionArn())
+								.build();
+							
 							snsClient.unsubscribe(unsubscribeReq);
 						}
 						
 						// Delete endpoint
-						deleteReq = new DeleteEndpointRequest();
-						deleteReq.setEndpointArn(endpointArn);
+						deleteReq = DeleteEndpointRequest.builder()
+								.endpointArn(endpointArn)
+								.build();
+						
 						snsClient.deleteEndpoint(deleteReq);
 					}
 				} catch (Exception e) {
 					// Invalid endpoint, delete subscription
 					orphan++;
-					UnsubscribeRequest unsubscribeReq = new UnsubscribeRequest();
-					unsubscribeReq.setSubscriptionArn(subscription.getSubscriptionArn());
+					UnsubscribeRequest unsubscribeReq = UnsubscribeRequest.builder()
+							.subscriptionArn(subscription.subscriptionArn())
+							.build();
+					
 					snsClient.unsubscribe(unsubscribeReq);
 				}
 			}
 			// Set the request to get the next subscriptions chunk
-			listSubscriptionsByTopicRequest.setNextToken(subscriptionsResult.getNextToken());
+			listSubscriptionsByTopicRequest = ListSubscriptionsByTopicRequest.builder()
+					.topicArn(amzPushTopicArn)
+					.nextToken(subscriptionsResult.nextToken())
+					.build();
+			
 			LOG.debug("Processing next subscriptions chunk, now starting from " + (count+1) + " - removed so far: " + disabled);
-		} while (subscriptionsResult.getNextToken() != null);
+		} while (subscriptionsResult.nextToken() != null);
 		
 		LOG.info("Amazon push subscriptions purge finished, " + count + " subscriptions processed, " + disabled + " removed, " + orphan + " orphan subscriptions");
 		return "Amazon push subscriptions purge finished, " + count + " subscriptions processed, " + disabled + " removed, " + orphan + " orphan subscriptions";

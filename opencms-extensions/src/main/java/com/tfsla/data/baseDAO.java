@@ -1,21 +1,22 @@
 package com.tfsla.data;
 
 
-import java.io.IOException;
-import java.io.InputStream;
+//import java.io.IOException;
+//import java.io.InputStream;
 import java.sql.*;
-
-import org.apache.commons.io.IOUtils;
-import org.opencms.configuration.CmsMedios;
-import org.opencms.configuration.CmsMediosInit;
 import org.opencms.db.CmsDbPool;
-import org.opencms.loader.I_CmsResourceLoader;
-import org.opencms.loader.TfsJspLoader;
+//import org.apache.commons.io.IOUtils;
+//import org.opencms.configuration.CmsMedios;
+//import org.opencms.configuration.CmsMediosInit;
+
+//import org.opencms.loader.I_CmsResourceLoader;
+//import org.opencms.loader.TfsJspLoader;
 import org.opencms.main.OpenCms;
 
 
 public abstract class baseDAO {
 
+/*	
 	private static String errorMsg = "hTe3GIq5GxbIz1X5LDKv143owhIi873jejaGuU3fdJwN4HWUiShongy00qunm8ZdWAtP3OzcqFM60xxboyTfFZ5Os9i6aFrqYwvagQDhveTt4wWmCRzAS4UxX0V+3pWbxgr7+rnFvFnBXychgbEqqLwT1IsvkylGkiG0WR1cc1U=";
 	
 	static {
@@ -51,7 +52,7 @@ public abstract class baseDAO {
 		if (sizeConn!=6965)
 			throw new RuntimeException(CmsMediosInit.getInstance().decode(errorMsg));
 	}
-	
+*/	
 
 	protected Connection conn;
 	private boolean isOpenLocaly;

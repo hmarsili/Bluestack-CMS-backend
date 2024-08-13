@@ -10,7 +10,7 @@ import org.opencms.file.CmsObject;
 import org.opencms.main.CmsLog;
 import org.opencms.main.OpenCms;
 
-import com.amazonaws.services.comprehend.model.Entity;
+import software.amazon.awssdk.services.comprehend.model.Entity;
 import com.tfsla.diario.ediciones.services.AmzComprehendService;
 import com.tfsla.diario.ediciones.services.AmzComprehendService.DocEntity;
 import com.tfsla.diario.terminos.data.TermsTypesDAO;

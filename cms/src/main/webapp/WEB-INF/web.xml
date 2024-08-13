@@ -201,9 +201,6 @@
     
     <servlet>
         <servlet-name>DownloadServlet</servlet-name>
-        <description>
-            para bajar los modulos
-        </description>
         <servlet-class>com.tfsla.opencmsdev.module.DownloadServlet</servlet-class>
     </servlet>
             

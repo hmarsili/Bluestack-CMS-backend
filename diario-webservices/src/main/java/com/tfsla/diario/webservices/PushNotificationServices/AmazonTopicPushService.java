@@ -8,15 +8,14 @@ import org.opencms.configuration.CPMConfig;
 import org.opencms.configuration.CmsMedios;
 import org.opencms.main.CmsLog;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.model.Region;
-import com.amazonaws.services.sns.AmazonSNS;
-import com.amazonaws.services.sns.AmazonSNSClient;
-import com.amazonaws.services.sns.model.MessageAttributeValue;
-import com.amazonaws.services.sns.model.PublishRequest;
-import com.amazonaws.services.sns.model.PublishResult;
+
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.sns.SnsClient;
+import software.amazon.awssdk.services.sns.model.MessageAttributeValue;
+import software.amazon.awssdk.services.sns.model.PublishRequest;
+import software.amazon.awssdk.services.sns.model.PublishResponse;
 
 public class AmazonTopicPushService {
 	
@@ -36,7 +35,7 @@ public class AmazonTopicPushService {
 		String pushTTL = config.getParam(site, publication, module, "pushTTL", "");
 		String pushCollapseKey = config.getParam(site, publication, module, "pushCollapseKey", "");
 		if (amzRegion == null || amzRegion.equals("")) {
-			amzRegion = Region.US_Standard.toString();
+			amzRegion = Region.US_EAST_1.toString();
 		}
 		
 		if (amzAccessKey == null || amzAccessID == null || amzAccessKey.equals("") || amzAccessID.equals("")) {
@@ -47,30 +46,35 @@ public class AmazonTopicPushService {
 			throw new Exception(String.format("amzPushTopicArn parameter not specified for module %s, site %s - publication %s", module, site, publication));
 		}
 		
-		AWSCredentials awsCreds = new BasicAWSCredentials(amzAccessID, amzAccessKey);
-		AmazonSNS snsClient = AmazonSNSClient.builder()
-				.withCredentials(new AWSStaticCredentialsProvider(awsCreds))
-				.withRegion(amzRegion)
+		AwsBasicCredentials awsCreds = AwsBasicCredentials.create(amzAccessID, amzAccessKey);
+
+		SnsClient snsClient = SnsClient.builder()
+				.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+				.region(Region.of(amzRegion))
 				.build();
 		
 		LOG.debug(String.format("Amz accessID: %s, secret: %s, region: %s", amzAccessID, amzAccessKey, amzRegion));
 		LOG.debug(String.format("Using %s as TTL and %s as collapse key for topic ARN %s", pushTTL, pushCollapseKey, amzPushTopicArn));
-		PublishRequest publishRequest = new PublishRequest();
+		
 		Map<String, MessageAttributeValue> messageAttributes = new HashMap<String, MessageAttributeValue>();
 		if (pushTTL != null && !pushTTL.equals("")) {
-			messageAttributes.put("AWS.SNS.MOBILE.BAIDU.TTL", new MessageAttributeValue().withDataType("String").withStringValue(pushTTL));
-			messageAttributes.put("time_to_live", new MessageAttributeValue().withDataType("String").withStringValue(pushTTL));
+			messageAttributes.put("AWS.SNS.MOBILE.BAIDU.TTL", MessageAttributeValue.builder().dataType("String").stringValue(pushTTL).build());
+			messageAttributes.put("time_to_live", MessageAttributeValue.builder().dataType("String").stringValue(pushTTL).build());
 		}
 		if (pushCollapseKey != null && !pushCollapseKey.equals("")) {
-			messageAttributes.put("collapse_key", new MessageAttributeValue().withDataType("String").withStringValue(pushCollapseKey));
+			messageAttributes.put("collapse_key", MessageAttributeValue.builder().dataType("String").stringValue(pushCollapseKey).build());
 		}
-		publishRequest.setMessageAttributes(messageAttributes);
-		publishRequest.setMessage("-");
-		publishRequest.setTargetArn(amzPushTopicArn);
+		
+		PublishRequest publishRequest =
+				PublishRequest.builder()
+				.messageAttributes(messageAttributes)
+				.message("-")
+				.targetArn(amzPushTopicArn)
+				.build();
 		
 		try {
-			PublishResult publishResult = snsClient.publish(publishRequest);
-			LOG.info(String.format("Published message id %s on ARN %s", publishResult.getMessageId(), amzPushTopicArn));
+			PublishResponse publishResult = snsClient.publish(publishRequest);
+			LOG.info(String.format("Published message id %s on ARN %s", publishResult.messageId(), amzPushTopicArn));
 		} catch (Exception e) {
 			LOG.error(e);
 			throw e;

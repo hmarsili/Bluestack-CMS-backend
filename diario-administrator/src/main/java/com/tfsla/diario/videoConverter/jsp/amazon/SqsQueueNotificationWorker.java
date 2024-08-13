@@ -5,13 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.tfsla.diario.videoConverter.ConverterLogger;
-import com.tfsla.diario.videoConverter.jsp.amazon.JobStatusNotification;
-import com.tfsla.diario.videoConverter.jsp.amazon.JobStatusNotificationHandler;
-import com.tfsla.diario.videoConverter.jsp.amazon.Notification;
-import com.amazonaws.services.sqs.AmazonSQS;
-import com.amazonaws.services.sqs.model.DeleteMessageRequest;
-import com.amazonaws.services.sqs.model.Message;
-import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
+import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
+import software.amazon.awssdk.services.sqs.model.Message;
+import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -27,14 +25,14 @@ public class SqsQueueNotificationWorker implements Runnable {
     private static final int WAIT_TIME_SECONDS = 15;
     private static final ObjectMapper mapper = new ObjectMapper();
     
-    private AmazonSQS amazonSqs;
+    private SqsClient amazonSqs;
     private String queueUrl;
     private List<JobStatusNotificationHandler> handlers;
     private ConverterLogger LOG = null;
     
     private volatile boolean shutdown = false;
     
-    public SqsQueueNotificationWorker(AmazonSQS amazonSqs, String queueUrl, ConverterLogger log) {
+    public SqsQueueNotificationWorker(SqsClient amazonSqs, String queueUrl, ConverterLogger log) {
         this.amazonSqs = amazonSqs;
         this.queueUrl = queueUrl;
         this.handlers = new ArrayList<JobStatusNotificationHandler>();
@@ -55,16 +53,17 @@ public class SqsQueueNotificationWorker implements Runnable {
     
     @Override
     public void run() {
-        ReceiveMessageRequest receiveMessageRequest = new ReceiveMessageRequest()
-            .withQueueUrl(queueUrl)
-            .withMaxNumberOfMessages(MAX_NUMBER_OF_MESSAGES)
-            .withVisibilityTimeout(VISIBILITY_TIMEOUT)
-            .withWaitTimeSeconds(WAIT_TIME_SECONDS);
+        ReceiveMessageRequest receiveMessageRequest = ReceiveMessageRequest.builder()
+            .queueUrl(queueUrl)
+            .maxNumberOfMessages(MAX_NUMBER_OF_MESSAGES)
+            .visibilityTimeout(VISIBILITY_TIMEOUT)
+            .waitTimeSeconds(WAIT_TIME_SECONDS)
+            .build();
         
         while (!shutdown) {
             // Long pole the SQS queue.  This will return as soon as a message
             // is received, or when WAIT_TIME_SECONDS has elapsed.
-            List<Message> messages = amazonSqs.receiveMessage(receiveMessageRequest).getMessages();
+            List<Message> messages = amazonSqs.receiveMessage(receiveMessageRequest).messages();
             if (messages == null) {
                 // If there were no messages during this poll period, SQS
                 // will return this list as null.  Continue polling.
@@ -84,15 +83,21 @@ public class SqsQueueNotificationWorker implements Runnable {
                     	LOG.log("Failed to convert notification: " + e.getMessage());
                     }
                     
+                   
+                    
                     // Delete the message from the queue.
-                    amazonSqs.deleteMessage(new DeleteMessageRequest().withQueueUrl(queueUrl).withReceiptHandle(message.getReceiptHandle()));
+                    amazonSqs.deleteMessage(
+                    		DeleteMessageRequest.builder()
+                    			.queueUrl(queueUrl)
+                    			.receiptHandle(message.receiptHandle())
+                    			.build());
                 }
             }
         }
     }
     
     private JobStatusNotification parseNotification(Message message) throws IOException {
-        Notification<JobStatusNotification> notification = mapper.readValue(message.getBody(), new TypeReference<Notification<JobStatusNotification>>() {});
+        Notification<JobStatusNotification> notification = mapper.readValue(message.body(), new TypeReference<Notification<JobStatusNotification>>() {});
         return notification.getMessage();
     }
 

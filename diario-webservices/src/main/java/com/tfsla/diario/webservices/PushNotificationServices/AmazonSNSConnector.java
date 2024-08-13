@@ -5,27 +5,25 @@ import org.opencms.configuration.CPMConfig;
 import org.opencms.configuration.CmsMedios;
 import org.opencms.main.CmsLog;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.model.Region;
-import com.amazonaws.services.sns.AmazonSNS;
-import com.amazonaws.services.sns.AmazonSNSClient;
-import com.amazonaws.services.sns.model.CreatePlatformEndpointRequest;
-import com.amazonaws.services.sns.model.CreatePlatformEndpointResult;
-import com.amazonaws.services.sns.model.DeleteEndpointRequest;
-import com.amazonaws.services.sns.model.GetEndpointAttributesRequest;
-import com.amazonaws.services.sns.model.GetEndpointAttributesResult;
-import com.amazonaws.services.sns.model.SubscribeRequest;
-import com.amazonaws.services.sns.model.SubscribeResult;
-import com.amazonaws.services.sns.model.UnsubscribeRequest;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.sns.SnsClient;
+import software.amazon.awssdk.services.sns.model.CreatePlatformEndpointRequest;
+import software.amazon.awssdk.services.sns.model.CreatePlatformEndpointResponse;
+import software.amazon.awssdk.services.sns.model.DeleteEndpointRequest;
+import software.amazon.awssdk.services.sns.model.GetEndpointAttributesRequest;
+import software.amazon.awssdk.services.sns.model.GetEndpointAttributesResponse;
+import software.amazon.awssdk.services.sns.model.SubscribeRequest;
+import software.amazon.awssdk.services.sns.model.SubscribeResponse;
+import software.amazon.awssdk.services.sns.model.UnsubscribeRequest;
 import com.tfsla.diario.webservices.common.strings.StringConstants;
 import com.tfsla.diario.webservices.data.PushClientDAO;
 
 public class AmazonSNSConnector {
 	
 	private CPMConfig config;
-	private AmazonSNS snsClient;
+	private SnsClient snsClient;
 	private String module;
 	private String site;
 	private String publication;
@@ -36,21 +34,25 @@ public class AmazonSNSConnector {
 		this.site = site;
 		this.publication = publication;
 		
+		
+		
 		String amzAccessID = config.getParam(site, publication, module, "amzAccessID", ""); 
 		String amzAccessKey = config.getParam(site, publication, module, "amzAccessKey","");
 		String amzRegion = config.getParam(site, publication, module, "amzRegion","");
 		if(amzRegion == null || amzRegion.equals("")) {
-			amzRegion = Region.US_Standard.toString();
+			amzRegion = Region.US_EAST_1.toString();
 		}
 		
 		if (amzAccessKey == null || amzAccessID == null || amzAccessKey.equals("") || amzAccessID.equals("")) {
 			throw new Exception(String.format("amzAccessID and amzAccessKey cannot be empty: module %s, site %s - publication %s", module, site, publication));
 		}
 		
-		AWSCredentials awsCreds = new BasicAWSCredentials(amzAccessID, amzAccessKey);
-		this.snsClient = AmazonSNSClient.builder()
-				.withCredentials(new AWSStaticCredentialsProvider(awsCreds))
-				.withRegion(amzRegion)
+		AwsBasicCredentials awsCreds = AwsBasicCredentials.create(amzAccessID, amzAccessKey);
+
+		this.snsClient = 
+				SnsClient.builder()
+				.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+				.region(Region.of(amzRegion))
 				.build();
 	}
 	
@@ -66,29 +68,33 @@ public class AmazonSNSConnector {
 		}
 		
 		// Get the ARN for the application (AKA: create platform endpoint)
-		CreatePlatformEndpointRequest platformEndpointRequest = new CreatePlatformEndpointRequest();
-		platformEndpointRequest.setPlatformApplicationArn(amzArn);
-		platformEndpointRequest.setToken(token.replace("https://android.googleapis.com/gcm/send/", ""));
-		CreatePlatformEndpointResult result = snsClient.createPlatformEndpoint(platformEndpointRequest);
+		CreatePlatformEndpointRequest platformEndpointRequest = CreatePlatformEndpointRequest.builder()
+				.platformApplicationArn(amzArn)
+				.token(token.replace("https://android.googleapis.com/gcm/send/", ""))
+				.build();
+		
+		CreatePlatformEndpointResponse result = snsClient.createPlatformEndpoint(platformEndpointRequest);
 		
 		// Subscribe the endpoint ARN to the topic
-		SubscribeRequest subscribeRequest = new SubscribeRequest();
-		subscribeRequest.setTopicArn(amzPushTopicArn);
-		subscribeRequest.setEndpoint(result.getEndpointArn());
-		subscribeRequest.setProtocol("Application");
-		SubscribeResult subscribeResult = snsClient.subscribe(subscribeRequest);
+		SubscribeRequest subscribeRequest = SubscribeRequest.builder()
+				.topicArn(amzPushTopicArn)
+				.endpoint(result.endpointArn())
+				.protocol("Application")
+				.build();
+				
+		SubscribeResponse subscribeResult = snsClient.subscribe(subscribeRequest);
 		
-		LOG.debug("Added push subscriber - token: " + token + ", endpoint: " + result.getEndpointArn());
+		LOG.debug("Added push subscriber - token: " + token + ", endpoint: " + result.endpointArn());
 		
 		if (saveInDB) {
 			PushClientDAO dao = new PushClientDAO();
 			try {
 				dao.openConnection();
 				
-				if (!dao.userExists(token, platform, subscribeResult.getSubscriptionArn(), site, Integer.valueOf(publication))) {
-					dao.registerEndpoint(token, platform, result.getEndpointArn(), subscribeResult.getSubscriptionArn(), site, publication);
+				if (!dao.userExists(token, platform, subscribeResult.subscriptionArn(), site, Integer.valueOf(publication))) {
+					dao.registerEndpoint(token, platform, result.endpointArn(), subscribeResult.subscriptionArn(), site, publication);
 				} else {
-					dao.updateEndpoint(token, platform, result.getEndpointArn(), subscribeResult.getSubscriptionArn(), site, publication);
+					dao.updateEndpoint(token, platform, result.endpointArn(), subscribeResult.subscriptionArn(), site, publication);
 				}
 				LOG.debug("Push subscriber registered with token " + token);
 			} catch (Exception e) {
@@ -102,10 +108,12 @@ public class AmazonSNSConnector {
 	
 	public String getEndpointToken(String endpointArn) throws Exception {
 		try {
-			GetEndpointAttributesRequest request = new GetEndpointAttributesRequest();
-			request.setEndpointArn(endpointArn);
-			GetEndpointAttributesResult result = snsClient.getEndpointAttributes(request);
-			return result.getAttributes().get("Token");
+			GetEndpointAttributesRequest request = GetEndpointAttributesRequest.builder()
+					.endpointArn(endpointArn)
+					.build();
+			
+			GetEndpointAttributesResponse result = snsClient.getEndpointAttributes(request);
+			return result.attributes().get("Token");
 		} catch (Exception e) {
 			return "";
 		}
@@ -116,26 +124,32 @@ public class AmazonSNSConnector {
 		
 		try {
 			// Get topic subscription
-			SubscribeRequest subscribeRequest = new SubscribeRequest();
-			subscribeRequest.setTopicArn(amzPushTopicArn);
-			subscribeRequest.setEndpoint(endpointArn);
-			subscribeRequest.setProtocol("Application");
-			SubscribeResult subscribeResult = snsClient.subscribe(subscribeRequest);
+			SubscribeRequest subscribeRequest = 
+					SubscribeRequest.builder()
+						.topicArn(amzPushTopicArn)
+						.endpoint(endpointArn)
+						.protocol("Application")
+						.build();
 			
-			if (subscribeResult.getSubscriptionArn() != null && !subscribeResult.getSubscriptionArn().equals("")) {
+			SubscribeResponse subscribeResult = snsClient.subscribe(subscribeRequest);
+			
+			if (subscribeResult.subscriptionArn() != null && !subscribeResult.subscriptionArn().equals("")) {
 				// Unsubscribe from push topic
-				UnsubscribeRequest unsubscribeReq = new UnsubscribeRequest();
-				unsubscribeReq.setSubscriptionArn(subscribeResult.getSubscriptionArn());
+				UnsubscribeRequest unsubscribeReq = UnsubscribeRequest.builder()
+						.subscriptionArn(subscribeResult.subscriptionArn())
+						.build();
 				snsClient.unsubscribe(unsubscribeReq);
-				LOG.debug("Removing subscription " + subscribeResult.getSubscriptionArn() + " for endpoint " + endpointArn);
+				LOG.debug("Removing subscription " + subscribeResult.subscriptionArn() + " for endpoint " + endpointArn);
 			}
 		} catch (Exception e) {
 			LOG.error("Error while removing endpoint " + endpointArn, e);
 		}
 		
 		// Delete endpoint from Application
-		DeleteEndpointRequest deleteReq = new DeleteEndpointRequest();
-		deleteReq.setEndpointArn(endpointArn);
+		DeleteEndpointRequest deleteReq = DeleteEndpointRequest.builder()
+				.endpointArn(endpointArn)
+				.build();
+		
 		snsClient.deleteEndpoint(deleteReq);
 	}
 	

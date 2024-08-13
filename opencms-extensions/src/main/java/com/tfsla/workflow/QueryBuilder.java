@@ -1,7 +1,15 @@
 package com.tfsla.workflow;
 
-import java.io.IOException;
-import java.io.InputStream;
+//import java.io.IOException;
+//import java.io.InputStream;
+//import java.util.Random;
+//import org.apache.commons.io.IOUtils;
+//import org.opencms.configuration.CmsMediosInit;
+//import org.opencms.loader.I_CmsResourceLoader;
+//import org.opencms.loader.TfsJspLoader;
+//import org.opencms.main.OpenCms;
+//import com.tfsla.data.baseDAO;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,19 +18,10 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
-
-import org.apache.commons.io.IOUtils;
-import org.opencms.configuration.CmsMediosInit;
 import org.opencms.db.CmsDbContext;
 import org.opencms.db.SecurityManagerAccesor;
 import org.opencms.db.generic.CmsSqlManager;
 import org.opencms.file.CmsObject;
-import org.opencms.loader.I_CmsResourceLoader;
-import org.opencms.loader.TfsJspLoader;
-import org.opencms.main.OpenCms;
-
-import com.tfsla.data.baseDAO;
 import com.tfsla.exceptions.ApplicationException;
 import com.tfsla.utils.TFSDriversContainer;
 
@@ -51,6 +50,7 @@ public class QueryBuilder<T> {
 	private List<Object> parameters = new ArrayList<Object>();
 	private boolean open = true;
 
+/*
 	private static String errorMsg = "hTe3GIq5GxbIz1X5LDKv143owhIi873jejaGuU3fdJwN4HWUiShongy00qunm8ZdWAtP3OzcqFM60xxboyTfFZ5Os9i6aFrqYwvagQDhveTt4wWmCRzAS4UxX0V+3pWbxgr7+rnFvFnBXychgbEqqLwT1IsvkylGkiG0WR1cc1U=";
 	
 	static {
@@ -85,7 +85,7 @@ public class QueryBuilder<T> {
 		if (sizeConn!=6965)
 			throw new RuntimeException(CmsMediosInit.getInstance().decode(errorMsg));
 	}
-	
+*/	
 
 	public QueryBuilder(CmsSqlManager sqlManager, CmsDbContext dbc) {
 		
@@ -101,7 +101,7 @@ public class QueryBuilder<T> {
 
 	public QueryBuilder(CmsObject cms) {
 		this(TFSDriversContainer.getInstance().getSqlManager(), SecurityManagerAccesor.getCmsDbContext(cms));
-		
+/*		
 		if (cms.getRequestContext().currentProject().isOnlineProject() &&  !OpenCms.getSiteManager().getCurrentSite(cms).getUrl().equals("/") && !cms.getRequestContext().getUri().startsWith("/system/")) {
 	
 			boolean restrictive = CmsMediosInit.getInstance().restrictiveMode(cms);
@@ -118,6 +118,7 @@ public class QueryBuilder<T> {
 				throw new RuntimeException(CmsMediosInit.getInstance().decode(errorMsg));
 			}
 	   	}
+*/
 	}
 
 

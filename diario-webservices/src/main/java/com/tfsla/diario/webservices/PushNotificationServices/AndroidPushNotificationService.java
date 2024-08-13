@@ -3,18 +3,21 @@ package com.tfsla.diario.webservices.PushNotificationServices;
 import java.util.Hashtable;
 import java.util.List;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.model.Region;
-import com.amazonaws.services.sns.AmazonSNS;
-import com.amazonaws.services.sns.AmazonSNSClient;
-import com.amazonaws.services.sns.model.CreatePlatformEndpointRequest;
-import com.amazonaws.services.sns.model.CreatePlatformEndpointResult;
-import com.amazonaws.services.sns.model.DeleteEndpointRequest;
-import com.amazonaws.services.sns.model.EndpointDisabledException;
-import com.amazonaws.services.sns.model.PublishRequest;
-import com.amazonaws.services.sns.model.PublishResult;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.sns.SnsClient;
+import software.amazon.awssdk.services.sns.model.CreatePlatformEndpointRequest;
+import software.amazon.awssdk.services.sns.model.CreatePlatformEndpointResponse;
+import software.amazon.awssdk.services.sns.model.DeleteEndpointRequest;
+import software.amazon.awssdk.services.sns.model.EndpointDisabledException;
+import software.amazon.awssdk.services.sns.model.GetEndpointAttributesRequest;
+import software.amazon.awssdk.services.sns.model.GetEndpointAttributesResponse;
+import software.amazon.awssdk.services.sns.model.PublishRequest;
+import software.amazon.awssdk.services.sns.model.PublishResponse;
+import software.amazon.awssdk.services.sns.model.SubscribeRequest;
+import software.amazon.awssdk.services.sns.model.SubscribeResponse;
+import software.amazon.awssdk.services.sns.model.UnsubscribeRequest;
 import com.google.android.gcm.server.Constants;
 import com.google.android.gcm.server.Message;
 import com.google.android.gcm.server.Message.Builder;
@@ -74,7 +77,7 @@ public class AndroidPushNotificationService extends PushNotificationService {
 		String amzRegion = config.getParam(site, publication, module, "amzRegion","");
 		String amzGCMArn = config.getParam(site, publication, module, "amzGCMArn", "");
 		if(amzRegion == null || amzRegion.equals("")) {
-			amzRegion = Region.US_Standard.toString();
+			amzRegion = Region.US_EAST_1.toString();
 		}
 		
 		if(amzAccessKey == null || amzAccessID == null || amzAccessKey.equals("") || amzAccessID.equals("")) {
@@ -85,20 +88,24 @@ public class AndroidPushNotificationService extends PushNotificationService {
 			throw new Exception(String.format("amzGCMArn parameter not specified for module %s, site %s - publication %s", module, site, publication));
 		}
 		
-		AWSCredentials awsCreds = new BasicAWSCredentials(amzAccessID, amzAccessKey);
-		AmazonSNS snsClient = AmazonSNSClient.builder()
-				.withCredentials(new AWSStaticCredentialsProvider(awsCreds))
-				.withRegion(amzRegion)
+		AwsBasicCredentials awsCreds = AwsBasicCredentials.create(amzAccessID, amzAccessKey);
+
+		SnsClient snsClient = SnsClient.builder()
+				.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+				.region(Region.of(amzGCMArn))
 				.build();
+		
 		LOG.info(String.format("Amz accessID: %s, secret: %s", amzAccessID, amzAccessKey));
 		for(String client : rawclients) {
-			CreatePlatformEndpointResult result = null;
+			CreatePlatformEndpointResponse result = null;
 			try {
-				CreatePlatformEndpointRequest platformEndpointRequest = new CreatePlatformEndpointRequest();
-				platformEndpointRequest.setPlatformApplicationArn(amzGCMArn);
-				platformEndpointRequest.setToken(client.replace("https://android.googleapis.com/gcm/send/", ""));
+				CreatePlatformEndpointRequest platformEndpointRequest = CreatePlatformEndpointRequest.builder()
+					.platformApplicationArn(amzGCMArn)
+					.token(client.replace("https://android.googleapis.com/gcm/send/", ""))
+					.build();
+				
 				result = snsClient.createPlatformEndpoint(platformEndpointRequest);
-				LOG.info(String.format("Obtained ARN %s for endpoint %s", result.getEndpointArn(), client));
+				LOG.info(String.format("Obtained ARN %s for endpoint %s", result.endpointArn(), client));
 			} catch(Exception e) {
 				LOG.info("Error trying to retrieve ARN for endpoint " + client);
 				if(result != null) {
@@ -108,14 +115,15 @@ public class AndroidPushNotificationService extends PushNotificationService {
 			}
 			
 			if(result != null) {
-				PublishRequest publishRequest = new PublishRequest();
-				publishRequest.setTargetArn(amzGCMArn);
-				publishRequest.setMessage("-");
-				publishRequest.setTargetArn(result.getEndpointArn());
+				PublishRequest publishRequest = PublishRequest.builder()
+						.targetArn(amzGCMArn)
+						.message("-")
+						.targetArn(result.endpointArn())
+						.build();
 				
 				try {
-					PublishResult publishResult = snsClient.publish(publishRequest);
-					LOG.info(String.format("Published message id %s on ARN %s", publishResult.getMessageId(), client));
+					PublishResponse publishResult = snsClient.publish(publishRequest);
+					LOG.info(String.format("Published message id %s on ARN %s", publishResult.messageId(), client));
 				} catch(EndpointDisabledException e) {
 					LOG.debug(String.format(LogMessages.REMOVING_ANDROID_CLIENT, client));
 					PushClientDAO dao = new PushClientDAO();
@@ -131,12 +139,14 @@ public class AndroidPushNotificationService extends PushNotificationService {
 					}
 					if(result != null) {
 						try {
-							LOG.info("Removing ARN " + result.getEndpointArn());
-							DeleteEndpointRequest deleteRequest = new DeleteEndpointRequest();
-							deleteRequest.setEndpointArn(result.getEndpointArn());
+							LOG.info("Removing ARN " + result.endpointArn());
+								DeleteEndpointRequest deleteRequest = DeleteEndpointRequest.builder()
+										.endpointArn(result.endpointArn())
+										.build();
+										
 							snsClient.deleteEndpoint(deleteRequest);
 						} catch(Exception ex) {
-							LOG.info("Error removing ARN " + result.getEndpointArn() + " from platform " + this.getPlatform());
+							LOG.info("Error removing ARN " + result.endpointArn() + " from platform " + this.getPlatform());
 							LOG.error(ex);
 						}
 					}

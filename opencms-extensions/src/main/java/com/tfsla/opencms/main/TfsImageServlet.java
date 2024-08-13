@@ -75,7 +75,7 @@ public class TfsImageServlet extends HttpServlet {
 				
 			} catch (CmsException e1) {
 				e1.printStackTrace();
-				CmsMediosInit.getInstance().addHit(currentSiteRoot);
+				//CmsMediosInit.getInstance().addHit(currentSiteRoot);
 
 			}
 
@@ -133,27 +133,6 @@ public class TfsImageServlet extends HttpServlet {
 
 			captchaChallengeAsJpeg = jpegOutputStream.toByteArray();
 			
-			long hv = CmsMediosInit.getInstance().getViews(currentSiteRoot);
-			int lv = CmsMediosInit.getInstance().licViolations(currentSiteRoot);
-			
-			byte[] data = null;
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();   
-			DataOutputStream dos = new DataOutputStream(bos);   
-			try {
-				
-				dos.writeLong((Long)hv);
-				dos.writeInt((Integer)lv);
-				dos.writeBytes("ugt");
-				dos.writeLong((Long)new Date().getTime());
-				dos.flush(); 
-				data = bos.toByteArray();
-				dos.close();
-				bos.close();
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
-			
-			byte[] result = ArrayUtils.addAll(captchaChallengeAsJpeg, data); 
 			
 			response.setHeader("Cache-Control", "no-store");
 			response.setHeader("Pragma", "no-cache");
@@ -162,7 +141,7 @@ public class TfsImageServlet extends HttpServlet {
 			ServletOutputStream responseOutputStream;
 			try {
 				responseOutputStream = response.getOutputStream();
-				responseOutputStream.write(result);
+				responseOutputStream.write(captchaChallengeAsJpeg);
 				responseOutputStream.flush();
 				responseOutputStream.close();
 			} catch (IOException e) {
