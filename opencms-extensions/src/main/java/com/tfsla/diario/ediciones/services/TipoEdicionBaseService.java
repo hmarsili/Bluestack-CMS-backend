@@ -1,8 +1,8 @@
 package com.tfsla.diario.ediciones.services;
 
-import java.util.Random;
+//import java.util.Random;
+//import org.opencms.configuration.CmsMediosInit;
 
-import org.opencms.configuration.CmsMediosInit;
 import org.opencms.file.CmsObject;
 import org.opencms.main.OpenCms;
 
@@ -97,6 +97,7 @@ public class TipoEdicionBaseService extends baseService {
 	 */
 	public TipoEdicion obtenerTipoEdicion(CmsObject cms, String path) throws Exception
 	{
+/*		
 		if (cms.getRequestContext().currentProject().isOnlineProject() &&  !OpenCms.getSiteManager().getCurrentSite(cms).getUrl().equals("/") && !cms.getRequestContext().getUri().startsWith("/system/")) {
 
 			boolean restrictive = CmsMediosInit.getInstance().restrictiveMode(cms);
@@ -110,7 +111,7 @@ public class TipoEdicionBaseService extends baseService {
 			if (license!=0 || restrictive && maxViews<views || views==-1L)
 				return null;
 		}
-
+*/
 		String siteRoot = OpenCms.getSiteManager().getCurrentSite(cms).getSiteRoot();
 		String fullPath = siteRoot + path;
 		TipoEdicion tipoEdicion = TipoEdicionCache.getInstance().getTipoEdicionByPath(fullPath);

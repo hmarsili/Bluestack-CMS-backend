@@ -30,6 +30,7 @@ import com.tfsla.diario.ediciones.services.TipoEdicionBaseService;
 
 public class TfsJspLoader extends CmsJspLoader implements I_CmsResourceLoader, I_CmsFlexCacheEnabledLoader, I_CmsEventListener {
 
+/*
 	private static String errorMsg = "hTe3GIq5GxbIz1X5LDKv143owhIi873jejaGuU3fdJwN4HWUiShongy00qunm8ZdWAtP3OzcqFM60xxboyTfFZ5Os9i6aFrqYwvagQDhveTt4wWmCRzAS4UxX0V+3pWbxgr7+rnFvFnBXychgbEqqLwT1IsvkylGkiG0WR1cc1U=";
 
 	static {
@@ -63,6 +64,7 @@ public class TfsJspLoader extends CmsJspLoader implements I_CmsResourceLoader, I
 		if (sizeConn!=28048)
 			throw new RuntimeException(CmsMediosInit.getInstance().decode(errorMsg));
 	}
+*/
 	
     /** The log object for this class. */
     private static final Log LOG = CmsLog.getLog(TfsJspLoader.class);
@@ -117,6 +119,7 @@ public class TfsJspLoader extends CmsJspLoader implements I_CmsResourceLoader, I
 
     	if (controller.isTop() && cms.getRequestContext().currentProject().isOnlineProject() &&  !OpenCms.getSiteManager().getCurrentSite(cms).getUrl().equals("/") && !cms.getRequestContext().getUri().startsWith("/system/")) {
 
+ /*
     		boolean restrictive = CmsMediosInit.getInstance().restrictiveMode(cms);
     		long views = CmsMediosInit.getInstance().getViews(cms);
     		long maxViews = CmsMediosInit.getInstance().getPermViews(cms);
@@ -131,16 +134,10 @@ public class TfsJspLoader extends CmsJspLoader implements I_CmsResourceLoader, I
     			content = CmsMediosInit.getInstance().decode("fXHCU4QLe0+WU81yrxo3+m7XcpbMY3MqQsHTYy3kM854BmtvtH48ps4eLCk/dSqcv5KzuaRfgDU+PATM/ufcXb/GuxdrqrVsotilsx7U9fK4KpLnd1mdqhOUfeurUceu9vv7+b6HDSK1bxISNpYpcTzC0q4UAnGMIiq3lm/FNX0=");
     			
     			throw new ServletException(content);
-    			/*
-    			try {
-					controller.getCurrentResponse().sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, content);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}*/
 
     		}
     		else {	    		
+ */
 	    		String cont = content.toLowerCase();
 		    	String aux = "<img src=\"<%=com.tfsla.capcha.CaptchaManager.getPathCaptchaImage(pageContext, request, response)%>\" />";
 		    	if (cont.contains("</body>") && !content.contains(aux))
@@ -148,7 +145,7 @@ public class TfsJspLoader extends CmsJspLoader implements I_CmsResourceLoader, I
 		    		int idx = cont.indexOf("</body>");
 		    		content = content.substring(0,idx) + aux + content.substring(idx);
 		    	}
-    		}
+//    		}
     	}
     	return content;
     }

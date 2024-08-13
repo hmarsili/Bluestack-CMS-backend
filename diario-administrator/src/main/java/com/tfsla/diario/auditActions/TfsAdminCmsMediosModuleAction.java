@@ -69,8 +69,9 @@ public class TfsAdminCmsMediosModuleAction extends A_CmsModuleAction {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (SAXException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		} 
 	}
 	
 	public void addTfsWidget(I_TfsWidget widget) {

@@ -45,7 +45,6 @@ import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -56,25 +55,6 @@ import java.net.HttpURLConnection;
 import java.net.SocketException;
 import java.net.URL;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.elastictranscoder.AmazonElasticTranscoder;
-import com.amazonaws.services.elastictranscoder.AmazonElasticTranscoderClient;
-import com.amazonaws.services.elastictranscoder.model.CreateJobOutput;
-import com.amazonaws.services.elastictranscoder.model.CreateJobPlaylist;
-import com.amazonaws.services.elastictranscoder.model.CreateJobRequest;
-import com.amazonaws.services.elastictranscoder.model.JobInput;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
-import com.amazonaws.services.sqs.AmazonSQS;
-import com.amazonaws.services.sqs.AmazonSQSClient;
 import com.tfsla.diario.auditActions.data.TfsAuditActionDAO;
 import com.tfsla.diario.auditActions.model.TfsAuditAction;
 import com.tfsla.diario.ediciones.model.TipoEdicion;
@@ -94,8 +74,23 @@ import com.tfsla.diario.videoConverter.jsp.amazon.JobStatusNotification.JobState
 import com.tfsla.diario.videoConverter.jsp.amazon.JobStatusNotificationHandler;
 import com.tfsla.diario.videoConverter.jsp.amazon.SqsQueueNotificationWorker;
 import com.tfsla.utils.CmsResourceUtils;
-import com.tfsla.utils.TfsAdminUserProvider;
-import com.tfsla.utils.UrlLinkHelper;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.core.ResponseBytes;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.services.elastictranscoder.ElasticTranscoderClient;
+import software.amazon.awssdk.services.elastictranscoder.model.CreateJobOutput;
+import software.amazon.awssdk.services.elastictranscoder.model.CreateJobPlaylist;
+import software.amazon.awssdk.services.elastictranscoder.model.CreateJobRequest;
+import software.amazon.awssdk.services.elastictranscoder.model.JobInput;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest.Builder;
+import software.amazon.awssdk.services.sqs.SqsClient;
 
 import org.opencms.report.CmsLogReport;
 import org.opencms.util.CmsFileUtil;
@@ -231,12 +226,23 @@ public class TfsVideosAdmin implements EncoderProgressListener {
 			String targetAMZPath = amzDirectory + "/" + linkFolderName + subFolderVFS + "/" + targetName;
 			
 			try {
-				AWSCredentials awsCreds = new BasicAWSCredentials(amzAccessID, amzAccessKey);
-		        AmazonS3 s3 = new AmazonS3Client(awsCreds);
+				AwsBasicCredentials awsCreds = AwsBasicCredentials.create(amzAccessID, amzAccessKey);
+		        
+				S3Client s3 = null;
+				
 				if(amzRegion != null && !amzRegion.equals("")) {
-					com.amazonaws.regions.Region region = com.amazonaws.regions.Region.getRegion(com.amazonaws.regions.Regions.valueOf(amzRegion));
-					s3.setRegion(region);
+					
+					s3 = S3Client.builder()
+						.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+						.region(Region.of(amzRegion))
+						.build();
+				}else {
+					
+					s3 = S3Client.builder()
+							.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+							.build();
 				}
+				
 				
 				if(!sourceUrl.contains("amazonaws.com")) {
 					sourceUrl = uploadS3(sourceUrl, file, amzBucket, amzRegion, awsCreds, cmsObj);
@@ -257,12 +263,15 @@ public class TfsVideosAdmin implements EncoderProgressListener {
 				LOG.log("Format Name: "+formatName);
 				LOG.log("Key: " + key);
 				
-				AmazonSQS amazonSqs = new AmazonSQSClient(awsCreds);
+				SqsClient amazonSqs = SqsClient.builder()
+						.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+						.build();
+				
 				SqsQueueNotificationWorker sqsQueueNotificationWorker = new SqsQueueNotificationWorker(amazonSqs, amzQueueURL, LOG);
 				Thread notificationThread = new Thread(sqsQueueNotificationWorker);
 		        notificationThread.start();
 				
-				JobInput input = new JobInput().withKey(key);
+				JobInput input = JobInput.builder().key(key).build();
 				List<CreateJobOutput> outputs = new ArrayList<CreateJobOutput>();
 				CreateJobPlaylist playlist = null;
 				if(isHLS) {
@@ -279,50 +288,73 @@ public class TfsVideosAdmin implements EncoderProgressListener {
 						String presetID = preset.substring(preset.indexOf("=")+1);
 						String presetTarget = amzDirectory + "/" + linkFolderName + subFolderVFS + "/" + targetName + "_" + presetName;
 						
-						CreateJobOutput output = new CreateJobOutput()
-				            .withKey(presetTarget)
-				            .withSegmentDuration(segmentDuration)
-				            .withPresetId(presetID);
+						CreateJobOutput output = CreateJobOutput.builder()
+				            .key(presetTarget)
+				            .segmentDuration(segmentDuration)
+				            .presetId(presetID)
+				            .build();
+						
 						outputs.add(output);
-						outputKeys.add(output.getKey());
+						outputKeys.add(output.key());
 						LOG.log("Adding Preset ID: " + presetID + ", name: " + presetName);
 						LOG.log("Target: " + presetTarget);
 					}
 					
 					LOG.log("Done loading presets, playlist target: " + targetAMZPath);
 					
-					playlist = new CreateJobPlaylist()
-			            .withName(targetAMZPath)
-			            .withFormat(format)
-			            .withOutputKeys(outputKeys);
+					playlist = CreateJobPlaylist.builder()
+			            .name(targetAMZPath)
+			            .format(format)
+			            .outputKeys(outputKeys)
+			            .build();
 				} else {
 					String amzPresetID = getParamFormat(formatName, "presetAMZ");
 					LOG.log("Target Amz Path: " + targetAMZPath);
 					LOG.log("Preset ID: " + amzPresetID);
 					
-			        CreateJobOutput output = new CreateJobOutput()
-			            .withKey(targetAMZPath)
-			            .withPresetId(amzPresetID);
+			        CreateJobOutput output = CreateJobOutput.builder()
+			            .key(targetAMZPath)
+			            .presetId(amzPresetID)
+			            .build();
 			        outputs.add(output);
 				}
 				
 		        LOG.log("Pipeline ID: " + amzPipelineID);
 		        LOG.log("Queue URL: " + amzQueueURL);
-		        CreateJobRequest createJobRequest = new CreateJobRequest()
-		            .withPipelineId(amzPipelineID)
-		            .withInput(input)
-		            .withOutputs(outputs);
+		        CreateJobRequest createJobRequest = null;
 		        
 		        if(isHLS) {
-		        	createJobRequest.withPlaylists(playlist);
+		        	createJobRequest = CreateJobRequest.builder()
+			            .pipelineId(amzPipelineID)
+			            .input(input)
+			            .outputs(outputs)
+			            .playlists(playlist)
+			            .build();
+		        }
+		        else {
+		        	createJobRequest = CreateJobRequest.builder()
+			            .pipelineId(amzPipelineID)
+			            .input(input)
+			            .outputs(outputs)
+			            .build();
+			     }
+		        
+		        ElasticTranscoderClient amazonElasticTranscoder = null;
+		        if(amzRegion == null || amzRegion.equals("")) {
+		        	amazonElasticTranscoder = ElasticTranscoderClient.builder()
+			        		.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+			        		.region(Region.of(amzRegion))
+			        		.build();
+		        	
+		        }
+		        else {
+		        	amazonElasticTranscoder = ElasticTranscoderClient.builder()
+			        		.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+			        		.region(Region.of(amzRegion))
+			        		.build();
 		        }
 		        
-		        AmazonElasticTranscoder amazonElasticTranscoder = new AmazonElasticTranscoderClient(awsCreds);
-		        if(amzRegion != null && !amzRegion.equals("")) {
-					com.amazonaws.regions.Region region = com.amazonaws.regions.Region.getRegion(com.amazonaws.regions.Regions.valueOf(amzRegion));
-					amazonElasticTranscoder.setRegion(region);
-				}
-		        final String jobID = amazonElasticTranscoder.createJob(createJobRequest).getJob().getId();
+		        final String jobID = amazonElasticTranscoder.createJob(createJobRequest).job().id();
 		        LOG.log("Created transcoding job with id " + jobID);
 		        JobStatusNotificationHandler handler = new JobStatusNotificationHandler() {
 		            
@@ -396,7 +428,19 @@ public class TfsVideosAdmin implements EncoderProgressListener {
 						String tmpFolder = config.getParam(siteName, publication, moduleConfigName, "tempFolder","");
 						String targetTempPath = tmpFolder + "/" + targetName;
 						File localFile = new File(targetTempPath);
-						s3.getObject(new GetObjectRequest(amzBucket.replace("/", ""), targetAMZPath), localFile);
+						
+						ResponseBytes<GetObjectResponse> objectBytes = s3.getObjectAsBytes(GetObjectRequest.builder()
+								.bucket(amzBucket.replace("/", ""))
+								.key(targetAMZPath)
+								.build());
+						
+			            byte[] data = objectBytes.asByteArray();
+
+			            
+			            OutputStream os = new FileOutputStream(localFile);
+			            os.write(data);
+			            os.close();
+			            
 						properties = getPropertiesConvertedVideo(targetTempPath, formatName);
 					} else {
 						linkName += ".m3u8";
@@ -441,13 +485,24 @@ public class TfsVideosAdmin implements EncoderProgressListener {
 		return result;
 	}
 	
-	private String uploadS3(String sourceUrl, CmsFile file, String amzBucket, String amzRegion, AWSCredentials awsCreds, CmsObject cms) throws Exception {
+	private String uploadS3(String sourceUrl, CmsFile file, String amzBucket, String amzRegion, AwsBasicCredentials awsCreds, CmsObject cms) throws Exception {
 		LOG.log(String.format("Moving %s to Amazon S3", sourceUrl));
-		AmazonS3 s3 = new AmazonS3Client(awsCreds);
+		S3Client s3;
+		
 		if(amzRegion != null && !amzRegion.equals("")) {
-			com.amazonaws.regions.Region region = com.amazonaws.regions.Region.getRegion(com.amazonaws.regions.Regions.valueOf(amzRegion));
-			s3.setRegion(region);
+			
+			s3 = S3Client.builder()
+				.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+				.region(Region.of(amzRegion))
+				.build();
+		}else {
+			
+			s3 = S3Client.builder()
+					.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+					.build();
 		}
+		
+
 		
 		String sitePath = cms.getSitePath(file);
 		if(sitePath.startsWith("/")) {
@@ -472,13 +527,14 @@ public class TfsVideosAdmin implements EncoderProgressListener {
 	        conn.disconnect();
 	    }
 		InputStream content = new URL(sourceUrl).openStream();
-		ObjectMetadata metadata = new ObjectMetadata();
-		if(contentLength > 0) {
-			metadata.setContentLength(contentLength);
-		}
-		s3.putObject(
-			new PutObjectRequest(amzBucket.replace("/", ""), sitePath, content, metadata).withCannedAcl(CannedAccessControlList.PublicRead)
-		);
+		
+		Builder putObjectRequestBuilder = PutObjectRequest.builder();
+		putObjectRequestBuilder.bucket(amzBucket.replace("/", ""));
+		putObjectRequestBuilder.contentLength(contentLength);
+		putObjectRequestBuilder.acl(ObjectCannedACL.PUBLIC_READ);
+		putObjectRequestBuilder.key(sitePath);
+		s3.putObject( putObjectRequestBuilder.build(), RequestBody.fromInputStream(content, contentLength));
+
 		
 		LOG.log(String.format("Locking %s", sitePath));
 		String path = cms.getSitePath(file);
@@ -1703,47 +1759,6 @@ public class TfsVideosAdmin implements EncoderProgressListener {
 		} catch(Exception e) {
 			  CmsLog.getLog(this).error("ERROR obteniento propiedades del video "+e.getMessage());
 		}
-	}
-	
-	public String tmpFileFFmepg(String filename, S3Object s3Object) {
-		String tmpFilePath = null;
-		
-		File temp = new File(System.getProperty("java.io.tmpdir"), "cmsMediosVideoConverter");
-		if (!temp.exists()) {
-			temp.mkdirs();
-			temp.deleteOnExit();
-		}
-		
-		Runtime runtime = Runtime.getRuntime();
-		try {
-			runtime.exec(new String[] { "/bin/chmod", "775",temp.getAbsolutePath() });
-		} catch (IOException e) {
-			LOG.log("ERROR", e.getMessage());
-			e.printStackTrace();
-		}
-		
-		String folderConvertPath = temp.getAbsolutePath();
-		String fileFFmpegPath = folderConvertPath + "/" + filename;
-		File uploadedFile = new File(fileFFmpegPath);
-		
-		try {
-		    FileOutputStream fos = new FileOutputStream(uploadedFile);
-		    S3ObjectInputStream s3is = s3Object.getObjectContent();
-		    byte[] read_buf = new byte[1024];
-		    int read_len = 0;
-		    while ((read_len = s3is.read(read_buf)) > 0) {
-		        fos.write(read_buf, 0, read_len);
-		    }
-		    s3is.close();
-		    fos.close();
-		    
-		    tmpFilePath = fileFFmpegPath;
-		    
-		} catch (Exception e1) {
-			   CmsLog.getLog(this).error("Error al intentar subir el archivo " + fileFFmpegPath +" :"+e1.getMessage());
-		}
-		
-		return tmpFilePath;
 	}
 	
 	public String tmpFileFFmepg(String filename, byte[] contentFFmpeg) {

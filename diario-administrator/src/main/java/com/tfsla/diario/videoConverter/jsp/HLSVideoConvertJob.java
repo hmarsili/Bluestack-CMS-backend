@@ -25,13 +25,15 @@ import org.opencms.main.OpenCms;
 import org.opencms.report.CmsLogReport;
 import org.opencms.scheduler.I_CmsScheduledJob;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest.Builder;
+
 import com.tfsla.diario.videoCollector.LuceneVideoCollector;
 
 public class HLSVideoConvertJob implements I_CmsScheduledJob {
@@ -154,11 +156,22 @@ public class HLSVideoConvertJob implements I_CmsScheduledJob {
 	}
 
 	private void uploadS3(String sourceUrl, CmsFile file) throws Exception {
-		AWSCredentials awsCreds = new BasicAWSCredentials(amzAccessID, amzAccessKey);
-		AmazonS3 s3 = new AmazonS3Client(awsCreds);
+		
+		AwsBasicCredentials awsCreds = AwsBasicCredentials.create(amzAccessID, amzAccessKey);
+
+		S3Client s3 = null;
+		
 		if(amzRegion != null && !amzRegion.equals("")) {
-			com.amazonaws.regions.Region region = com.amazonaws.regions.Region.getRegion(com.amazonaws.regions.Regions.valueOf(amzRegion));
-			s3.setRegion(region);
+			
+			s3 = S3Client.builder()
+				.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+				.region(Region.of(amzRegion))
+				.build();
+		}else {
+			
+			s3 = S3Client.builder()
+					.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+					.build();
 		}
 		
 		String sitePath = cms.getSitePath(file);
@@ -183,15 +196,17 @@ public class HLSVideoConvertJob implements I_CmsScheduledJob {
 	    } finally {
 	        conn.disconnect();
 	    }
-		InputStream content = new URL(sourceUrl).openStream();
-		ObjectMetadata metadata = new ObjectMetadata();
-		if(contentLength > 0) {
-			metadata.setContentLength(contentLength);
-		}
-		s3.putObject(
-			new PutObjectRequest(amzBucket.replace("/", ""), sitePath, content, metadata).withCannedAcl(CannedAccessControlList.PublicRead)
-		);
 		
+		InputStream content = new URL(sourceUrl).openStream();
+		
+		Builder putObjectRequestBuilder = PutObjectRequest.builder();
+		putObjectRequestBuilder.bucket(amzBucket.replace("/", ""));
+		putObjectRequestBuilder.contentLength(contentLength);
+		putObjectRequestBuilder.acl(ObjectCannedACL.PUBLIC_READ);
+		putObjectRequestBuilder.key(sitePath);
+		s3.putObject( putObjectRequestBuilder.build(), RequestBody.fromInputStream(content, contentLength));
+
+				
 		LOG.info(String.format("Locking %s", sitePath));
 		stealLock(cms.getSitePath(file));
 		

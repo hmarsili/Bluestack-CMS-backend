@@ -8,21 +8,20 @@ import org.opencms.file.CmsObject;
 import org.opencms.main.CmsLog;
 import org.opencms.scheduler.I_CmsScheduledJob;
 
-import com.amazonaws.SdkClientException;
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.sns.AmazonSNS;
-import com.amazonaws.services.sns.AmazonSNSClient;
-import com.amazonaws.services.sns.model.DeleteEndpointRequest;
-import com.amazonaws.services.sns.model.SubscribeRequest;
-import com.amazonaws.services.sns.model.SubscribeResult;
-import com.amazonaws.services.sns.model.UnsubscribeRequest;
-import com.amazonaws.services.sqs.AmazonSQS;
-import com.amazonaws.services.sqs.AmazonSQSClient;
-import com.amazonaws.services.sqs.model.DeleteMessageRequest;
-import com.amazonaws.services.sqs.model.Message;
-import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
+
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.core.exception.SdkClientException;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.sns.SnsClient;
+import software.amazon.awssdk.services.sns.model.DeleteEndpointRequest;
+import software.amazon.awssdk.services.sns.model.SubscribeRequest;
+import software.amazon.awssdk.services.sns.model.SubscribeResponse;
+import software.amazon.awssdk.services.sns.model.UnsubscribeRequest;
+import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
+import software.amazon.awssdk.services.sqs.model.Message;
+import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 
 import net.sf.json.JSONObject;
 
@@ -37,22 +36,25 @@ public class PurgeAmazonQueuedSubscriptions implements I_CmsScheduledJob {
 		String amzRegion = parameters.get("region").toString();
 		String queueURL = parameters.get("queueUrl").toString();
 		
-		AWSCredentials awsCreds = new BasicAWSCredentials(amzAccessID, amzAccessKey);
-		AmazonSNS snsClient = AmazonSNSClient.builder()
-				.withCredentials(new AWSStaticCredentialsProvider(awsCreds))
-				.withRegion(amzRegion)
+		AwsBasicCredentials awsCreds = AwsBasicCredentials.create(amzAccessID, amzAccessKey);
+
+		SnsClient snsClient = SnsClient.builder()
+				.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+				.region(Region.of(amzRegion))
 				.build();
 		
-		AmazonSQS sqsClient = AmazonSQSClient.builder()
-				.withCredentials(new AWSStaticCredentialsProvider(awsCreds))
-				.withRegion(amzRegion)
+		SqsClient sqsClient = SqsClient.builder()
+				.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+				.region(Region.of(amzRegion))
 				.build();
 		
 		int count = 0;
 		int skipped = 0;
 		int errors = 0;
-		ReceiveMessageRequest receiveMessageRequest = new ReceiveMessageRequest(queueURL);
-		receiveMessageRequest.setMaxNumberOfMessages(10);
+		ReceiveMessageRequest receiveMessageRequest = ReceiveMessageRequest.builder()
+				.queueUrl(queueURL)
+				.maxNumberOfMessages(10)
+				.build();
 		List<Message> messages = null;
 		DeleteEndpointRequest deleteReq = null;
 		do {
@@ -63,7 +65,7 @@ public class PurgeAmazonQueuedSubscriptions implements I_CmsScheduledJob {
 				endpointArn = "";
 				try {
 					count++;
-					String body = message.getBody();
+					String body = message.body();
 					JSONObject jsonRequest = JSONObject.fromObject(body);
 					String topicArn = amzPushTopicArn;
 					if (jsonRequest.containsKey("TopicArn")) {
@@ -82,16 +84,20 @@ public class PurgeAmazonQueuedSubscriptions implements I_CmsScheduledJob {
 					endpointArn = jsonRequest.getString("EndpointArn");
 				
 					// Get endpoint subscription
-					SubscribeRequest subscribeRequest = new SubscribeRequest();
-					subscribeRequest.setTopicArn(topicArn);
-					subscribeRequest.setEndpoint(endpointArn);
-					subscribeRequest.setProtocol("Application");
-					SubscribeResult subscribeResult = snsClient.subscribe(subscribeRequest);
+					SubscribeRequest subscribeRequest = SubscribeRequest.builder()
+						.topicArn(topicArn)
+						.endpoint(endpointArn)
+						.protocol("Application")
+						.build();
 					
-					if (subscribeResult != null && subscribeResult.getSubscriptionArn() != null) {
+					SubscribeResponse subscribeResult = snsClient.subscribe(subscribeRequest);
+					
+					if (subscribeResult != null && subscribeResult.subscriptionArn() != null) {
 						// If there is a subscription, remove it
-						UnsubscribeRequest unsubscribeReq = new UnsubscribeRequest();
-						unsubscribeReq.setSubscriptionArn(subscribeResult.getSubscriptionArn());
+						UnsubscribeRequest unsubscribeReq = UnsubscribeRequest.builder()
+								.subscriptionArn(subscribeResult.subscriptionArn())
+								.build();
+						
 						snsClient.unsubscribe(unsubscribeReq);
 					}
 				} catch (Exception e) {
@@ -101,8 +107,10 @@ public class PurgeAmazonQueuedSubscriptions implements I_CmsScheduledJob {
 					if (!endpointArn.equals("")) {
 						try {
 							// Delete endpoint
-							deleteReq = new DeleteEndpointRequest();
-							deleteReq.setEndpointArn(endpointArn);
+							deleteReq = DeleteEndpointRequest.builder()
+									.endpointArn(endpointArn)
+									.build();
+							
 							snsClient.deleteEndpoint(deleteReq);
 						} catch(Exception e) {
 							LOG.error("Error on fallback removing endpoint ARN" + endpointArn, e);
@@ -110,20 +118,24 @@ public class PurgeAmazonQueuedSubscriptions implements I_CmsScheduledJob {
 					}
 				}
 				
-				String messageReceiptHandle = message.getReceiptHandle();
-				sqsClient.deleteMessage(new DeleteMessageRequest().withQueueUrl(queueURL).withReceiptHandle(messageReceiptHandle));
+				String messageReceiptHandle = message.receiptHandle();
+				sqsClient.deleteMessage(
+						DeleteMessageRequest.builder()
+							.queueUrl(queueURL)
+							.receiptHandle(messageReceiptHandle)
+							.build());
 			}
 		} while (messages != null && messages.size() > 0);
 		
 		return "Processed " + count + " messages - " + skipped + " skipped - " + errors +  " errors, from invalid tokens queue";
 	}
 
-	private List<Message> getMessages(AmazonSQS sqsClient, ReceiveMessageRequest receiveMessageRequest) throws Exception {
+	private List<Message> getMessages(SqsClient sqsClient, ReceiveMessageRequest receiveMessageRequest) throws Exception {
 		List<Message> messages = null;
 		int attempts = 0;
 		do {
 			try {
-				messages = sqsClient.receiveMessage(receiveMessageRequest).getMessages();
+				messages = sqsClient.receiveMessage(receiveMessageRequest).messages();
 				return messages;
 			} catch(SdkClientException e) {
 				attempts++;

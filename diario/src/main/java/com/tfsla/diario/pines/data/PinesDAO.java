@@ -46,6 +46,41 @@ public class PinesDAO extends baseDAO {
 		return pines;
 	}
 	
+	public List<Pin> getPines(String user, int publication, int type) throws Exception {
+		List<Pin> pines = new ArrayList<Pin>();
+
+		try {
+			if (!connectionIsOpen())
+				OpenConnection();
+
+			PreparedStatement stmt;
+
+			stmt = conn.prepareStatement("Select ID_PIN, RESOURCE_PATH, USER_ID, PIN_PUBLICATION, PIN_ORDEN, RESOURCE_TYPE from TFS_PINES where "
+					+ " USER_ID=? and PIN_PUBLICATION=? and RESOURCE_TYPE=?");
+
+			stmt.setString(1, user);
+			stmt.setInt(2, publication);
+			stmt.setInt(3, type);
+			
+			ResultSet rs = stmt.executeQuery();
+			while (rs.next()) {
+				Pin pin = fillPin(rs);
+				pines.add(pin);
+			}
+
+			rs.close();
+			stmt.close();
+
+		} catch (Exception e) {
+			throw e;
+		} finally {
+			if (connectionIsOpenLocaly())
+				closeConnection();
+		}
+
+		return pines;
+	}
+	
 	public boolean existsPin(String user, int publication, String resource) throws Exception {
 
 		Boolean pinExit = false;

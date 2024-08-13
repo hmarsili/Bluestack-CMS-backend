@@ -31,18 +31,21 @@ import org.opencms.main.CmsLog;
 import org.opencms.main.OpenCms;
 import org.opencms.util.CmsFileUtil;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.S3Object;
 import com.tfsla.diario.ediciones.model.TipoEdicion;
 import com.tfsla.diario.ediciones.services.ImagenService;
 import com.tfsla.diario.ediciones.services.TipoEdicionService;
 import com.tfsla.diario.ediciones.services.VideosService;
 import com.tfsla.diario.videoConverter.VideoCapture;
 import com.tfsla.diario.videoConverter.jsp.TfsVideosAdmin;
+
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.core.ResponseBytes;
+import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 
 public class TfsVideoImage {
 	
@@ -214,12 +217,23 @@ public class TfsVideoImage {
 				CmsFile vfsFile = m_cms.readFile(vfsResource);
 				String sourceUrl = new String(vfsFile.getContents());
 				
-				AWSCredentials awsCreds = new BasicAWSCredentials(amzAccessID, amzAccessKey);
-		        AmazonS3 s3 = new AmazonS3Client(awsCreds);
+				AwsBasicCredentials awsCreds = AwsBasicCredentials.create(amzAccessID, amzAccessKey);
+
+				S3Client s3 = null;
+				
 				if(amzRegion != null && !amzRegion.equals("")) {
-					com.amazonaws.regions.Region region = com.amazonaws.regions.Region.getRegion(com.amazonaws.regions.Regions.valueOf(amzRegion));
-					s3.setRegion(region);
+					
+					s3 = S3Client.builder()
+						.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+						.region(Region.of(amzRegion))
+						.build();
+				}else {
+					
+					s3 = S3Client.builder()
+							.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+							.build();
 				}
+				
 				
 				// Paso el archivo del bucket de amz a un tmp del server
 				int ix = 0;
@@ -231,11 +245,19 @@ public class TfsVideoImage {
 				}
 				String fileName = sourceUrl.substring(ix);
 				CmsLog.getLog(this).info("Videos - AMZ Key: " + fileName);
-				S3Object s3Object = s3.getObject(new GetObjectRequest(amzBucket.replace("/", ""), fileName));
-				
+	
+				ResponseBytes<GetObjectResponse> response = s3.getObjectAsBytes(
+						GetObjectRequest.builder()
+							.bucket(amzBucket.replace("/", ""))
+							.key(fileName)
+							.build());
+						
+						
+				byte[] dataBytes = response.asByteArray();
+								
 				fileName = fileName.substring(fileName.lastIndexOf("/")+1);
 				CmsLog.getLog(this).info("Videos - Temp File Name: " + fileName);
-				String tmpFile = tfsVideosAdmin.tmpFileFFmepg(fileName, s3Object);
+				String tmpFile = tfsVideosAdmin.tmpFileFFmepg(fileName, dataBytes);
 				CmsLog.getLog(this).info("Videos - TMP file: " + tmpFile);
 				
 				if(tmpFile != null)

@@ -10,34 +10,33 @@ import org.opencms.file.CmsObject;
 import org.opencms.file.CmsResource;
 import org.opencms.main.CmsLog;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.cloudfront.AmazonCloudFrontClient;
-import com.amazonaws.services.cloudfront.AmazonCloudFrontClientBuilder;
-import com.amazonaws.services.cloudfront.model.AccessDeniedException;
-import com.amazonaws.services.cloudfront.model.BatchTooLargeException;
-import com.amazonaws.services.cloudfront.model.CreateInvalidationRequest;
-import com.amazonaws.services.cloudfront.model.CreateInvalidationResult;
-import com.amazonaws.services.cloudfront.model.GetDistributionRequest;
-import com.amazonaws.services.cloudfront.model.GetDistributionResult;
-import com.amazonaws.services.cloudfront.model.InconsistentQuantitiesException;
-import com.amazonaws.services.cloudfront.model.InvalidArgumentException;
-import com.amazonaws.services.cloudfront.model.InvalidationBatch;
-import com.amazonaws.services.cloudfront.model.InvalidationSummary;
-import com.amazonaws.services.cloudfront.model.ListInvalidationsRequest;
-import com.amazonaws.services.cloudfront.model.ListInvalidationsResult;
-import com.amazonaws.services.cloudfront.model.MissingBodyException;
-import com.amazonaws.services.cloudfront.model.NoSuchDistributionException;
-import com.amazonaws.services.cloudfront.model.Paths;
-import com.amazonaws.services.cloudfront.model.TooManyInvalidationsInProgressException;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.services.cloudfront.CloudFrontClient;
+import software.amazon.awssdk.services.cloudfront.model.AccessDeniedException;
+import software.amazon.awssdk.services.cloudfront.model.BatchTooLargeException;
+import software.amazon.awssdk.services.cloudfront.model.CreateInvalidationRequest;
+import software.amazon.awssdk.services.cloudfront.model.CreateInvalidationResponse;
+import software.amazon.awssdk.services.cloudfront.model.GetDistributionRequest;
+import software.amazon.awssdk.services.cloudfront.model.GetDistributionResponse;
+import software.amazon.awssdk.services.cloudfront.model.InconsistentQuantitiesException;
+import software.amazon.awssdk.services.cloudfront.model.InvalidArgumentException;
+import software.amazon.awssdk.services.cloudfront.model.InvalidationBatch;
+import software.amazon.awssdk.services.cloudfront.model.InvalidationSummary;
+import software.amazon.awssdk.services.cloudfront.model.ListInvalidationsRequest;
+import software.amazon.awssdk.services.cloudfront.model.ListInvalidationsResponse;
+import software.amazon.awssdk.services.cloudfront.model.MissingBodyException;
+import software.amazon.awssdk.services.cloudfront.model.NoSuchDistributionException;
+import software.amazon.awssdk.services.cloudfront.model.Paths;
+import software.amazon.awssdk.services.cloudfront.model.TooManyInvalidationsInProgressException;
+
 import com.tfsla.cdnIntegration.model.InteractionResponse;
 import com.tfsla.utils.UrlLinkHelper;
 
 public class CloudFront extends A_ContentDeliveryNetwork {
 	private static final Log LOG = CmsLog.getLog(CloudFront.class);
 		
-	private AWSCredentials awsCredential;
+	private AwsBasicCredentials awsCredential;
 	private String distribution;
 	private String amzAccessKey;
 	private String amzSecretKey;
@@ -58,7 +57,7 @@ public class CloudFront extends A_ContentDeliveryNetwork {
 		amzSecretKey = CmsMedios.getInstance().getCmsParaMediosConfiguration().getParam(siteName, publication, module, "amzSecretKey", "");
 		distribution = CmsMedios.getInstance().getCmsParaMediosConfiguration().getParam(siteName, publication, module, "distribution", "");
 		retries = CmsMedios.getInstance().getCmsParaMediosConfiguration().getIntegerParam(siteName, publication, module, "retries", 0);
-		awsCredential = new BasicAWSCredentials(amzAccessKey, amzSecretKey);
+		awsCredential = AwsBasicCredentials.create(amzAccessKey, amzSecretKey);
 		return this;
 	}
 
@@ -96,37 +95,46 @@ public class CloudFront extends A_ContentDeliveryNetwork {
 		}
 		
 		//Creo la informacion a pasar por el batch
-		Paths paths = new Paths();
-		paths.setItems(filesAux);
-		paths.setQuantity(files.size());
+		Paths paths = Paths.builder()
+				.items(filesAux)
+				.quantity(files.size())
+				.build();
 		
 		String callerReference =  String.valueOf(new Date().getTime()); //ver que poner
 		LOG.debug("CloudFront - Creando invalidation branch - callerReference" + callerReference);
 		
 		//Se arma el batch
-		InvalidationBatch invalidationBatch = new  InvalidationBatch(paths, callerReference);
+		InvalidationBatch invalidationBatch = InvalidationBatch.builder()
+				.paths(paths)
+				.callerReference(callerReference)
+				.build();
 		
 		LOG.debug("CloudFront - Creando invalidation Request");
 		//Se crea el request a la distribucion correspondiente
-		CreateInvalidationRequest request =  new CreateInvalidationRequest(distribution, invalidationBatch);
+		CreateInvalidationRequest request =  CreateInvalidationRequest.builder()
+				.distributionId(distribution)
+				.invalidationBatch(invalidationBatch)
+				.build();
 		
 		//Armo el pedido
 		LOG.debug("CloudFront - Creando client Request");
-		AmazonCloudFrontClient client = (AmazonCloudFrontClient) AmazonCloudFrontClientBuilder.standard().withCredentials(
-				new AWSStaticCredentialsProvider(awsCredential)).build();
+		CloudFrontClient client = CloudFrontClient.builder()
+				.credentialsProvider(StaticCredentialsProvider.create(awsCredential))
+				.build();
+		
 		try {
 			LOG.debug("CloudFront - Creando client Invalidation");
-			CreateInvalidationResult invalidationResult = client.createInvalidation(request);
-			LOG.debug("CloudFront - status code: " + invalidationResult.getSdkHttpMetadata().getHttpStatusCode() );
-			if (invalidationResult.getSdkHttpMetadata().getHttpStatusCode() == 201) {	
+			CreateInvalidationResponse invalidationResult = client.createInvalidation(request);
+			LOG.debug("CloudFront - status code: " + invalidationResult.sdkHttpResponse().statusCode() );
+			if (invalidationResult.sdkHttpResponse().statusCode() == 201) {	
 				result.setSuccess(true);
-				result.setResponseMsg(invalidationResult.getSdkHttpMetadata().getHttpStatusCode() + "-" + invalidationResult.getLocation());
+				result.setResponseMsg(invalidationResult.sdkHttpResponse().statusCode() + "-" + invalidationResult.location());
 			} else {
 				result.setSuccess(false);
-				result.setResponseMsg(invalidationResult.getSdkHttpMetadata().getHttpStatusCode() + "-" + invalidationResult.getLocation());
+				result.setResponseMsg(invalidationResult.sdkHttpResponse().statusCode()+ "-" + invalidationResult.location());
 		
 			}
-			LOG.debug("CloudFront -  status code - " + invalidationResult.getSdkHttpMetadata().getHttpStatusCode()); 
+			LOG.debug("CloudFront -  status code - " + invalidationResult.sdkHttpResponse().statusCode()); 
 		} catch (AccessDeniedException ex) { //- Access denied.
 			result.setResponseMsg("Error al realidar la ivalidacion" );
 			result.addError("acces Denied" + ex.getMessage());
@@ -176,13 +184,19 @@ public class CloudFront extends A_ContentDeliveryNetwork {
 		InteractionResponse result = new InteractionResponse();
 		
 		try {
-			AmazonCloudFrontClient client = new AmazonCloudFrontClient(awsCredential);
+			CloudFrontClient client = CloudFrontClient.builder()
+					.credentialsProvider(StaticCredentialsProvider.create(awsCredential))
+					.build();
 			
-			GetDistributionRequest getDistributionRequest = new GetDistributionRequest(distribution);
-			GetDistributionResult distributionResult = client.getDistribution( getDistributionRequest);
+			
+			GetDistributionRequest getDistributionRequest = GetDistributionRequest.builder()
+					.id(distribution)
+					.build();
+			
+			GetDistributionResponse distributionResult = client.getDistribution( getDistributionRequest);
 			
 			result.setSuccess(true);
-			result.setResponseMsg("Se obtuvieron los datos de la distribucion: " + distributionResult.getDistribution().getDomainName());
+			result.setResponseMsg("Se obtuvieron los datos de la distribucion: " + distributionResult.distribution().domainName());
 		} catch (AccessDeniedException ex) {
 			result.setSuccess(false);
 			result.addError(ex.getMessage());
@@ -202,19 +216,24 @@ public class CloudFront extends A_ContentDeliveryNetwork {
 			
 		LOG.debug("CloudFront - Creando get invalidation Request");
 		//Se crea el request a la distribucion correspondiente
-		ListInvalidationsRequest request =  new ListInvalidationsRequest(distribution);
+		ListInvalidationsRequest request =  ListInvalidationsRequest.builder()
+				.distributionId(distribution)
+				.build();
 		
 		//Armo el pedido
 		LOG.debug("CloudFront - Creando client Request");
-		AmazonCloudFrontClient client = new AmazonCloudFrontClient(awsCredential);
+		CloudFrontClient client = CloudFrontClient.builder()
+				.credentialsProvider(StaticCredentialsProvider.create(awsCredential))
+				.build();
+		
 		try {
 			LOG.debug("CloudFront - Creando client getInvalidation");
-			ListInvalidationsResult invalidationResult = client.listInvalidations(request);
-			LOG.debug("CloudFront - cantidad de invalidations: " + invalidationResult.getInvalidationList().getItems() );
+			ListInvalidationsResponse invalidationResult = client.listInvalidations(request);
+			LOG.debug("CloudFront - cantidad de invalidations: " + invalidationResult.invalidationList().items() );
 			result.setSuccess(true);
 			String resultado = "";
-			for (InvalidationSummary element : invalidationResult.getInvalidationList().getItems()) {
-				resultado += "invalidation: " + element.getId() + " status: " + element.getStatus() + "; "; 
+			for (InvalidationSummary element : invalidationResult.invalidationList().items()) {
+				resultado += "invalidation: " + element.id() + " status: " + element.status() + "; "; 
 			}
 			result.setResponseMsg(resultado);
 		} catch (Exception	ex) {
