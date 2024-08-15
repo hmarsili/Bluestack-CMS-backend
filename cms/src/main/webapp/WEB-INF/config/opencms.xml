@@ -9,7 +9,6 @@
                 <config class="org.opencms.configuration.CmsImportExportConfiguration"/>
                 <config class="org.opencms.configuration.CmsSearchConfiguration"/>
                 <config class="org.opencms.configuration.CmsModuleConfiguration"/>
-                <config class="org.opencms.configuration.CmsMediosInit"/>
                 <config class="org.opencms.configuration.CmsMedios"/>
 		<config class="org.opencms.configuration.CmsSchedulerConfiguration"/>
 

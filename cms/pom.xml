@@ -5,11 +5,11 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>blueStack</groupId>
-  <artifactId>cms</artifactId>
+  <artifactId>blueStack-cms</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>war</packaging>
 
-  <name>cms Maven Webapp</name>
+  <name>CMS BlueStack Webapp</name>
   <!-- FIXME change it to the project's website -->
   <url>http://www.example.com</url>
 	<repositories>
