@@ -98,7 +98,6 @@
 				<collector class="org.opencms.file.collectors.CmsDateResourceCollector" order="120" />
 				<collector class="org.opencms.file.collectors.CmsTimeFrameCategoryCollector" order="130" />
 				<collector class="org.opencms.file.collectors.CmsCategoryResourceCollector" order="140" />
-				<collector class="com.tfsla.opencms.dev.collector.ZoneCollector" order="190" />
 				<collector class="com.tfsla.diario.ediciones.collector.NoticiasHomeImpresaCollector" order="170" />
 				<collector class="com.tfsla.diario.ediciones.collector.NoticiasImpresasCollector" order="180" />
 				<collector class="com.tfsla.diario.ediciones.collector.NoticiasTitularesImpresaCollector" order="220"/>	
