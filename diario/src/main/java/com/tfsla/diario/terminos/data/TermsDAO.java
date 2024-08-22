@@ -354,9 +354,11 @@ public class TermsDAO extends baseDAO {
 		}
 		return terminos;
 	}
-
-	
 	public List<Terms> getTermsWithSynonymous(SearchOptions options) throws Exception {
+		return getTermsWithSynonymous(options,"");
+	}
+	
+	public List<Terms> getTermsWithSynonymous(SearchOptions options, String startWith) throws Exception {
 		Map<String, Terms> termsMap = new HashMap<String,Terms>();
 		
 		String collation = getCollation();
@@ -434,6 +436,15 @@ public class TermsDAO extends baseDAO {
 						"group by name, id_term, lastmodified, APPROVED,type, url, name_search ";
 			}
 			
+			if(startWith != null && !startWith.equals("")) {
+				if (!startWith.equals("NOT")) {
+					strQuery +=  " AND NAME_SEARCH Like '"+startWith+"%' collate "+collation+" ";
+				}else {
+					strQuery +=  " AND NAME_SEARCH NOT REGEXP '^[A-Za-z]' collate "+collation+" ";
+				}
+			}
+			
+			
 			//agrego valores para obtener todos los sinonimos
 			strQuery = "Select * from\r\n" + 
 					"\r\n" + 
@@ -452,6 +463,7 @@ public class TermsDAO extends baseDAO {
 			int elementValue=1;
 			cantFilters++;
 			boolean useSynonymous = false;
+				
 			if(options.getText() != null && !options.getText().equals("")) {
 				stmt.setString(elementValue++,"%"+ options.getText().toLowerCase() +"%");
 				stmt.setString(cantFilters++,"%"+ options.getText().toLowerCase() +"%");

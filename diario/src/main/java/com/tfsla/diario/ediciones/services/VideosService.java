@@ -12,6 +12,8 @@ import org.opencms.configuration.CPMConfig;
 import org.opencms.configuration.CmsMedios;
 import org.opencms.configuration.CmsSchedulerConfiguration;
 import org.opencms.db.CmsDbSqlException;
+import org.opencms.db.CmsResourceState;
+import org.opencms.file.CmsFile;
 import org.opencms.file.CmsObject;
 import org.opencms.file.CmsProject;
 import org.opencms.file.CmsProperty;
@@ -62,6 +64,7 @@ import com.tfsla.diario.videoConverter.VideoInfoExtractor;
 import com.tfsla.diario.videoConverter.VideoSize;
 import com.tfsla.opencms.dev.collector.DateFolder;
 import com.tfsla.utils.CmsResourceUtils;
+import com.tfsla.workflow.QueryBuilder;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -431,7 +434,7 @@ public class VideosService extends UploadService {
 		fileName = getValidFileName(fileName);
 
 		LOG.debug("Nombre corregido para el archivo del tipo video-processing: " + fileName);
-		String subFolderRFSPath = getRFSSubFolderPath(rfsSubFolderFormat, new HashMap<String,String>());
+		String subFolderRFSPath = getRFSSubFolderPath(rfsSubFolderFormat, new HashMap<>());
 		LOG.debug("subcarpeta: " + subFolderRFSPath);
 
 		String dir =  "/" + subFolderRFSPath;
@@ -461,27 +464,87 @@ public class VideosService extends UploadService {
 	@Override 
 	public String uploadAmzFileTM(String fullPath, Map<String,String> parameters, InputStream content) throws Exception {
 	
-		//Subo el video
-		String uploadStatus = super.uploadAmzFileTM(fullPath, parameters, content);
+		String amzUrlUploaded = null;
+		String uploadStatus = null;
 		
-		// Agregamos las properties automaticas
-		createSpecificProperties(fullPath);
+		amzUrlUploaded = super.uploadAmzFileTM(fullPath, parameters, content);
 		
-		// Al terminar cambio el tipo
-		CmsResource resource = cmsObject.readResource(fullPath);
-		resource.setType(TfsResourceTypeVideoLink.getStaticTypeId());
-		
+		if(amzUrlUploaded!=null && !amzUrlUploaded.equals("Error")) {
+			
+			byte[] amzUrl = amzUrlUploaded.getBytes();
+			
+			cmsObject.lockResource(fullPath);
+			
+			CmsResource resource = cmsObject.readResource(fullPath);
+			resource.setType(TfsResourceTypeVideoLink.getStaticTypeId());
+
+			CmsFile file = cmsObject.readFile(resource);
+            file.setContents(amzUrl);
+            cmsObject.writeFile(file);
+			
+            cmsObject.unlockResource(fullPath);
+            
+            try {
+            	createSpecificProperties(fullPath);
+            } catch (CmsException e) {
+    			LOG.error("Error al intentar obtener la info del video: " + fullPath,e);
+    		}
+         			
+		}else {
+			uploadStatus = amzUrlUploaded;
+		}
 		
 		return uploadStatus;
 	}
 	
-	public String uploadCancel(String path) throws Exception {
+	public static String getUploadStatus(String fullPath) {
 		
-		// Borra el video-processing
-		// Cancela la subida
+		String status = com.tfsla.diario.ediciones.services.UploadService.getUploadStatus(fullPath);
 		
-		return "";
+		return status;
+	}
+	
+	public String uploadCancel(String path) {
+		
+		String status = "ok";
+		try {
+			
+			cmsObject.lockResource(path);
+			
+			CmsResource resource = cmsObject.readResource(path);
+			int resourceType = resource.getTypeId();
+		
+			cmsObject.deleteResource(path, CmsResource.DELETE_PRESERVE_SIBLINGS);
+		
+			if(OpenCms.getResourceManager().getResourceType("video-processing").getTypeId()==resourceType){
+				com.tfsla.diario.ediciones.services.UploadService.uploadCancel(true);
+			}else{
+				 deleteVideoFromQueueByPath(path);
+				 com.tfsla.diario.ediciones.services.UploadService.setUploadStatus(path,"Canceled");
+			}
+			
+			CmsResourceState  estado = resource.getState();
+			String estadoStr = estado.toString();
+		
+			if( !estadoStr.equals("2") )
+				OpenCms.getPublishManager().publishResource(cmsObject,path);
+		
+		} catch (CmsException e) {
+			status = "Error."+e.getMessage();
+		} catch (Exception e) {
+			status = "Error."+e.getMessage();
+		}
+		
+		return status;
 	}	
+	
+	protected void deleteVideoFromQueueByPath(String source) {
+		QueryBuilder queryBuilder = new QueryBuilder(cmsObject);
+		queryBuilder.setSQLQuery("DELETE FROM TFS_ENCODER_QUEUE WHERE SOURCE=? ");
+		queryBuilder.addParameter(source);
+		
+		queryBuilder.execute();
+	}
 
 	protected void createSpecificProperties(String vfsResource) throws Exception {
 		
