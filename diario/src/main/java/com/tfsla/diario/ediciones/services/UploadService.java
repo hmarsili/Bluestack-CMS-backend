@@ -12,8 +12,10 @@ import java.net.URLConnection;
 import java.text.Normalizer;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -45,11 +47,19 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest.Builder;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 import software.amazon.awssdk.transfer.s3.S3TransferManager;
 import software.amazon.awssdk.transfer.s3.model.CompletedUpload;
 import software.amazon.awssdk.transfer.s3.model.Upload;
 import software.amazon.awssdk.transfer.s3.model.UploadRequest;
 import software.amazon.awssdk.transfer.s3.progress.LoggingTransferListener;
+import software.amazon.awssdk.transfer.s3.progress.TransferListener;
+import software.amazon.awssdk.transfer.s3.progress.TransferListener.Context.BytesTransferred;
+import software.amazon.awssdk.transfer.s3.progress.TransferListener.Context.TransferComplete;
+import software.amazon.awssdk.transfer.s3.progress.TransferListener.Context.TransferFailed;
+import software.amazon.awssdk.transfer.s3.progress.TransferListener.Context.TransferInitiated;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 
 import com.tfsla.diario.file.types.TfsResourceTypeVideoVodLink;
@@ -342,7 +352,184 @@ public abstract class UploadService {
 		}
 	}
 	
-	private static long transferredBytes = 0;
+	public class preUploadResponse {
+		String presignedUrl;
+		String vfsPath;
+		
+		public preUploadResponse(String presignedUrl, String vfsPath) {
+			this.presignedUrl = presignedUrl;
+			this.vfsPath = vfsPath;
+		}
+		
+		public String getPresignedUrl() {
+			return presignedUrl;
+		}
+
+		public void setPresignedUrl(String presignedUrl) {
+			this.presignedUrl = presignedUrl;
+		}
+
+		public String getVfsPath() {
+			return vfsPath;
+		}
+
+		public void setVfsPath(String vfsPath) {
+			this.vfsPath = vfsPath;
+		}
+
+	}
+	
+	public preUploadResponse preUploadAmzFile(CmsObject cmsObject, String path, String fileName, Map<String,String> parameters, List properties) throws Exception {
+		fileName = getValidFileName(fileName);
+
+		LOG.debug("Nombre corregido del archivo a subir al s3 de amazon: " + fileName);
+		String subFolderRFSPath = getRFSSubFolderPath(rfsSubFolderFormat, parameters);
+		LOG.debug("subcarpeta: " + subFolderRFSPath);
+
+		String dir = amzDirectory + "/" + subFolderRFSPath;
+		if(!dir.endsWith("/")) {
+			dir += "/";
+		}
+		
+
+		String fullPath = dir + fileName;
+		String urlRegion = amzRegion.toLowerCase().replace("_", "-");
+		String amzUrl = String.format("https://%s.s3.dualstack.%s.amazonaws.com/%s", amzBucket, urlRegion, fullPath);
+		LOG.debug("S3 url: " + amzUrl);
+		
+		
+		try {
+			String linkName = path + fileName;
+			LOG.debug("creando link a S3 en vfs: " + linkName + " en " + cmsObject.getRequestContext().getSiteRoot() + " (" + cmsObject.getRequestContext().currentProject().getName()  + "|" + cmsObject.getRequestContext().currentUser().getFullName() + " )");
+			int type = getPointerType();
+			if (this.videoType.equals("video-processing")) {
+				type = TfsResourceTypeVideoLinkProcessing.getStaticTypeId();
+			}
+			if (!this.videoType.equals("video-processing") && !this.videoType.equals("")) {
+				type = TfsResourceTypeVideoVodLink.getStaticTypeId();
+			}
+			
+			cmsObject.createResource(linkName, 
+					type,
+					amzUrl.getBytes(),
+					properties);
+
+			cmsObject.unlockResource(linkName);
+			
+			Map<String, String> metadata = new HashMap<String,String>();
+			metadata.put("vfsUrl", linkName);
+			
+			String presignedUrl = createPresignedUrl(amzBucket.replace("/", ""),fullPath,metadata);
+			return new preUploadResponse(presignedUrl,linkName);
+			
+			//return linkName;
+		} catch (CmsException e) {
+			LOG.error("Error al intentar subir a S3 el archivo " + fullPath,e);
+			throw e;
+		}
+	}
+	
+	/* Create a presigned URL to use in a subsequent PUT request */
+    protected String createPresignedUrl(String bucketName, String keyName, Map<String, String> metadata) {
+        
+    	AwsBasicCredentials awsCreds = AwsBasicCredentials.create(amzAccessID, amzAccessKey);
+
+    	try (S3Presigner presigner = S3Presigner.builder()
+    			.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+    			.build()
+    		) {
+
+            PutObjectRequest objectRequest = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(keyName)
+                    .metadata(metadata)
+                    .build();
+
+            PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
+                    .signatureDuration(Duration.ofMinutes(10))  // The URL expires in 10 minutes.
+                    .putObjectRequest(objectRequest)
+                    .build();
+
+
+            PresignedPutObjectRequest presignedRequest = presigner.presignPutObject(presignRequest);
+            String myURL = presignedRequest.url().toString();
+            LOG.info("Presigned URL to upload a file to: " + myURL);
+            LOG.info("HTTP method: " + presignedRequest.httpRequest().method());
+
+            return presignedRequest.url().toExternalForm();
+        }
+    }
+	
+	private static boolean shouldCancel = false;
+	private static HashMap<String, String> uploadStatus = new HashMap<String, String>();
+	
+	public static void setUploadStatus(String path,String status) {
+		
+		String oldStatus = uploadStatus.get(path);
+		String[] parts = oldStatus.split("\\|");
+		
+		String newStatus = parts[0]+"|"+status;
+		
+		uploadStatus.put(path, newStatus);
+	}
+	
+	public static String getUploadStatus(String fullPath) {
+		return uploadStatus.get(fullPath);
+	}
+	
+	public static void uploadCancel(boolean cancel) {
+		shouldCancel = cancel;
+	}
+	
+	
+	public static class customTransferListener implements TransferListener {
+
+		private String fullpath;
+		HashMap<String, String> uploadStatus;
+		
+		public customTransferListener(HashMap<String, String> uploadStatus, String fullpath) {
+			this.fullpath = fullpath; 
+			this.uploadStatus = uploadStatus;
+		}
+		
+		@Override
+		public void transferInitiated(TransferInitiated context) {
+			// TODO Auto-generated method stub
+			TransferListener.super.transferInitiated(context);
+		}
+
+		@Override
+		public void bytesTransferred(BytesTransferred context) {
+			double porcentaje = 0;
+			try {
+				porcentaje = context.progressSnapshot().ratioTransferred().getAsDouble()* 100;
+			}
+			catch (Exception e) {
+				// TODO: handle exception
+			}
+			uploadStatus.put(fullpath, porcentaje+"|Uploading");
+		
+			TransferListener.super.bytesTransferred(context);
+		}
+
+		@Override
+		public void transferComplete(TransferComplete context) {
+			// TODO Auto-generated method stub
+			uploadStatus.put(fullpath, "Done");
+			TransferListener.super.transferComplete(context);
+		}
+
+		@Override
+		public void transferFailed(TransferFailed context) {
+			uploadStatus.put(fullpath, "Failed");
+			TransferListener.super.transferFailed(context);
+		}
+
+		public static customTransferListener create(HashMap<String, String> uploadStatus, String fullpath) {
+			return new customTransferListener(uploadStatus, fullpath);
+		}
+		
+	}
 	
 	// Upload con Transfer Manager para manejar avance y cancelacion
 	public String uploadAmzFileTM(String fullPath, Map<String,String> parameters, InputStream content) throws IOException, Exception {
@@ -395,7 +582,7 @@ public abstract class UploadService {
 		//s3.putObject( putObjectRequestBuilder.build(), RequestBody.fromInputStream(content, contentLength));
 
 		
-		LoggingTransferListener listener = LoggingTransferListener.create();
+		customTransferListener listener = customTransferListener.create(uploadStatus, fullPath);
 		
 		UploadRequest uploaRequest = UploadRequest.builder()
 	            .putObjectRequest(putObjectRequestBuilder.build())
@@ -403,11 +590,13 @@ public abstract class UploadService {
 	            .addTransferListener(listener)
 	            .build();
 		
-		
+			
 		Upload fileUpload = transferManager.upload(uploaRequest);
 	
 		software.amazon.awssdk.transfer.s3.model.CompletedFileUpload a;
-		 CompletedUpload uploadResult = fileUpload.completionFuture().join();
+		CompletedUpload uploadResult = fileUpload.completionFuture().join();
+		
+		//fileUpload.completionFuture().cancel(true);
 		
 		return uploadResult.response().eTag();
 		

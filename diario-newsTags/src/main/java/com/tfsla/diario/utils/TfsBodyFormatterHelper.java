@@ -2423,6 +2423,9 @@ public class TfsBodyFormatterHelper {
 				
 				if (!element.attr("title").equals(""))
 					newImage.attr("title", element.attr("title"));
+				
+				if (!element.attr("loading").equals(""))
+					newImage.attr("loading",element.attr("loading"));
 
 				if (!path.equals(""))
 					newImage.attr("src", path);
