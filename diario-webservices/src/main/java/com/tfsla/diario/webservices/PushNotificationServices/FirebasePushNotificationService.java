@@ -5,6 +5,14 @@ import org.opencms.configuration.CPMConfig;
 import org.opencms.configuration.CmsMedios;
 import org.opencms.main.CmsLog;
 
+import com.google.firebase.messaging.AndroidConfig;
+import com.google.firebase.messaging.AndroidConfig.Priority;
+import com.google.firebase.messaging.AndroidNotification;
+import com.google.firebase.messaging.Message;
+import com.google.firebase.messaging.Notification;
+import com.google.firebase.messaging.WebpushConfig;
+import com.google.firebase.messaging.WebpushNotification;
+
 import net.sf.json.JSONObject;
 
 /**
@@ -25,61 +33,80 @@ public class FirebasePushNotificationService {
 	}
 
 	public void pushMessage(JSONObject jsonObject) throws Exception {
-		JSONObject message = getPayloadMessage(jsonObject);
+		Message message = getPayloadMessage(jsonObject);
 		FirebaseConnector connector = new FirebaseConnector(site, publication);
 		connector.setTopic(topic);
 		connector.pushMessage(message);
 	}
 	
-	protected JSONObject getPayloadMessage(JSONObject toPush) {
-		JSONObject ret = new JSONObject();
-		JSONObject message = new JSONObject();
-		JSONObject data = new JSONObject();
-		if (hasProperty(toPush, "urlredirect")) {
-			data.put("click_action", toPush.getString("urlredirect"));
-		} else if (hasProperty(toPush, "urlfriendly")) {
-			data.put("click_action", toPush.getString("urlfriendly"));
-		} else if (hasProperty(toPush, "canonical")) {
-			data.put("click_action", toPush.getString("canonical"));
-		} else {
-			String url = toPush.getString("url").replace(this.site, "");
-			data.put("click_action", url);
-		}
-		if (hasProperty(toPush, "icon")) {
-			data.put("icon", toPush.getString("icon"));
-		}
-		if (hasProperty(toPush, "image")) {
-			data.put("image", toPush.getString("image"));
+	protected Message getPayloadMessage(JSONObject toPush) {
+		
+		Message.Builder messageBuilder = Message.builder();
+		Notification.Builder notificationBuilder = Notification.builder();
+		
+		AndroidConfig.Builder androidConfigBuilder = AndroidConfig.builder();
+		WebpushConfig.Builder webpushConfigBuilder = WebpushConfig.builder();
+		
+		
+		AndroidNotification.Builder androidNotificationBuilder = AndroidNotification.builder();
+		WebpushNotification.Builder webpushNotificationBuilder = WebpushNotification.builder();
+		
+		messageBuilder.setTopic(topic);
+		
+		/*
+		Message message = Message.builder()
+			    .putData("score", "850")
+			    .putData("time", "2:45")
+			    .setToken(registrationToken)
+			    .build();
+		*/
+
+		
+		
+		notificationBuilder.setTitle(toPush.getString("title"));
+		if (hasProperty(toPush, "subtitle")) {
+			notificationBuilder.setBody(toPush.getString("subtitle"));
 		}
 
-		message.put("data", data);
 		
-		JSONObject notification = new JSONObject();
-		notification.put("title", toPush.getString("title"));
-		if (hasProperty(toPush, "subtitle")) {
-			notification.put("body", toPush.getString("subtitle"));
+		
+		androidConfigBuilder.setPriority(Priority.HIGH);
+		androidConfigBuilder.setTtl(Long.parseLong(ttl));
+		
+		
+		if (hasProperty(toPush, "icon")) {
+			androidNotificationBuilder.setIcon(toPush.getString("icon"));
+			messageBuilder.putData("icon",toPush.getString("icon"));
+		}
+		String url = "";
+		if (hasProperty(toPush, "urlredirect")) {
+			url = toPush.getString("urlredirect");
+		} else if (hasProperty(toPush, "urlfriendly")) {
+			url = toPush.getString("urlfriendly");
+		} else if (hasProperty(toPush, "canonical")) {
+			url = toPush.getString("canonical");
+		} else {
+			url = toPush.getString("url").replace(this.site, "");
+			
+		}
+		androidNotificationBuilder.setClickAction(url);
+		messageBuilder.putData("click_action",url);
+		
+		if (hasProperty(toPush, "image")) {
+			notificationBuilder.setImage(toPush.getString("image"));
+			androidNotificationBuilder.setImage(toPush.getString("image"));
+			webpushNotificationBuilder.setImage(toPush.getString("image"));
+			messageBuilder.putData("image",toPush.getString("image"));
 		}
 		
-		message.put("notification", notification);
+		webpushConfigBuilder.setNotification(webpushNotificationBuilder.build());
+		androidConfigBuilder.setNotification(androidNotificationBuilder.build());
 		
-		JSONObject android = new JSONObject();
-		android.put("ttl", ttl + "s");
-		message.put("android", android);
+		messageBuilder.setAndroidConfig(androidConfigBuilder.build());
+		messageBuilder.setWebpushConfig(webpushConfigBuilder.build());
+		messageBuilder.setNotification(notificationBuilder.build());
 		
-		JSONObject webpush = new JSONObject();
-		JSONObject headers = new JSONObject();
-		headers.put("Urgency", "high");
-		headers.put("TTL", ttl);
-		webpush.put("headers", headers);
-		
-		message.put("webpush", webpush);
-		message.put("topic", this.topic);
-		
-		ret.put("message", message);
-		ret.put("validate_only", false);
-		
-		
-		return ret;
+		return messageBuilder.build();
 	}
 	
 	protected Boolean hasProperty(JSONObject jsonObject, String key) {
