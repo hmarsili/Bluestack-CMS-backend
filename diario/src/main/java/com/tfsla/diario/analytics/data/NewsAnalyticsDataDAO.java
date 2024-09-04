@@ -162,7 +162,7 @@ public class NewsAnalyticsDataDAO extends baseDAO {
 
 			PreparedStatement stmt;
 
-			stmt = conn.prepareStatement("delete from TFS_NEWS_ANALYTICS where SITENAME=? and PUBLICATION=? and PAGE <= ?");
+			stmt = conn.prepareStatement("delete from TFS_NEWS_ANALYTICS where SITENAME=? and PUBLICATION=? and PAGE = ?");
 			stmt.setString(1, siteName);
 			stmt.setInt(1, publication);
 			stmt.setString(1, resourcePath);

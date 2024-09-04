@@ -494,7 +494,7 @@ public abstract class UploadService {
 		
 		@Override
 		public void transferInitiated(TransferInitiated context) {
-			// TODO Auto-generated method stub
+			uploadStatus.put(fullpath, "|Init");
 			TransferListener.super.transferInitiated(context);
 		}
 
@@ -533,18 +533,7 @@ public abstract class UploadService {
 	
 	// Upload con Transfer Manager para manejar avance y cancelacion
 	public String uploadAmzFileTM(String fullPath, Map<String,String> parameters, InputStream content) throws IOException, Exception {
-		/*fileName = getValidFileName(fileName);
-
-		LOG.debug("Nombre corregido del archivo a subir al s3 de amazon: " + fileName);
-		String subFolderRFSPath = getRFSSubFolderPath(rfsSubFolderFormat, parameters);
-		LOG.debug("subcarpeta: " + subFolderRFSPath);
-
-		String dir = amzDirectory + "/" + subFolderRFSPath;
-		if(!dir.endsWith("/")) {
-			dir += "/";
-		}
-		String fullPath = dir + fileName;
-		*/
+		
 		String urlRegion = amzRegion.toLowerCase().replace("_", "-");
 		String amzUrl = String.format("https://%s.s3.dualstack.%s.amazonaws.com/%s", amzBucket, urlRegion, fullPath);
 		LOG.debug("S3 url: " + amzUrl);
@@ -594,6 +583,11 @@ public abstract class UploadService {
 		Upload fileUpload = transferManager.upload(uploaRequest);
 	
 		software.amazon.awssdk.transfer.s3.model.CompletedFileUpload a;
+		
+		if(shouldCancel){
+			fileUpload.completionFuture().cancel(true);
+		}
+		
 		CompletedUpload uploadResult = fileUpload.completionFuture().join();
 		
 		//fileUpload.completionFuture().cancel(true);
