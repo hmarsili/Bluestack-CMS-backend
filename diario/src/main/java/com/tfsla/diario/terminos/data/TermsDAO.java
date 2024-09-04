@@ -725,6 +725,23 @@ public class TermsDAO extends baseDAO {
 		} catch (SQLException e) {
 			termino.setLastmodified(null);
 		}
+		termino.setCustom1(rs.getString("CUSTOM1"));
+		termino.setCustom2(rs.getString("CUSTOM2"));
+		termino.setCustom3(rs.getString("CUSTOM3"));
+		termino.setCustom4(rs.getString("CUSTOM4"));
+		termino.setCustom5(rs.getString("CUSTOM5"));
+		termino.setCustom6(rs.getString("CUSTOM6"));
+		termino.setCustom7(rs.getString("CUSTOM7"));
+		termino.setCustom8(rs.getString("CUSTOM8"));
+		termino.setCustom9(rs.getString("CUSTOM9"));
+		termino.setCustom10(rs.getString("CUSTOM10"));
+		termino.setFacebook(rs.getString("FACEBOOK"));
+		termino.setTwt(rs.getString("TWT"));
+		termino.setGoogle(rs.getString("GOOGLE"));
+		termino.setLinkedin(rs.getString("LINKEDIN"));
+		termino.setInstagram(rs.getString("INSTAGRAM"));
+		termino.setCuerpo(rs.getString("CUERPO"));
+
 		return termino;
 	}
 
@@ -875,7 +892,9 @@ public class TermsDAO extends baseDAO {
 
 			PreparedStatement stmt = conn.prepareStatement("update tfs_terms set DESCRIPTION=?, "
 					+ " TYPE=?, LASTMODIFIED=?, APPROVED=?, NAME=?, IMAGE=?, URL=?, NAME_SEARCH=?, "
-					+ "TEMPLATE=? "
+					+ "TEMPLATE=?, "
+					+ "CUSTOM1=?, CUSTOM2=?, CUSTOM3=?, CUSTOM4=?, CUSTOM5=?, CUSTOM6=?, CUSTOM7=?, CUSTOM8=?, CUSTOM9=?, CUSTOM10=?, "
+					+ "FACEBOOK=? ,TWT=?, GOOGLE=?, INSTAGRAM=?, LINKEDIN=? , CUERPO=? "
 					+ "where ID_TERM=? AND TYPE=?");
 			stmt.setString(1,termino.getDescription());
 			stmt.setLong(2,termino.getType());
@@ -887,8 +906,24 @@ public class TermsDAO extends baseDAO {
 			stmt.setString(7,termino.getUrl());
 			stmt.setString(8,termino.getName().toLowerCase());
 			stmt.setString(9, termino.getTemplate());
-			stmt.setLong(10, termino.getId_term());
-			stmt.setLong(11, termino.getPrevType());
+			stmt.setString(10,termino.getCustom1());
+			stmt.setString(11,termino.getCustom2());
+			stmt.setString(12,termino.getCustom3());
+			stmt.setString(13,termino.getCustom4());
+			stmt.setString(14,termino.getCustom5());
+			stmt.setString(15,termino.getCustom6());
+			stmt.setString(16,termino.getCustom7());
+			stmt.setString(17,termino.getCustom8());
+			stmt.setString(18,termino.getCustom9());
+			stmt.setString(19,termino.getCustom10());
+			stmt.setString(20,termino.getFacebook());
+			stmt.setString(21,termino.getTwt());
+			stmt.setString(22,termino.getGoogle());
+			stmt.setString(23,termino.getInstagram());
+			stmt.setString(24,termino.getLinkedin());
+			stmt.setString(25,termino.getCuerpo());
+			stmt.setLong(26, termino.getId_term());
+			stmt.setLong(27, termino.getPrevType());
 			stmt.executeUpdate();
 			stmt.close();
 			
@@ -949,7 +984,9 @@ public class TermsDAO extends baseDAO {
 				OpenConnection();
 			}
 
-			PreparedStatement stmt = conn.prepareStatement("insert into tfs_terms (LASTMODIFIED, DESCRIPTION, APPROVED, TYPE, NAME, NAME_SEARCH, IMAGE, URL, TEMPLATE) values (?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+			PreparedStatement stmt = conn.prepareStatement("insert into tfs_terms (LASTMODIFIED, DESCRIPTION, APPROVED, TYPE, NAME, NAME_SEARCH, IMAGE, URL, TEMPLATE, "
+					+ "CUSTOM1, CUSTOM2, CUSTOM3, CUSTOM4, CUSTOM5, CUSTOM6, CUSTOM7, CUSTOM8, CUSTOM9, CUSTOM10, "
+					+ "FACEBOOK, TWT, GOOGLE, LINKEDIN, INSTAGRAM, CUERPO) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 			try {
 				java.util.Date parsedDate = dateFormat.parse(termino.getLastmodified());
@@ -967,6 +1004,22 @@ public class TermsDAO extends baseDAO {
 			stmt.setString(7,termino.getImage());
 			stmt.setString(8,termino.getUrl());
 			stmt.setString(9,termino.getTemplate());
+			stmt.setString(10,termino.getCustom1());
+			stmt.setString(11,termino.getCustom2());
+			stmt.setString(12,termino.getCustom3());
+			stmt.setString(13,termino.getCustom4());
+			stmt.setString(14,termino.getCustom5());
+			stmt.setString(15,termino.getCustom6());
+			stmt.setString(16,termino.getCustom7());
+			stmt.setString(17,termino.getCustom8());
+			stmt.setString(18,termino.getCustom9());
+			stmt.setString(19,termino.getCustom10());
+			stmt.setString(20,termino.getFacebook());
+			stmt.setString(21,termino.getTwt());
+			stmt.setString(22,termino.getInstagram());
+			stmt.setString(23,termino.getGoogle());
+			stmt.setString(24,termino.getLinkedin());
+			stmt.setString(25,termino.getCuerpo());
 			stmt.executeUpdate();
 			
 			ResultSet rs = stmt.getGeneratedKeys();
