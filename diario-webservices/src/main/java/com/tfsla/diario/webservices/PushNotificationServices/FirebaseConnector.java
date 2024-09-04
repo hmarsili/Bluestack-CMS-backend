@@ -1,27 +1,31 @@
 package com.tfsla.diario.webservices.PushNotificationServices;
 
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.StringWriter;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.opencms.configuration.CPMConfig;
 import org.opencms.configuration.CmsMedios;
 import org.opencms.main.CmsLog;
-
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
+import com.google.firebase.IncomingHttpResponse;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.FirebaseMessagingException;
+import com.google.firebase.messaging.Message;
+import com.google.firebase.messaging.TopicManagementResponse;
 import com.tfsla.diario.webservices.common.strings.StringConstants;
 import com.tfsla.diario.webservices.data.PushClientDAO;
 
-import net.sf.json.JSONObject;
 
 public class FirebaseConnector {
 	
@@ -38,29 +42,31 @@ public class FirebaseConnector {
 		this.LOG = CmsLog.getLog(this);
 	}
 	
-	public void pushMessage(JSONObject message) throws Exception {
-		String url = "https://fcm.googleapis.com/v1/projects/"+this.firebaseProjectName+"/messages:send";
-		LOG.debug("Firebase push URL: "+url);
-		HttpURLConnection con = this.getConnection(url);
+	public void pushMessage(Message message) throws Exception {
+		
+		
+		FirebaseApp app = getFirebaseApp();
+		String msgId;
+		
+		try {
+			msgId = FirebaseMessaging.getInstance(app).send(message);
+			LOG.info("Push message sent, msgId: " + msgId);
+		} catch (FirebaseMessagingException ex){
+			  IncomingHttpResponse response = ex.getHttpResponse();
+			  if (response != null) {
+				  
+				  LOG.error("FCM service responded with HTTP " + response.getStatusCode());
 
-		String msg = new String(message.toString().getBytes(), "ISO-8859-1");
-		LOG.info("Push message to be sent: " + msg);
-		
-		con.setDoOutput(true);
-		DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-		wr.writeBytes(msg);
-		wr.flush();
-		wr.close();
-		
-		if (con.getResponseCode() != 200) {
-			StringWriter writer = new StringWriter();
-			IOUtils.copy(con.getErrorStream(), writer, "UTF-8");
-			String errorResponse = writer.toString();
-			throw new Exception("Error while trying to send a push message, code: " + con.getResponseCode() + " - message: " + errorResponse);
+			    Map<String, Object> headers = response.getHeaders();
+			    for (Map.Entry<String, Object> entry : headers.entrySet()) {
+			    	LOG.error(">>> " + entry.getKey() + ": " + entry.getValue());
+			    }
+
+			    LOG.error(">>>");
+			    LOG.error(">>> " + response.getContent());
+			  }
 		}
 		
-		String result = this.getHttpResponse(con);
-		LOG.info("Push message sent, response: " + result);
 	}
 	
 	
@@ -87,27 +93,72 @@ public class FirebaseConnector {
 		return topics;
 	}
 	
+	
+	protected FirebaseApp getFirebaseApp() throws FileNotFoundException, IOException {
+		FirebaseApp app=null;
+		
+		try {
+			app = FirebaseApp.getInstance(this.firebaseKeysPath);
+		}
+		catch ( java.lang.IllegalStateException ex) {
+			List<String> scopes = new ArrayList<String>();
+			scopes.add("https://www.googleapis.com/auth/firebase.messaging");
+			
+			GoogleCredentials googleCredentials = GoogleCredentials
+				      .fromStream(new FileInputStream(this.firebaseKeysPath))
+				      .createScoped(scopes);
+			
+			FirebaseOptions options = FirebaseOptions.builder()
+				    .setCredentials(googleCredentials)
+				    .build();
+				
+			app = FirebaseApp.initializeApp(options,this.firebaseKeysPath);
+		}
+		
+		return app;
+	}
+	
 	public void addPushSubscriber(String token, String platform, String topic, Boolean saveInDB) throws Exception {
 		if (token == null || token.equals("")) {
 			return;
 		}
+		
+		
+		FirebaseApp app = getFirebaseApp();
+			
+		
+	    // These registration tokens come from the client FCM SDKs.
+		List<String> registrationTokens = Arrays.asList(
+	    		token
+	    );
+			/*
+		// [START subscribe]
+	    // Subscribe the devices corresponding to the registration tokens to the
+	    // topic.
+		*/
+		TopicManagementResponse response = FirebaseMessaging.getInstance(app).subscribeToTopicAsync(
+	        registrationTokens, topic).get();
+	    // See the TopicManagementResponse reference documentation
+	    // for the contents of response.
+	    
+	    // [END subscribe]
+	
+		if (response==null || response.getSuccessCount() == 0) {
+			LOG.debug("Token: " + String.join(",", registrationTokens));
+			LOG.debug("topic: " + topic);
+			for (com.google.firebase.messaging.TopicManagementResponse.Error err : response.getErrors()) {
+				LOG.error("Error while trying add push a subscriber : " + err.getReason());
+			}
+			throw new Exception("Error while trying add push a subscriber - message: " + response.getErrors().get(0).getReason());
+		}
+		
+		LOG.debug(response.getSuccessCount() + " tokens were subscribed successfully");
+	    
+		
 		String[] replacements = {"https://android.googleapis.com/gcm/send/", "https://fcm.googleapis.com/fcm/send/"};
 		String t = token;
 		for (String r : replacements) {
 			t = t.replace(r, "");
-		}
-		String url = String.format("https://iid.googleapis.com/iid/v1/%s/rel/topics/%s", t, topic);
-		HttpURLConnection con = this.getConnection(url, true);
-		con.setDoOutput(true);
-		DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-		wr.flush();
-		wr.close();
-		
-		if (con.getResponseCode() != 200) {
-			StringWriter writer = new StringWriter();
-			IOUtils.copy(con.getErrorStream(), writer, "UTF-8");
-			String errorResponse = writer.toString();
-			throw new Exception("Error while trying add push a subscriber, code: " + con.getResponseCode() + " - message: " + errorResponse);
 		}
 		
 		if (saveInDB) {
@@ -133,37 +184,31 @@ public class FirebaseConnector {
 	public void removeTopicPushSubscriber(String token, String topic)  throws Exception {
 		
 
-		String url = "https://iid.googleapis.com/iid/v1:batchRemove";
-		HttpURLConnection con = this.getConnection(url, true);
+		FirebaseApp app = getFirebaseApp();
 		
-		String postData = "{\n"
-				+ "\"to\": \"/topics/" + topic + "\",\n"  
-				+ "\"registration_tokens\": [\"" + token + "\"],\n" + 
-				"}";
-		byte[] postDataBytes = postData.toString().getBytes("UTF-8");
-		con.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
+		// These registration tokens come from the client FCM SDKs.
+	    List<String> registrationTokens = Arrays.asList(
+	    		token
+	    );
+
+	    // Unsubscribe the devices corresponding to the registration tokens from
+	    // the topic.
+	    TopicManagementResponse response = FirebaseMessaging.getInstance(app).unsubscribeFromTopicAsync(
+	        registrationTokens, topic).get();
+	    
+	    
+	    
+	    // See the TopicManagementResponse reference documentation
+	    // for the contents of response.
+	    System.out.println(response.getSuccessCount() + " tokens were unsubscribed successfully");
+	    // [END unsubscribe]
+	    
 		
-		con.setDoOutput(true);
-		DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-		
-		
-		
-		con.getOutputStream().write(postDataBytes);
-		
-		wr.flush();
-		wr.close();
-		
-		if (con.getResponseCode() != 200) {
-			StringWriter writer = new StringWriter();
-			IOUtils.copy(con.getErrorStream(), writer, "UTF-8");
-			String errorResponse = writer.toString();
-			throw new Exception("Error while trying add remove a subscriber from topic " + topic + ", code: " + con.getResponseCode() + " - message: " + errorResponse
-					+ "   || Json: " + postData
-					);
+		if (response.getSuccessCount() == 0) {
+			throw new Exception("Error while trying add remove a subscriber from topic " + topic + " - message: " + response.getErrors().get(0).getReason());
 		}
 		
-		String result = this.getHttpResponse(con);
-		LOG.info("unsubscribe from notification " + topic + " sent, response: " + result);
+		LOG.info("unsubscribe from notification " + topic + " sent");
 		
 		PushClientDAO dao = new PushClientDAO();
 		try {
@@ -178,66 +223,54 @@ public class FirebaseConnector {
 		}
 	}
 	
-	public void removePushSubscriber(String token) throws Exception {
-		String url = String.format("https://iid.googleapis.com/v1/web/iid/%s", token);
-		HttpURLConnection con = this.getConnection(url, "DELETE", true);
-		
-		con.setDoOutput(true);
-		
-		DataOutputStream wr = new DataOutputStream(con.getOutputStream());
 	
-		wr.flush();
-		wr.close();
+	
+	public void removePushSubscriber(String token) throws Exception {
+
 		
-		PushClientDAO dao = new PushClientDAO();
-		try {
-			dao.openConnection();
-			dao.unregisterClient(token, StringConstants.PLATFORM_WEB);
-			LOG.debug("Push subscriber removed with token " + token);
-		} catch (Exception e) {
-			LOG.error("Error adding push subscriber", e);
-			e.printStackTrace();
-		} finally {
-			dao.closeConnection();
-		}
+		List<String> topics = getTopicsOfClient(token, StringConstants.PLATFORM_WEB);
+		
+		if (topics!=null && topics.size()>0) {
+			
+			FirebaseApp app = getFirebaseApp();
+			
+			// These registration tokens come from the client FCM SDKs.
+			List<String> registrationTokens = Arrays.asList(
+		    		token
+		    );
+			
+			for (String topic : topics) {
+			    
+			    // Unsubscribe the devices corresponding to the registration tokens from
+			    // the topic.
+			    TopicManagementResponse response = FirebaseMessaging.getInstance(app).unsubscribeFromTopicAsync(
+			        registrationTokens, topic).get();
+			    
+			    
+			    // See the TopicManagementResponse reference documentation
+			    // for the contents of response.
+			    System.out.println(response.getSuccessCount() + " tokens were unsubscribed successfully to topic " + topic);
+			    // [END unsubscribe]
+			    
+			}
+			
+			PushClientDAO dao = new PushClientDAO();
+			try {
+				dao.openConnection();
+				
+				dao.unregisterClient(token, StringConstants.PLATFORM_WEB);
+				LOG.debug("Push subscriber removed with token " + token);
+			} catch (Exception e) {
+				LOG.error("Error adding push subscriber", e);
+				e.printStackTrace();
+			} finally {
+				dao.closeConnection();
+			}
+		}	
 	}
 	
 	public String getTopic() {
 		return this.topic;
-	}
-	
-	protected HttpURLConnection getConnection(String url, Boolean useServerApi) throws IOException {
-		return this.getConnection(url, "POST", useServerApi);
-	}
-	
-	protected HttpURLConnection getConnection(String url) throws IOException {
-		return this.getConnection(url, "POST", false);
-	}
-	
-	protected HttpURLConnection getConnection(String url, String method, Boolean useServerApi) throws IOException {
-		URL urlObject = new URL(url);
-		HttpURLConnection con = (HttpURLConnection)urlObject.openConnection();
-		con.setRequestMethod("POST");
-		if (useServerApi) {
-			con.setRequestProperty("Authorization", "key="+this.firebaseApiKey);
-		} else {
-			String token = this.getAccessToken();
-			LOG.debug("Firebase token: "+token);
-			con.setRequestProperty("Authorization", "Bearer "+token);
-		}
-		con.setRequestProperty("Content-Type", "application/json");
-		return con;
-	}
-	
-	public String getAccessToken() throws IOException {
-		List<String> scopes = new ArrayList<String>();
-		scopes.add("https://www.googleapis.com/auth/firebase.messaging");
-		
-		GoogleCredential googleCredential = GoogleCredential
-	      .fromStream(new FileInputStream(this.firebaseKeysPath))
-	      .createScoped(scopes);
-		googleCredential.refreshToken();
-		return googleCredential.getAccessToken();
 	}
 	
 	protected String getHttpResponse(HttpURLConnection con) throws IOException {
