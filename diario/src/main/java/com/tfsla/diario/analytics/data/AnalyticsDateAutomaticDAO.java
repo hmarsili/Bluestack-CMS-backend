@@ -4,12 +4,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.tfsla.data.baseDAO;
 import com.tfsla.diario.analytics.model.AnalyticsDateAutomatic;
-import com.tfsla.diario.analytics.model.NewsAnalyticsData;
 
 public class AnalyticsDateAutomaticDAO extends baseDAO {
 
@@ -22,9 +19,9 @@ public class AnalyticsDateAutomaticDAO extends baseDAO {
 			PreparedStatement stmt;
 
 			stmt = conn.prepareStatement("update TFS_NEWS_ANALYTICS_UPDATEDDATE set AUTOMATIC_UPDATED_DATE=? where SITENAME=? and PUBLICATION=?)",Statement.RETURN_GENERATED_KEYS);
-			stmt.setString(1, dataUpdated.getSitename());
-			stmt.setInt(2, dataUpdated.getPublication());
-			stmt.setLong(3, dataUpdated.getDateUpdated());
+			stmt.setLong(1, dataUpdated.getDateUpdated());
+			stmt.setString(2, dataUpdated.getSitename());
+			stmt.setInt(3, dataUpdated.getPublication());
 			stmt.executeUpdate();
 
 			stmt.close();

@@ -48,7 +48,6 @@ public class AnalyticsServices {
 
 	public AnalyticsServices( String _siteName, String _publication ) throws Exception {
 		
-		LOG.debug("Se inicializa la clase AnalyticsServices ");
 		configura = CmsMedios.getInstance().getCmsParaMediosConfiguration(); 
 		
 		siteName = _siteName;
@@ -62,28 +61,7 @@ public class AnalyticsServices {
 		siteUrl = configura.getParam(siteName, publication, moduleConfiguration, "siteUrl", "");
 		
 		gservice = new SearchConsoleService();
-		LOG.debug("Se va a iniciar  SearchConsoleService con " + siteName +" - " +publication);
-		
 		gservice.initializeContext(siteName,publication);
-
-
-	}
-	
-	public AnalyticsServices( String _siteName, String _publication, SearchConsoleService _gservice) throws Exception {
-
-		configura = CmsMedios.getInstance().getCmsParaMediosConfiguration(); 
-		
-		siteName = _siteName;
-		publication = _publication;
-
-		moduleConfiguration = "analyticsView";
-
-		updatedDateManual = configura.getBooleanParam(siteName, publication, moduleConfiguration, "updatedDateManual",false);
-		updatedDateManualTime = configura.getIntegerParam(siteName, publication, moduleConfiguration, "updatedDateManualTime",30);
-		newsFromLastHoursPublish = configura.getIntegerParam(siteName, publication, moduleConfiguration, "newsFromLastHoursPublish", 72);
-		siteUrl = configura.getParam(siteName, publication, moduleConfiguration, "siteUrl", "");
-		
-		gservice = _gservice;
 
 	}
 	
@@ -124,14 +102,11 @@ public class AnalyticsServices {
 	}
 	
 	/**
-	 * Metodo que actualiza la noticia en la ta~-bla del CMS. 
+	 * Metodo que actualiza la noticia en la tabla del CMS. 
 	 * @return
 	 */
 
 	public void updateAnalyticsData(NewsAnalyticsData newsAnalyticsData) throws Exception {
-		
-		LOG.debug(" -------- INI updateAnalyticsData -------- " );
-		LOG.debug(" newsAnalyticsData " + newsAnalyticsData );
 		
 		NewsAnalyticsDataDAO analyticsDAO = new NewsAnalyticsDataDAO();
 		try {
@@ -139,9 +114,6 @@ public class AnalyticsServices {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		LOG.debug(" -------- FIN updateAnalyticsData -------- " );
-		
 	}
 	
 	/**
@@ -168,7 +140,10 @@ public class AnalyticsServices {
 	 */
 	public boolean checkDataAnalytics() throws Exception {
 
-		String datajson = "{\"startDate\":\""+formatDateGoogle.format(getDateFrom()).toString()+"\", \"endDate\":\""+formatDateGoogle.format(new Date()).toString()+"\", \"dimensions\":[\"DATE\"]}";
+		Date nowDate = new Date();
+		String today = formatDateGoogle.format(nowDate).toString();
+		
+		String datajson = "{\"startDate\":\""+today+"\", \"endDate\":\""+today+"\", \"dimensions\":[\"DATE\"], \"dataState\": \"ALL\"}";
 		
 		JSONObject jsondata = callAnalyticApis(datajson);
 		if (jsondata.has("rows"))
@@ -177,94 +152,64 @@ public class AnalyticsServices {
 			return false;
 	}
 	
-	/**
-	 * Método valida si existen datos para su actualizacion.
-	 * 
-	 * @return
-	 * @throws Exception
-	 
-	public boolean updateNewsData() throws Exception {
-
-		String datajson = "{\"startDate\":\""+formatDateGoogle.format(getDateFrom()).toString()+"\","
-							+ "\"endDate\":\""+formatDateGoogle.format(new Date()).toString()+"\","
-							+ "\"dimensions\":[\"DATE\"]}"
-							+ "";
-		
-		JSONObject jsondata = callAnalyticApis(datajson);
-		
-		if (jsondata.has("rows")){
-			return true;
-		}else {
-			return false;
-
-		}
-	}
-
-	*/
-	/**
+		/**
 	 * Metodo utilizado para llamar a la api de Google Search Console - Analytcis, para obtener datos. 
+	 * SE valida si esta autorizado o no la api de Google Search Console.. 
 	 * 
 	 * @param datajson: json de la consulta de datos que queremos traer. 
 	 * @return json con los datos de los usuarios. 
 	 * @throws Exception
 	 */
+	
 	public JSONObject callAnalyticApis(String datajson) throws Exception {
 
 		JSONObject jsono = new JSONObject();
 		
 		if (gservice.isAuthorized()) {
-		String YOUR_API_KEY = gservice.getApiKey();
-		
-		siteUrl = siteUrl.replaceAll("https://","https%3A%2F%2F");
-		siteUrl = siteUrl.replaceAll("http://","http%3A%2F%2F");
-		
-		LOG.debug(" -------- INI callAnalyticApis -------- " );
-		LOG.debug("YOUR_API_KEY " + YOUR_API_KEY + " siteUrl: " + siteUrl );
-		LOG.debug("datajson " + datajson); 
-		
-		String queryUrl = "https://searchconsole.googleapis.com/webmasters/v3/sites/"+siteUrl+"/searchAnalytics/query?key="+YOUR_API_KEY;
-		URL urlObject = new URL(queryUrl);
-		HttpURLConnection con = (HttpURLConnection)urlObject.openConnection();
-		con.setRequestMethod("POST");
-		
-		LOG.debug("gservice.getCredential " + gservice.getCredential()  );
-		LOG.debug("gservice.getCredential().getAccessToken() " + gservice.getCredential().getAccessToken() );
-
-		con.setRequestProperty("Authorization", "Bearer "+gservice.getCredential().getAccessToken());
-		con.setRequestProperty("Content-Type", "application/json");
-		
-		con.setDoOutput(true);
-		DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-		wr.writeBytes(datajson);
-		wr.flush();
-		wr.close();
-		if (con.getResponseCode() != 200) {
-			StringWriter writer = new StringWriter();
-			IOUtils.copy(con.getErrorStream(), writer, "UTF-8");
-			jsono = JSONObject.fromObject(writer.toString());  
-			jsono.put("status","error");
-			jsono.put("errorCode","008.019"); 
 			
-		}else{
-			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-			String inputLine;
-			StringBuffer responseBF = new StringBuffer(); 
-			while ((inputLine = in.readLine()) != null){
-				responseBF.append(inputLine);
-			}
-			in.close();
-			String respuesta = responseBF.toString();
+			String YOUR_API_KEY = gservice.getApiKey();
 			
-			jsono = JSONObject.fromObject(respuesta);  
-			if (jsono.has("error"))
+			siteUrl = siteUrl.replaceAll("https://","https%3A%2F%2F");
+			siteUrl = siteUrl.replaceAll("http://","http%3A%2F%2F");
+		
+			String queryUrl = "https://searchconsole.googleapis.com/webmasters/v3/sites/"+siteUrl+"/searchAnalytics/query?key="+YOUR_API_KEY;
+			URL urlObject = new URL(queryUrl);
+			HttpURLConnection con = (HttpURLConnection)urlObject.openConnection();
+			con.setRequestMethod("POST");
+			
+			con.setRequestProperty("Authorization", "Bearer "+gservice.getCredential().getAccessToken());
+			con.setRequestProperty("Content-Type", "application/json");
+			
+			con.setDoOutput(true);
+			DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+			wr.writeBytes(datajson);
+			wr.flush();
+			wr.close();
+			
+			if (con.getResponseCode() != 200) {
+				StringWriter writer = new StringWriter();
+				IOUtils.copy(con.getErrorStream(), writer, "UTF-8");
+				jsono = JSONObject.fromObject(writer.toString());  
 				jsono.put("status","error");
-			else
-				jsono.put("status","ok");
-			
-		}
-
-		LOG.debug("return jsono " + jsono); 
-		LOG.debug(" -------- FIN callAnalyticApis -------- " );
+				jsono.put("errorCode","008.019"); 
+				
+			}else{
+				BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+				String inputLine;
+				StringBuffer responseBF = new StringBuffer(); 
+				while ((inputLine = in.readLine()) != null){
+					responseBF.append(inputLine);
+				}
+				in.close();
+				String respuesta = responseBF.toString();
+				
+				jsono = JSONObject.fromObject(respuesta);  
+				if (jsono.has("error"))
+					jsono.put("status","error");
+				else
+					jsono.put("status","ok");
+				
+			}
 		} else {
 			jsono.put("status","error");
 			jsono.put("error","no esta autorizado.");
@@ -277,6 +222,8 @@ public class AnalyticsServices {
 	
 	/**
 	 * Método que actuliza manualmente una noticica en el CMS con datos de la api de Google.
+	 * valida si esta activo o no el metodo
+	 * validamos si existen datos de esa noticia en la tabla.
 	 * 
 	 * @param canonical
 	 * @return JSONObject
@@ -304,16 +251,16 @@ public class AnalyticsServices {
 				//valido si la fecha actual es mayor a la fecha de proxima ejecucion.
 				if (dateNow > dateToNextUpdated.getTime()) {
 					
-					String jsonAnalytics = "{\"startDate\":\""+formatDateGoogle.format(getDateFrom()).toString()+"\",\"endDate\":\""+formatDateGoogle.format(dateNow).toString()+"\",\"dimensions\":[\"DATE\"],\"dimensionFilterGroups\":[{\"filters\":[{\"dimension\":\"PAGE\",\"expression\":\""+canonical+"\",\"operator\":\"EQUALS\"}]}],\"aggregationType\":\"BY_PAGE\",\"rowLimit\":500,\"startRow\":0}";
-					
+					String today = formatDateGoogle.format(dateNow).toString();
+					String jsonAnalytics = "{\"startDate\":\""+today+"\",\"endDate\":\""+today+"\",\"dimensions\":[\"DATE\"],\"dimensionFilterGroups\":[{\"filters\":[{\"dimension\":\"PAGE\",\"expression\":\""+canonical+"\",\"operator\":\"EQUALS\"}]}],\"aggregationType\":\"BY_PAGE\",\"rowLimit\":500,\"startRow\":0,\"dataState\":\"ALL\"}";
+
 					//pedimos los datos a la api
 					JSONObject jsonDataAnalytics = callAnalyticApis(jsonAnalytics);
 					
 					if (jsonDataAnalytics.has("rows") && jsonDataAnalytics.getJSONArray("rows").size()>0) {
 						
 						JSONArray dataRows= jsonDataAnalytics.getJSONArray("rows");					
-						// Se cambia porque mostramos del ultimo dia no un acumulado. 
-						// for (int i = 0 ;  i < dataRows.size() ; i++) {
+
 							
 							JSONObject dataItem = dataRows.getJSONObject(dataRows.size()-1);
 
@@ -321,14 +268,31 @@ public class AnalyticsServices {
 							newsToUpdated.setClicks(dataItem.getString("clicks"));
 							newsToUpdated.setCtr(dataItem.getString("ctr"));
 							newsToUpdated.setPosition(dataItem.getString("position"));
-							newsToUpdated.setPrints(dataItem.getString("impressions"));
+						    newsToUpdated.setPrints(dataItem.getString("impressions"));
+							newsToUpdated.setSitename(siteName);
+							newsToUpdated.setPublication(Integer.parseInt(publication));
+							newsToUpdated.setPage(canonical);
 							newsToUpdated.setUpdatedDate(dateNow);
+
+							NewsAnalyticsDataDAO analyticsDAO = new NewsAnalyticsDataDAO();
 							
-							updateAnalyticsData(newsToUpdated);
+							if (analyticsDAO.getNewsData(siteName,Integer.parseInt(publication),canonical).getSitename() != null ) {
+								try {
+									analyticsDAO.updateDataResources(newsToUpdated);
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+							}else{
+								try {
+									analyticsDAO.insertNewsData(newsToUpdated);
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+							}
+
 							jsonResult.put("status","ok");
 							jsonResult.put("dataUpdated",newsToUpdated);
 	
-					//	}
 					} else {
 						if (jsonDataAnalytics.has("error")) {
 							//Error al pedir los datos en Analytics .
@@ -354,7 +318,6 @@ public class AnalyticsServices {
 				jsonResult.put("status","fail");
 				jsonResult.put("error",canonical);
 				jsonResult.put("errorCode","018.002"); 
-
 			}
 			
 		}else{
