@@ -17,6 +17,7 @@
 	  <module>../searchExtensions</module>
 	  <module>../imageVariants</module>
 	  <module>../diario</module>
+	  <module>../diario-administrator</module>
 	  <module>../diario-comentarios</module>
 	  <module>../diario-encuestas</module>
 	  <module>../diario-webservices</module>
