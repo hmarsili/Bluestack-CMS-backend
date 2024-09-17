@@ -47,6 +47,16 @@ public class VertexIaNewsService {
 	protected String basePrompt = null;
 	
 
+	public VertexIaNewsService(String site, String publication) {
+		this.siteName = site;
+		this.publication = publication;
+	}
+
+
+	public VertexIaNewsService() {
+	}
+
+	
 	public JsonObject generateNews(String prompt) throws IOException {
         GoogleCredentials credentials = null;
 		
