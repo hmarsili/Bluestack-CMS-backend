@@ -461,7 +461,7 @@ public abstract class UploadService {
     }
 	
 	private static boolean shouldCancel = false;
-	private static HashMap<String, String> uploadStatus = new HashMap<String, String>();
+	public static HashMap<String, String> uploadStatus = new HashMap<String, String>();
 	
 	public static void setUploadStatus(String path,String status) {
 		
@@ -474,6 +474,10 @@ public abstract class UploadService {
 	}
 	
 	public static String getUploadStatus(String fullPath) {
+		
+		if (fullPath.startsWith("/"))
+            fullPath = fullPath.substring(1);  
+		
 		return uploadStatus.get(fullPath);
 	}
 	
@@ -535,7 +539,7 @@ public abstract class UploadService {
 	public String uploadAmzFileTM(String fullPath, Map<String,String> parameters, InputStream content) throws IOException, Exception {
 		
 		String urlRegion = amzRegion.toLowerCase().replace("_", "-");
-		String amzUrl = String.format("https://%s.s3.dualstack.%s.amazonaws.com/%s", amzBucket, urlRegion, fullPath);
+		String amzUrl = String.format("https://%s.s3.dualstack.%s.amazonaws.com%s", amzBucket, urlRegion, "/"+fullPath);
 		LOG.debug("S3 url: " + amzUrl);
 		
 		

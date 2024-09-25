@@ -207,6 +207,8 @@ public class VideosService extends UploadService {
 		
 		youTubeDataAPIKey = config.getParam(siteName, publication, module, "youTubeDataAPIKey");
 		
+		rfsSubFolderFormat = config.getParam(siteName, publication, module, "rfsSubFolderFormat",""); 
+		
 		loadBaseProperties(siteName, publication);
 	}
 
@@ -434,10 +436,10 @@ public class VideosService extends UploadService {
 		fileName = getValidFileName(fileName);
 
 		LOG.debug("Nombre corregido para el archivo del tipo video-processing: " + fileName);
-		String subFolderRFSPath = getRFSSubFolderPath(rfsSubFolderFormat, new HashMap<>());
-		LOG.debug("subcarpeta: " + subFolderRFSPath);
+		String subFolderVFSPath = getDefaultVFSUploadFolder(new HashMap<>());
+		LOG.debug("subcarpeta: " + subFolderVFSPath);
 
-		String dir =  "/" + subFolderRFSPath;
+		String dir =  "/" + subFolderVFSPath;
 		if(!dir.endsWith("/")) {
 			dir += "/";
 		}
@@ -467,7 +469,14 @@ public class VideosService extends UploadService {
 		String amzUrlUploaded = null;
 		String uploadStatus = null;
 		
-		amzUrlUploaded = super.uploadAmzFileTM(fullPath, parameters, content);
+		String subFolderRFSPath = getRFSSubFolderPath(rfsSubFolderFormat, parameters);
+		String dir = amzDirectory + "/" + subFolderRFSPath;
+		
+        String fileName = fullPath.substring(fullPath.lastIndexOf('/') + 1);  
+		
+		String amzPath = dir + fileName;
+		
+		amzUrlUploaded = super.uploadAmzFileTM(amzPath, parameters, content);
 		
 		if(amzUrlUploaded!=null && !amzUrlUploaded.equals("Error")) {
 			
@@ -497,11 +506,39 @@ public class VideosService extends UploadService {
 		return uploadStatus;
 	}
 	
+	public String getAmzSubFolderPath(String vfsPath){
+		
+		String amzSubFolderPath = "";
+		
+		Map<String,String> parameters = new HashMap<String,String>();
+		
+		try {
+			String subFolderRFSPath = getRFSSubFolderPath(rfsSubFolderFormat, parameters);
+			String dir = "/" +amzDirectory + "/" + subFolderRFSPath;
+			
+	        String fileName = vfsPath.substring(vfsPath.lastIndexOf('/') + 1);  
+			
+	        amzSubFolderPath = dir + fileName;
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return amzSubFolderPath;
+	}
+	
 	public static String getUploadStatus(String fullPath) {
 		
 		String status = com.tfsla.diario.ediciones.services.UploadService.getUploadStatus(fullPath);
 		
 		return status;
+	}
+	
+	public static void setUploadStatus(String path,String status){
+		
+		com.tfsla.diario.ediciones.services.UploadService.setUploadStatus(path,status);
+		
+		return;
 	}
 	
 	public String uploadCancel(String path) {
