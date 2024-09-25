@@ -237,9 +237,9 @@ public class ImagenService extends UploadService {
 		LOG.debug("upload - uploadFTPFile imagen.getWidth(null): " + imagen.getWidth(null));
 		LOG.debug("imagen.getHeight(null): " + imagen.getHeight(null));
 		
-		if (!String.valueOf(imagen.getWidth(null)).equals(null) && String.valueOf(imagen.getHeight(null)).equals(null)) {
-			int fpx = imagen.getWidth(null)%2;
-			int fpy = imagen.getHeight(null)%2;
+		if (!String.valueOf(imagen.getWidth(null)).equals(null) && !String.valueOf(imagen.getHeight(null)).equals(null)) {
+			int fpx = imagen.getWidth(null)/2;
+			int fpy = imagen.getHeight(null)/2;
 			String focalPoint = "fpx:"+fpx+",fpy:"+fpy; 
 			p = new CmsProperty(CmsPropertyDefinition.PROPERTY_FOCALPOINT, null,focalPoint);
 			properties.add(p);
@@ -368,9 +368,9 @@ public class ImagenService extends UploadService {
 		LOG.debug("upload - uploadRFSFile imagen.getWidth(null): " + imagen.getWidth(null));
 		LOG.debug("imagen.getHeight(null): " + imagen.getHeight(null));
 		
-		if (!String.valueOf(imagen.getWidth(null)).equals(null) && String.valueOf(imagen.getHeight(null)).equals(null)) {
-			int fpx = imagen.getWidth(null)%2;
-			int fpy = imagen.getHeight(null)%2;
+		if (!String.valueOf(imagen.getWidth(null)).equals(null) && !String.valueOf(imagen.getHeight(null)).equals(null)) {
+			int fpx = imagen.getWidth(null)/2;
+			int fpy = imagen.getHeight(null)/2;
 			String focalPoint = "fpx:"+fpx+",fpy:"+fpy; 
 			p = new CmsProperty(CmsPropertyDefinition.PROPERTY_FOCALPOINT, null,focalPoint);
 			properties.add(p);
@@ -477,11 +477,11 @@ public class ImagenService extends UploadService {
 		LOG.debug("upload - uploadAMZ imagen.getWidth(null): " + imagen.getWidth(null));
 		LOG.debug("imagen.getHeight(null): " + imagen.getHeight(null));
 		
-		if (!String.valueOf(imagen.getWidth(null)).equals(null) && String.valueOf(imagen.getHeight(null)).equals(null)) {
-			int fpx = imagen.getWidth(null)%2;
-			int fpy = imagen.getHeight(null)%2;
+		if (!String.valueOf(imagen.getWidth(null)).equals(null) && !String.valueOf(imagen.getHeight(null)).equals(null)) {
+			int fpx = imagen.getWidth(null)/2;
+			int fpy = imagen.getHeight(null)/2;
 			String focalPoint = "fpx:"+fpx+",fpy:"+fpy; 
-			p = new CmsProperty(CmsPropertyDefinition.PROPERTY_FOCALPOINT, null,focalPoint);
+			p = new CmsProperty(CmsPropertyDefinition.PROPERTY_FOCALPOINT, focalPoint,null);
 			properties.add(p);
 			LOG.debug("focalPoint: " + focalPoint);
 		}
