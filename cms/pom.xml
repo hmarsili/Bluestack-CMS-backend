@@ -173,11 +173,18 @@
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
     
-           <dependency>
+    <dependency>
       <groupId>blueStack</groupId>
       <artifactId>ahocorasick</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
+
+    <dependency>
+      <groupId>Alkacon</groupId>
+      <artifactId>org.opencms.ocee.base</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+
     
     <dependency>
       <groupId>Alkacon</groupId>
