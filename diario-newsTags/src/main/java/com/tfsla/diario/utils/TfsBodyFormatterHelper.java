@@ -2337,7 +2337,10 @@ public class TfsBodyFormatterHelper {
         }
     }
 	
-	private static void getImageWidthControl(CmsResource newsFile, Element element, Element newImage, CmsObject cms, String maxImageWidth,PageContext pageContext ) throws NumberFormatException, Exception{
+	private static void getImageWidthControl(CmsResource newsFile, Element element, Element newImage, CmsObject cms, String maxImageWidth,boolean isLoadingLazy,PageContext pageContext ) throws NumberFormatException, Exception{
+		
+		if(maxImageWidth.equals("0"))
+			return;
 		
 		String srcset = element.attr("srcset");
 		
@@ -2424,9 +2427,6 @@ public class TfsBodyFormatterHelper {
 				if (!element.attr("title").equals(""))
 					newImage.attr("title", element.attr("title"));
 				
-				if (!element.attr("loading").equals(""))
-					newImage.attr("loading",element.attr("loading"));
-
 				if (!path.equals(""))
 					newImage.attr("src", path);
 				else {
@@ -2443,6 +2443,11 @@ public class TfsBodyFormatterHelper {
 		}else {
 			newImage.attr("src", "");
 		}
+		
+		if(isLoadingLazy)
+			newImage.attr("loading","lazy");
+		else
+			newImage.removeAttr("loading"); 
 	}
 	
 	public static String formatWidthControl(String content, CmsResource resource, CmsObject cms, ServletRequest request, PageContext pageContext){
@@ -2456,32 +2461,39 @@ public class TfsBodyFormatterHelper {
 		}
 		
 		String  maxImageWidth = "0";
+		Boolean isLoadingLazy = false;
 		
-		if (tEdicion != null )
+		if (tEdicion != null ){
 			maxImageWidth = config.getParam(OpenCms.getSiteManager().getCurrentSite(cms).getSiteRoot(), String.valueOf(tEdicion.getId()), "body-formats", "maxImageWidth","0");
-			
-		if(!maxImageWidth.equals("0")){
-			
-			Document doc = Jsoup.parse(content);
-			Elements images = doc.select("img");
-			
-			for (Element element:images){
-				
-				try {
-					Element newImage = new Element(Tag.valueOf("img"), "");
-					getImageWidthControl(resource, element, newImage, cms, maxImageWidth, pageContext);
-					
-					if (!newImage.attr("src").equals(""))
-						element.replaceWith(newImage);
-					
-				} catch (Exception ex) {
-					LOG.error ("Error al controlar el ancho de la imagen", ex);
-					element.remove();
-				}
-			}
-			
-			content = doc.body().html();
+			isLoadingLazy = config.getBooleanParam(OpenCms.getSiteManager().getCurrentSite(cms).getSiteRoot(), String.valueOf(tEdicion.getId()), "imageUpload", "loadingLazy",false);
 		}
+		
+		Document doc = Jsoup.parse(content);
+		Elements images = doc.select("img");
+			
+		for (Element element:images){
+				
+			try {
+				Element newImage = new Element(Tag.valueOf("img"), "");
+				getImageWidthControl(resource, element, newImage, cms, maxImageWidth,isLoadingLazy, pageContext);
+					
+				if (!newImage.attr("src").equals("")) {
+						element.replaceWith(newImage);
+				}else{
+					if(isLoadingLazy)
+						element.attr("loading","lazy");
+					else
+						element.removeAttr("loading"); 
+				}
+					
+			} catch (Exception ex) {
+				LOG.error ("Error al controlar el ancho de la imagen", ex);
+				element.remove();
+			}
+		}
+			
+		content = doc.body().html();
+		
 		
 		return content;
 	}
