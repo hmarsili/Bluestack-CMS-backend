@@ -538,6 +538,8 @@ public abstract class UploadService {
 	// Upload con Transfer Manager para manejar avance y cancelacion
 	public String uploadAmzFileTM(String fullPath, Map<String,String> parameters, InputStream content) throws IOException, Exception {
 		
+		uploadStatus.put(fullPath, "0|Uploading");
+		
 		String urlRegion = amzRegion.toLowerCase().replace("_", "-");
 		String amzUrl = String.format("https://%s.s3.dualstack.%s.amazonaws.com%s", amzBucket, urlRegion, "/"+fullPath);
 		LOG.debug("S3 url: " + amzUrl);

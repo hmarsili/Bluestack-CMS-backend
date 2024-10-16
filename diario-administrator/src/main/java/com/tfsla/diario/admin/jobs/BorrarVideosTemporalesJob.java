@@ -50,7 +50,6 @@ public class BorrarVideosTemporalesJob implements I_CmsScheduledJob  {
 		Calendar cal = new GregorianCalendar();
 		cal.setTime(now);
 
-		//String proyecto = OpenCmsBaseService.getCurrentSite(cms);
 		String siteName = OpenCms.getSiteManager().getCurrentSite(cms).getSiteRoot();
 		
 		this.loadConfiguration(siteName, _publication);
@@ -79,6 +78,8 @@ public class BorrarVideosTemporalesJob implements I_CmsScheduledJob  {
 				OpenCms.getPublishManager().publishResource(cms, cms.getSitePath(resource));
 			}
 		}
+		
+		com.tfsla.diario.ediciones.services.UploadService.uploadStatus.clear();
 
 		return resultados;
 	}
