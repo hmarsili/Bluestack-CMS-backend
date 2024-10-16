@@ -400,6 +400,27 @@ public String uploadFFmpegImage(String imgPath, String type) throws Exception{
             prop.setValue(imageVFSPath, CmsProperty.TYPE_INDIVIDUAL);
             m_cms.writePropertyObject(videoPath, prop);
 			m_cms.addRelationToResource( videoPath, imageVFSPath, "videoImage");
+			
+			CmsProperty titleVideoProp = m_cms.readPropertyObject(videoPath, "Title", false);  
+			String titleVideo = null;
+			
+			if(titleVideoProp!=null) {
+				titleVideo = titleVideoProp.getValue();
+				
+				if(titleVideo.equals(""))
+					titleVideo = videoPath.substring(videoPath.lastIndexOf('/') + 1);  
+			}
+			
+			prop = new CmsProperty();
+            prop.setName("Title");
+            prop.setValue(titleVideo, CmsProperty.TYPE_INDIVIDUAL);
+            m_cms.writePropertyObject(imageVFSPath, prop);
+            
+            prop = new CmsProperty();
+            prop.setName("Description");
+            prop.setValue(titleVideo, CmsProperty.TYPE_INDIVIDUAL);
+            m_cms.writePropertyObject(imageVFSPath, prop);
+			
 			m_cms.unlockResource(videoPath);
 			m_cms.unlockResource(imageVFSPath);
 			
