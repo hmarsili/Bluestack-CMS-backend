@@ -3,7 +3,7 @@ package com.tfsla.diario.friendlyTags;
 import java.util.Iterator;
 import java.util.Locale;
 
-import javax.servlet.jsp.JspTagException;
+import jakarta.servlet.jsp.JspTagException;
 
 import org.opencms.file.CmsFile;
 import org.opencms.file.CmsObject;

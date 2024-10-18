@@ -1,6 +1,6 @@
 package com.tfsla.diario.webservices.common.interfaces;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 public interface IRegisterPushClientService {
 

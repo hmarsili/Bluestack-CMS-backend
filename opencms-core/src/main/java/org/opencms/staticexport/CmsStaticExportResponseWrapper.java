@@ -33,16 +33,16 @@ package org.opencms.staticexport;
 
 import java.io.IOException;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponseWrapper;
 
 /**
  * Response wrapper for static export requests, required to access the status code of the response.<p>
  * 
- * The <code>{@link org.opencms.loader.I_CmsResourceLoader#export(org.opencms.file.CmsObject, org.opencms.file.CmsResource, javax.servlet.http.HttpServletRequest, HttpServletResponse)}</code>
+ * The <code>{@link org.opencms.loader.I_CmsResourceLoader#export(org.opencms.file.CmsObject, org.opencms.file.CmsResource, jakarta.servlet.http.HttpServletRequest, HttpServletResponse)}</code>
  * method is called by the static export manager. Many implementations set the http status codes for the response.
  * This wrapper enables the export manager to return the status code set on the response 
- * in <code>{@link org.opencms.staticexport.CmsStaticExportManager#export(javax.servlet.http.HttpServletRequest, HttpServletResponse, org.opencms.file.CmsObject, CmsStaticExportData)}</code>.<p>
+ * in <code>{@link org.opencms.staticexport.CmsStaticExportManager#export(jakarta.servlet.http.HttpServletRequest, HttpServletResponse, org.opencms.file.CmsObject, CmsStaticExportData)}</code>.<p>
  * 
  * @author Alexander Kandzior 
  * 
@@ -78,7 +78,7 @@ public class CmsStaticExportResponseWrapper extends HttpServletResponseWrapper {
     }
 
     /**
-     * @see javax.servlet.http.HttpServletResponse#sendError(int)
+     * @see jakarta.servlet.http.HttpServletResponse#sendError(int)
      */
     @Override
     public void sendError(int status) throws IOException {
@@ -88,7 +88,7 @@ public class CmsStaticExportResponseWrapper extends HttpServletResponseWrapper {
     }
 
     /**
-     * @see javax.servlet.http.HttpServletResponse#sendError(int, java.lang.String)
+     * @see jakarta.servlet.http.HttpServletResponse#sendError(int, java.lang.String)
      */
     @Override
     public void sendError(int status, String message) throws IOException {
@@ -98,7 +98,7 @@ public class CmsStaticExportResponseWrapper extends HttpServletResponseWrapper {
     }
 
     /**
-     * @see javax.servlet.http.HttpServletResponseWrapper#setStatus(int)
+     * @see jakarta.servlet.http.HttpServletResponseWrapper#setStatus(int)
      */
     @Override
     public void setStatus(int status) {
@@ -107,13 +107,4 @@ public class CmsStaticExportResponseWrapper extends HttpServletResponseWrapper {
         super.setStatus(status);
     }
 
-    /**
-     * @see javax.servlet.http.HttpServletResponseWrapper#setStatus(int, java.lang.String)
-     */
-    @Override
-    public void setStatus(int status, String message) {
-
-        m_status = status;
-        super.setStatus(status, message);
-    }
 }

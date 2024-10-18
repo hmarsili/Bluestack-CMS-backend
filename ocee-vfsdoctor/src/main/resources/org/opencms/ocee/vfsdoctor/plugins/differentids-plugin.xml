@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE opencms SYSTEM "http://www.alkacon.com/dtd/6.0/vfsdoctor-plugin.dtd">
+<opencms>
+	<vfsdoctor>
+		<plugin>
+			<queries>
+				<query name="SELECT_ALL_UNSYNC_RES" >
+					<default><![CDATA[
+						SELECT 
+							CMSOFF.STRUCTURE_ID, CMSOFF.PARENT_ID, CMSOFF.RESOURCE_ID, CMSOFF.RESOURCE_PATH,
+							CMSON.STRUCTURE_ID, CMSON.PARENT_ID, CMSON.RESOURCE_ID, CMSON.RESOURCE_PATH
+						FROM 
+							CMS_OFFLINE_STRUCTURE  CMSOFF,
+							CMS_ONLINE_STRUCTURE CMSON
+						WHERE 
+							CMSON.RESOURCE_PATH = CMSOFF.RESOURCE_PATH
+							AND ( 
+								NOT CMSOFF.RESOURCE_ID = CMSON.RESOURCE_ID
+								OR NOT CMSOFF.STRUCTURE_ID = CMSON.STRUCTURE_ID
+							)
+					]]></default>
+				</query> 
+				<query name="UPDATE_ONLINE_STRUCTURE_IDS" >
+					<default><![CDATA[
+						UPDATE 
+							CMS_ONLINE_STRUCTURE
+						SET
+						    STRUCTURE_ID = ?, 
+							PARENT_ID = ?, 
+							RESOURCE_ID = ?
+						WHERE
+							STRUCTURE_ID = ? 
+					]]></default>
+				</query> 
+				<query name="UPDATE_ONLINE_PARENT_IDS" >
+					<default><![CDATA[
+						UPDATE 
+							CMS_ONLINE_STRUCTURE
+						SET
+							PARENT_ID = ?, 
+						WHERE
+							PARENT_ID = ? 
+					]]></default>
+				</query> 
+				<query name="UPDATE_ONLINE_PROPERTY_IDS" >
+					<default><![CDATA[
+						UPDATE 
+							CMS_ONLINE_PROPERTIES
+						SET
+							PROPERTY_MAPPING_ID = ?
+						WHERE
+							PROPERTY_MAPPING_ID = ? 
+					]]></default>
+				</query> 
+				<query name="UPDATE_ONLINE_RESOURCE_IDS" >
+					<default><![CDATA[
+						UPDATE 
+							CMS_ONLINE_RESOURCES
+						SET
+							RESOURCE_ID = ?
+						WHERE
+							RESOURCE_ID = ? 
+					]]></default>
+				</query> 
+				<query name="UPDATE_ONLINE_ACE_IDS" >
+					<default><![CDATA[
+						UPDATE 
+							CMS_ONLINE_ACCESSCONTROL
+						SET
+							RESOURCE_ID = ?
+						WHERE
+							RESOURCE_ID = ? 
+					]]></default>
+				</query> 
+				<query name="UPDATE_ONLINE_CONTENT_IDS" >
+					<default><![CDATA[
+						UPDATE 
+							CMS_CONTENTS
+						SET
+							RESOURCE_ID = ?
+						WHERE
+							RESOURCE_ID = ? 
+					]]></default>
+				</query> 
+			</queries>
+		</plugin>
+	</vfsdoctor>
+</opencms>

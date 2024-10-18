@@ -1,7 +1,7 @@
 package com.tfsla.diario.friendlyTags;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.BodyTagSupport;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.tagext.BodyTagSupport;
 
 import com.tfsla.templateManager.jsp.PageBuilder;
 

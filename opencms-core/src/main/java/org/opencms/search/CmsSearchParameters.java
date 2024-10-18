@@ -43,7 +43,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.collections.ListUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.logging.Log;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.Sort;

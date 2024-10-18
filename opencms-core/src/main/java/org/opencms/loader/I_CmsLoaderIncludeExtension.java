@@ -35,8 +35,8 @@ import org.opencms.main.CmsException;
 
 import java.util.Map;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 
 /**
  * Allows extensions to the default include mechanism, 
@@ -48,7 +48,7 @@ import javax.servlet.ServletResponse;
  * 
  * @since 6.0.0 
  * 
- * @see org.opencms.jsp.CmsJspTagInclude#includeTagAction(javax.servlet.jsp.PageContext, String, String, boolean, Map, ServletRequest, ServletResponse)
+ * @see org.opencms.jsp.CmsJspTagInclude#includeTagAction(jakarta.servlet.jsp.PageContext, String, String, boolean, Map, ServletRequest, ServletResponse)
  */
 public interface I_CmsLoaderIncludeExtension {
 

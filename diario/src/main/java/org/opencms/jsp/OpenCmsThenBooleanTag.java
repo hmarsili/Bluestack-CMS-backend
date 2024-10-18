@@ -1,6 +1,6 @@
 package org.opencms.jsp;
 
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspException;
 
 /**
  * Es un tag para ejecutar sólo si un elemento booleano es true, 

@@ -31,8 +31,8 @@
 
 package org.opencms.jsp;
 
-import javax.servlet.jsp.tagext.TagData;
-import javax.servlet.jsp.tagext.TagExtraInfo;
+import jakarta.servlet.jsp.tagext.TagData;
+import jakarta.servlet.jsp.tagext.TagExtraInfo;
 
 /**
  * This is a TagExtraInfo evaluation class that checks the attibutes of 

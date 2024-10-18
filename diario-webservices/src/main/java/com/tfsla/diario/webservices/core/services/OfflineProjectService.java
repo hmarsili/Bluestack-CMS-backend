@@ -1,6 +1,6 @@
 package com.tfsla.diario.webservices.core.services;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.opencms.main.CmsException;
 

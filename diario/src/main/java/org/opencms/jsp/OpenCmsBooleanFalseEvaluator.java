@@ -1,6 +1,6 @@
 package org.opencms.jsp;
 
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspException;
 
 /**
  * Ejecuta el Contenido si la condición es false

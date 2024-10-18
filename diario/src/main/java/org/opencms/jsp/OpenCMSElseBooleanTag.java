@@ -1,6 +1,6 @@
 package org.opencms.jsp;
 
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspException;
 
 /**
  * Es un tag de else. Necesita estar metido en un OpenCmsIfElseEvaluator <code>

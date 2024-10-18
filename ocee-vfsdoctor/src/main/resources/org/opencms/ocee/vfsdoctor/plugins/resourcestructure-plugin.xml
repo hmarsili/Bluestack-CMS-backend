@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE opencms SYSTEM "http://www.alkacon.com/dtd/6.0/vfsdoctor-plugin.dtd">
+<opencms>
+	<vfsdoctor>
+		<plugin>
+			<queries>
+				<query name="SELECT_ALL_STRUCTURES_WITH_NO_RESOURCE" >
+					<default><![CDATA[
+						SELECT 
+							STR.STRUCTURE_ID, STR.PARENT_ID, 
+							STR.RESOURCE_ID, STR.RESOURCE_PATH
+						FROM 
+							CMS_${PROJECT}_STRUCTURE STR 
+						LEFT JOIN CMS_${PROJECT}_RESOURCES RES
+ 						ON
+						    STR.RESOURCE_ID = RES.RESOURCE_ID 
+						WHERE 
+							RES.RESOURCE_ID IS NULL
+						ORDER BY
+							STR.RESOURCE_PATH 	
+					]]></default>
+				</query> 
+			</queries>
+		</plugin>
+	</vfsdoctor>
+</opencms>

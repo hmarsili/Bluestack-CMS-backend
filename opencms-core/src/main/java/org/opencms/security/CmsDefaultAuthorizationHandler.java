@@ -41,8 +41,8 @@ import org.opencms.workplace.CmsWorkplaceManager;
 
 import java.io.IOException;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.binary.Base64;
 
@@ -111,7 +111,7 @@ public class CmsDefaultAuthorizationHandler extends A_CmsAuthorizationHandler {
     }
     
     /**
-     * @see org.opencms.security.I_CmsAuthorizationHandler#initCmsObject(javax.servlet.http.HttpServletRequest, org.opencms.security.I_CmsAuthorizationHandler.I_PrivilegedLoginAction)
+     * @see org.opencms.security.I_CmsAuthorizationHandler#initCmsObject(jakarta.servlet.http.HttpServletRequest, org.opencms.security.I_CmsAuthorizationHandler.I_PrivilegedLoginAction)
      */
     public CmsObject initCmsObject(HttpServletRequest request, I_CmsAuthorizationHandler.I_PrivilegedLoginAction loginAction) {
         

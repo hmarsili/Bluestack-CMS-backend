@@ -36,6 +36,8 @@ import org.opencms.main.CmsLog;
 import org.opencms.util.CmsFileUtil;
 import org.opencms.xml.CmsXmlEntityResolver;
 import org.opencms.xml.CmsXmlErrorHandler;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -50,8 +52,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections.ExtendedProperties;
-import org.apache.commons.digester.Digester;
+
+import org.apache.commons.digester3.Digester;
 import org.apache.commons.logging.Log;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
@@ -59,7 +61,6 @@ import org.dom4j.Element;
 import org.dom4j.dom.DOMDocumentType;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
-import org.xml.sax.SAXException;
 
 /**
  * Configuration manager for digesting the OpenCms XML configuration.<p>
@@ -121,7 +122,7 @@ public class CmsConfigurationManager implements I_CmsXmlConfiguration {
     private Digester m_digester;
 
     /** The configuration based on <code>opencms.properties</code>. */
-    private ExtendedProperties m_propertyConfiguration;
+    private CmsParameterConfiguration m_propertyConfiguration;
 
     /**
      * Creates a new OpenCms configuration manager.<p>
@@ -169,6 +170,9 @@ public class CmsConfigurationManager implements I_CmsXmlConfiguration {
         cacheDtdSystemId(configuration);
     }
 
+    public void prueba(String value) {
+    	System.out.println("Prueba --> " + value);
+    }
     /**
      * @see org.opencms.configuration.I_CmsConfigurationParameterHandler#addConfigurationParameter(java.lang.String, java.lang.String)
      */
@@ -178,15 +182,21 @@ public class CmsConfigurationManager implements I_CmsXmlConfiguration {
     }
 
     /**
-     * @see org.opencms.configuration.I_CmsXmlConfiguration#addXmlDigesterRules(org.apache.commons.digester.Digester)
+     * @see org.opencms.configuration.I_CmsXmlConfiguration#addXmlDigesterRules(org.apache.commons.digester3.Digester)
      */
     public void addXmlDigesterRules(Digester digester) {
 
         // add rule for <configuration> node        
-        digester.addObjectCreate(
+
+    	//AGREGADO PRUEBA
+    	digester.addCallMethod("*/" + N_CONFIGURATION + "/" + N_CONFIG, "prueba", 1);
+    	digester.addCallParam("*/" + N_CONFIGURATION + "/" + N_CONFIG, 0,  I_CmsXmlConfiguration.A_CLASS);
+    	// FIN AGREGADO PRUEBA
+    	
+    	digester.addObjectCreate(
             "*/" + N_CONFIGURATION + "/" + N_CONFIG,
-            I_CmsXmlConfiguration.A_CLASS,
-            CmsConfigurationException.class);
+            CmsConfigurationException.class.getName(),
+            I_CmsXmlConfiguration.A_CLASS);
         digester.addSetNext("*/" + N_CONFIGURATION + "/" + N_CONFIG, "addConfiguration");
     }
 
@@ -250,7 +260,7 @@ public class CmsConfigurationManager implements I_CmsXmlConfiguration {
      * @see #setConfiguration(ExtendedProperties)
      * @see org.opencms.configuration.I_CmsConfigurationParameterHandler#getConfiguration()
      */
-    public Map getConfiguration() {
+    public CmsParameterConfiguration getConfiguration() {
 
         return m_propertyConfiguration;
     }
@@ -359,7 +369,7 @@ public class CmsConfigurationManager implements I_CmsXmlConfiguration {
      * 
      * @see #getConfiguration()
      */
-    public void setConfiguration(ExtendedProperties propertyConfiguration) {
+    public void setConfiguration(CmsParameterConfiguration  propertyConfiguration) {
 
         m_propertyConfiguration = propertyConfiguration;
     }
@@ -506,10 +516,14 @@ public class CmsConfigurationManager implements I_CmsXmlConfiguration {
         // add this class to the Digester
         m_digester.push(configuration);
 
+        
         configuration.addXmlDigesterRules(m_digester);
-
+        System.out.println(fileUrl);
+        System.out.println("<!--!> loadXmlConfiguration " + configuration.getXmlFileName());
         // start the parsing process        
-        m_digester.parse(fileUrl.openStream());
+        InputSource  inputSource = new InputSource(fileUrl.openStream());
+        
+        m_digester.parse(inputSource);
     }
 
     /**

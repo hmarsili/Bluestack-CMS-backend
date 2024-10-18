@@ -50,9 +50,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.BodyTagSupport;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.tagext.BodyTagSupport;
 
 import org.apache.commons.logging.Log;
 
@@ -274,7 +274,7 @@ public class CmsJspTagImage extends BodyTagSupport implements I_CmsJspTagParamPa
     }
 
     /**
-     * @see javax.servlet.jsp.tagext.Tag#doEndTag()
+     * @see jakarta.servlet.jsp.tagext.Tag#doEndTag()
      */
     @Override
     public int doEndTag() throws JspException {
@@ -303,7 +303,7 @@ public class CmsJspTagImage extends BodyTagSupport implements I_CmsJspTagParamPa
                 if (LOG.isErrorEnabled()) {
                     LOG.error(Messages.get().getBundle().key(Messages.ERR_PROCESS_TAG_1, "image"), ex);
                 }
-                throw new javax.servlet.jsp.JspException(ex);
+                throw new jakarta.servlet.jsp.JspException(ex);
             }
         }
         if (OpenCms.getSystemInfo().getServletContainerSettings().isReleaseTagsAfterEnd()) {
@@ -318,7 +318,7 @@ public class CmsJspTagImage extends BodyTagSupport implements I_CmsJspTagParamPa
      * 
      * @return <code>{@link #EVAL_BODY_BUFFERED}</code>
      * 
-     * @see javax.servlet.jsp.tagext.Tag#doStartTag()
+     * @see jakarta.servlet.jsp.tagext.Tag#doStartTag()
      */
     @Override
     public int doStartTag() {
@@ -539,7 +539,7 @@ public class CmsJspTagImage extends BodyTagSupport implements I_CmsJspTagParamPa
     }
 
     /**
-     * @see javax.servlet.jsp.tagext.Tag#release()
+     * @see jakarta.servlet.jsp.tagext.Tag#release()
      */
     @Override
     public void release() {

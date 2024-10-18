@@ -3,8 +3,8 @@ package org.opencms.jsp;
 
 	import java.io.File;
 
-import javax.servlet.ServletRequest;
-	import javax.servlet.jsp.JspException;
+import jakarta.servlet.ServletRequest;
+	import jakarta.servlet.jsp.JspException;
 
 	import org.apache.commons.logging.Log;
 	import org.opencms.flex.CmsFlexController;

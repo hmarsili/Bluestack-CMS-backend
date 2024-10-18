@@ -3,7 +3,7 @@ package org.opencms.jsp;
 import java.io.IOException;
 import java.util.Iterator;
 
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspException;
 
 import com.tfsla.utils.StringParser;
 import com.tfsla.utils.StringUtils;

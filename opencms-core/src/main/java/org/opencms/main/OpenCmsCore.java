@@ -35,6 +35,7 @@ import org.opencms.configuration.CmsConfigurationException;
 import org.opencms.configuration.CmsConfigurationManager;
 import org.opencms.configuration.CmsImportExportConfiguration;
 import org.opencms.configuration.CmsModuleConfiguration;
+import org.opencms.configuration.CmsParameterConfiguration;
 import org.opencms.configuration.CmsSchedulerConfiguration;
 import org.opencms.configuration.CmsSearchConfiguration;
 import org.opencms.configuration.CmsSystemConfiguration;
@@ -89,7 +90,6 @@ import org.opencms.site.CmsSiteManagerImpl;
 import org.opencms.staticexport.CmsDefaultLinkSubstitutionHandler;
 import org.opencms.staticexport.CmsLinkManager;
 import org.opencms.staticexport.CmsStaticExportManager;
-import org.opencms.util.CmsPropertyUtils;
 import org.opencms.util.CmsRequestUtil;
 import org.opencms.util.CmsStringUtil;
 import org.opencms.util.CmsUUID;
@@ -110,13 +110,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
-import org.apache.commons.collections.ExtendedProperties;
 import org.apache.commons.logging.Log;
 
 /**
@@ -1038,7 +1037,7 @@ public final class OpenCmsCore {
      * @param configuration the configurations from the <code>opencms.properties</code> file
      * @throws CmsInitException in case OpenCms can not be initialized
      */
-    protected synchronized void initConfiguration(ExtendedProperties configuration) throws CmsInitException {
+    protected synchronized void initConfiguration(CmsParameterConfiguration configuration) throws CmsInitException {
 
         String systemEncoding = null;
         try {
@@ -1341,9 +1340,9 @@ public final class OpenCmsCore {
         getSystemInfo().init(servletContainerSettings);
 
         // Collect the configurations 
-        ExtendedProperties configuration;
+        CmsParameterConfiguration configuration;
         try {
-            configuration = CmsPropertyUtils.loadProperties(getSystemInfo().getConfigurationFileRfsPath());
+            configuration = new CmsParameterConfiguration(getSystemInfo().getConfigurationFileRfsPath());
         } catch (Exception e) {
             throw new CmsInitException(Messages.get().container(
                 Messages.ERR_CRITICAL_INIT_PROPFILE_1,
@@ -1804,7 +1803,7 @@ public final class OpenCmsCore {
      * @throws CmsInitException in case OpenCms can not be initialized
      * @return the initialized OpenCmsCore
      */
-    protected OpenCmsCore upgradeRunlevel(ExtendedProperties configuration) throws CmsInitException {
+    protected OpenCmsCore upgradeRunlevel(CmsParameterConfiguration configuration) throws CmsInitException {
 
         synchronized (LOCK) {
             if ((m_instance != null) && (getRunLevel() >= OpenCms.RUNLEVEL_2_INITIALIZING)) {
@@ -2309,7 +2308,7 @@ public final class OpenCmsCore {
             }
 
             /**
-             * @see org.opencms.security.I_CmsAuthorizationHandler.I_PrivilegedLoginAction#doLogin(javax.servlet.http.HttpServletRequest, java.lang.String)
+             * @see org.opencms.security.I_CmsAuthorizationHandler.I_PrivilegedLoginAction#doLogin(jakarta.servlet.http.HttpServletRequest, java.lang.String)
              */
             public CmsObject doLogin(HttpServletRequest request, String principal) throws CmsException {
 

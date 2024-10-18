@@ -3,9 +3,9 @@ package com.tfsla.diario.ediciones.jsp;
 import java.util.List;
 //import java.util.Locale;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.jsp.PageContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.jsp.PageContext;
 
 import org.opencms.file.CmsProperty;
 import org.opencms.file.CmsRequestContext;

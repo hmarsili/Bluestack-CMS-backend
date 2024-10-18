@@ -25,7 +25,6 @@
 	  <module>../diario-newsTags</module>
 	  <module>../ocee-cache</module>
 	  <module>../ocee-ldap</module>
-	  <module>../statisticsClient</module>
 	  <module>../templateManager</module>
 	  <module>../tfsUsers</module>
 	  <module>../tfsUsers-newsPublisher</module>

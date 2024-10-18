@@ -88,7 +88,7 @@ import javax.mail.internet.InternetAddress;
 
 import org.apache.commons.collections.Buffer;
 import org.apache.commons.collections.buffer.SynchronizedBuffer;
-import org.apache.commons.collections.map.LRUMap;
+import org.apache.commons.collections4.map.LRUMap;
 import org.apache.commons.logging.Log;
 
 /**

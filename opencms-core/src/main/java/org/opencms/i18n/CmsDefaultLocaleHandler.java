@@ -44,7 +44,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Locale;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 
@@ -75,7 +75,7 @@ public class CmsDefaultLocaleHandler implements I_CmsLocaleHandler {
     }
 
     /**
-     * @see org.opencms.i18n.I_CmsLocaleHandler#getI18nInfo(javax.servlet.http.HttpServletRequest, org.opencms.file.CmsUser, org.opencms.file.CmsProject, java.lang.String)
+     * @see org.opencms.i18n.I_CmsLocaleHandler#getI18nInfo(jakarta.servlet.http.HttpServletRequest, org.opencms.file.CmsUser, org.opencms.file.CmsProject, java.lang.String)
      */
     public CmsI18nInfo getI18nInfo(HttpServletRequest req, CmsUser user, CmsProject project, String resourceName) {
 

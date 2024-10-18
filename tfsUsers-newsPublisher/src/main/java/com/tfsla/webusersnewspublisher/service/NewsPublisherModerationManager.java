@@ -37,9 +37,6 @@ import com.tfsla.diario.ediciones.model.*;
 import com.tfsla.diario.ediciones.services.*;
 import com.tfsla.event.I_TfsEventListener;
 import com.tfsla.planilla.herramientas.PlanillaFormConstants;
-import com.tfsla.rankUsers.model.TfsUserRankResults;
-import com.tfsla.rankUsers.service.RankService;
-import com.tfsla.statistics.model.TfsUserStatsOptions;
 import com.tfsla.webusersnewspublisher.model.ModerationReason;
 import com.tfsla.webusersnewspublisher.model.ModerationResult;
 import com.tfsla.webusersposts.common.PostDetails;
@@ -161,31 +158,6 @@ public class NewsPublisherModerationManager {
 		return noModerationRankingLimit;
 	}
 
-	public boolean hasBigRating(CmsUser user, String sitio) {
-		String uid = user.getId().toString();
-		TfsUserStatsOptions options = new TfsUserStatsOptions();
-		options.setSitio(sitio);
-		options.setUsuario(uid);
-		options.setFrom(noModerationRankingAge);
-		options.setTo(new Date());
-		options.setRankMode(TfsUserStatsOptions.RANK_GENERAL);
-		options.setShowGeneralRank(true);
-		RankService rServiceUser = new RankService();
-		TfsUserRankResults resUser;
-		try {
-			resUser = rServiceUser.getStatistics(options);
-		
-			float generalRank=0;
-			if ( resUser != null && resUser.getRank() != null ) {
-				generalRank = resUser.getRank()[0].getGeneralRank();
-			}
-		
-			return generalRank>noModerationRankingLimit;
-		} catch (RemoteException e) {
-			return false;
-		}
-	}
-
 	//Puede postear pero moderado de acuerdo a los permisos del usuario, el ranking y la precencia de palabras moderadas.
 	public List<ModerationResult> moderatePost(CmsObject cms, CmsUser user, String sectionName, String category, String content) throws CmsException {
 		List<CmsGroup> groups = cms.getGroupsOfUser(user.getName(), false, true);
@@ -193,16 +165,16 @@ public class NewsPublisherModerationManager {
 		
 		String sitePath = getSiteName(cms);
 		String siteName = sitePath.replaceFirst("/sites/", "");
-		boolean hasBigRating = hasBigRating(user, siteName);
+		//boolean hasBigRating = hasBigRating(user, siteName);
 
-		if(isSectionModerateForGroups(sectionName, groups) && !hasBigRating) {
+		if(isSectionModerateForGroups(sectionName, groups)) {
 			ret.add(ModerationResult.getInstance(ModerationReason.SECTION_MODERATED, sectionName));
 		}
-		if(isCategoryModerateForGroups(category, groups) && !hasBigRating) {
+		if(isCategoryModerateForGroups(category, groups)) {
 			ret.add(ModerationResult.getInstance(ModerationReason.CATEGORY_MODERATED, sectionName));
 		}
 		
-		LOG.debug("hasBigRating: " + hasBigRating);
+		//LOG.debug("hasBigRating: " + hasBigRating);
 		
 		List<String> moderated = getModeratedWordsInContent(cms, content);
 		List<String> forbidden = getForbiddenWordsInContent(cms, content);

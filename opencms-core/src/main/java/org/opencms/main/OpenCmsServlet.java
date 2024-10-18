@@ -41,11 +41,11 @@ import org.opencms.util.CmsRequestUtil;
 
 import java.io.IOException;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 
@@ -119,7 +119,7 @@ public class OpenCmsServlet extends HttpServlet implements I_CmsRequestHandler {
     /**
      * OpenCms servlet main request handling method.<p>
      * 
-     * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     * @see jakarta.servlet.http.HttpServlet#doGet(jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse)
      */
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
@@ -159,7 +159,7 @@ public class OpenCmsServlet extends HttpServlet implements I_CmsRequestHandler {
      * OpenCms servlet POST request handling method, 
      * will just call {@link #doGet(HttpServletRequest, HttpServletResponse)}.<p>
      * 
-     * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     * @see jakarta.servlet.http.HttpServlet#doPost(jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse)
      */
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
@@ -226,7 +226,7 @@ public class OpenCmsServlet extends HttpServlet implements I_CmsRequestHandler {
     }
 
     /**
-     * @see javax.servlet.Servlet#init(javax.servlet.ServletConfig)
+     * @see jakarta.servlet.Servlet#init(jakarta.servlet.ServletConfig)
      */
     @Override
     public synchronized void init(ServletConfig config) throws ServletException {

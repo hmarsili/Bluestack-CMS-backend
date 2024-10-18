@@ -16,8 +16,11 @@ import org.opencms.xml.CmsXmlException;
 import org.opencms.xml.content.CmsXmlContent;
 import org.opencms.xml.content.CmsXmlContentFactory;
 import org.opencms.xml.types.I_CmsXmlContentValue;
+import org.xml.sax.EntityResolver;
 
 import com.tfsla.webusersnewspublisher.model.News;
+
+import jakarta.servlet.http.Part;
 
 public class XmlContentHelper {
 	
@@ -38,7 +41,7 @@ public class XmlContentHelper {
 		}
 		
 		try {
-			xmlContent.validateXmlStructure(new CmsXmlEntityResolver(this.cmsObject));
+			xmlContent.validateXmlStructure((EntityResolver)new CmsXmlEntityResolver(this.cmsObject));
 		} catch (CmsXmlException eXml) {
 			xmlContent.setAutoCorrectionEnabled(true);
 			xmlContent.correctXmlStructure(this.cmsObject);
@@ -118,10 +121,10 @@ public class XmlContentHelper {
 		
 	}
 	
-	public void setXmlImageValues(List<FileItem> values, List<String> imageNames, List<String> values64, List<String> names64) {
+	public void setXmlImageValues(List<Part> values, List<String> imageNames, List<String> values64, List<String> names64) {
 		int pos = 0;
 		if(values != null && values.size() > 0) {
-			for (FileItem item : values) {
+			for (Part item : values) {
 				this.setXmlImageItem(pos, item.getName(), imageNames.get(values.indexOf(item)));
 				pos++;
 			}

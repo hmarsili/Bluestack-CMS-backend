@@ -2,8 +2,8 @@ package com.tfsla.diario.friendlyTags;
 
 import java.util.List;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.JspTagException;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspTagException;
 
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.opencms.file.CmsObject;

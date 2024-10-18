@@ -62,9 +62,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.jsp.PageContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.jsp.PageContext;
 
 import org.apache.commons.fileupload.FileItem;
 
@@ -339,7 +339,7 @@ public class CmsHtmlImportDialog extends CmsWidgetDialog {
     }
 
     /**
-     * @see org.opencms.workplace.CmsWidgetDialog#fillWidgetValues(javax.servlet.http.HttpServletRequest)
+     * @see org.opencms.workplace.CmsWidgetDialog#fillWidgetValues(jakarta.servlet.http.HttpServletRequest)
      */
     @Override
     protected void fillWidgetValues(HttpServletRequest request) {

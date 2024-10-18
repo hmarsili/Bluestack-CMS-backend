@@ -3,9 +3,9 @@ package com.tfsla.diario.friendlyTags;
 import java.io.IOException;
 import java.util.List;
 
-import javax.servlet.jsp.JspTagException;
-import javax.servlet.jsp.tagext.Tag;
-import javax.servlet.jsp.tagext.TagSupport;
+import jakarta.servlet.jsp.JspTagException;
+import jakarta.servlet.jsp.tagext.Tag;
+import jakarta.servlet.jsp.tagext.TagSupport;
 
 import com.tfsla.opencmsdev.encuestas.RespuestaEncuestaConVotos;
 

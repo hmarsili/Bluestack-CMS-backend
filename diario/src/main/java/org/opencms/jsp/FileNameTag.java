@@ -1,6 +1,6 @@
 package org.opencms.jsp;
 
-import javax.servlet.jsp.PageContext;
+import jakarta.servlet.jsp.PageContext;
 
 import org.opencms.file.CmsFile;
 import org.opencms.flex.CmsFlexController;

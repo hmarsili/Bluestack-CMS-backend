@@ -9,7 +9,7 @@ import java.util.Locale;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;

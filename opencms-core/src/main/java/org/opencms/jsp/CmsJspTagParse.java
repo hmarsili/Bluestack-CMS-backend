@@ -45,10 +45,10 @@ import java.io.StringWriter;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.tagext.BodyTagSupport;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.PageContext;
+import jakarta.servlet.jsp.tagext.BodyTagSupport;
 
 import org.apache.commons.logging.Log;
 
@@ -92,7 +92,7 @@ public class CmsJspTagParse extends BodyTagSupport {
     private String m_param = "";
 
     /**
-     * @see javax.servlet.jsp.tagext.Tag#doEndTag()
+     * @see jakarta.servlet.jsp.tagext.Tag#doEndTag()
      * 
      * @return EVAL_PAGE
      * 
@@ -272,7 +272,7 @@ public class CmsJspTagParse extends BodyTagSupport {
     }
 
     /**
-     * @see javax.servlet.jsp.tagext.Tag#release()
+     * @see jakarta.servlet.jsp.tagext.Tag#release()
      */
     @Override
     public void release() {

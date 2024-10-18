@@ -3,7 +3,7 @@ package com.tfsla.diario.friendlyTags;
 import org.opencms.file.CmsObject;
 import org.opencms.flex.CmsFlexController;
 
-import javax.servlet.jsp.tagext.BodyTagSupport;
+import jakarta.servlet.jsp.tagext.BodyTagSupport;
 
 public abstract class BaseTag extends BodyTagSupport {
 

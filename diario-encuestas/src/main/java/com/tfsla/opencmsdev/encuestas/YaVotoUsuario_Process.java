@@ -3,7 +3,7 @@ package com.tfsla.opencmsdev.encuestas;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.opencms.file.CmsObject;
 

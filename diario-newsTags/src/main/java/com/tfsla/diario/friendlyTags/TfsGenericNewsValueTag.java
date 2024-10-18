@@ -1,6 +1,6 @@
 package com.tfsla.diario.friendlyTags;
 
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspException;
 
 public class TfsGenericNewsValueTag extends A_TfsNoticiaValue {
 

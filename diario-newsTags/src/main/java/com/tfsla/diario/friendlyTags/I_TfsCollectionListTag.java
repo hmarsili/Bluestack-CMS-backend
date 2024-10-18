@@ -1,6 +1,6 @@
 package com.tfsla.diario.friendlyTags;
 
-import javax.servlet.jsp.JspTagException;
+import jakarta.servlet.jsp.JspTagException;
 
 public interface I_TfsCollectionListTag {
 	public int getIndex();

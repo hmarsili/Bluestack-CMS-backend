@@ -31,8 +31,6 @@
 
 package org.opencms.frontend.photoalbum;
 
-import com.alkacon.simapi.Simapi;
-
 import org.opencms.file.CmsFile;
 import org.opencms.file.CmsObject;
 import org.opencms.jsp.CmsJspActionElement;
@@ -42,6 +40,8 @@ import org.opencms.util.CmsStringUtil;
 import org.opencms.xml.content.CmsXmlContent;
 import org.opencms.xml.content.CmsXmlContentFactory;
 import org.opencms.xml.types.CmsXmlHtmlValue;
+
+import com.alkacon.simapi.Simapi;
 
 import java.awt.Color;
 import java.util.List;

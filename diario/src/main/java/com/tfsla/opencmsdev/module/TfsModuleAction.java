@@ -49,7 +49,6 @@ import com.tfsla.opencmsdev.RecipeOnPublishEvent;
 import com.tfsla.opencmsdev.TriviaOnPublishEvent;
 import com.tfsla.opencmsdev.VodOnPublishEvent;
 import com.tfsla.opencmsdev.VodPublishExpirationChangeEvent;
-import com.tfsla.rankViews.service.RankService;
 
 public class TfsModuleAction implements I_CmsModuleAction {
 
@@ -106,7 +105,7 @@ public class TfsModuleAction implements I_CmsModuleAction {
 		OpenCms.addCmsEventListener(new UnlockResourceEventListener(), eventResoureDeleted);
 	
 
-		CmsMediosInit.getInstance().addService(new RankService());
+//		CmsMediosInit.getInstance().addService(new RankService());
 	}
 
 	protected synchronized void addListener(Integer cmsEventType, I_CmsEventListener listener) {

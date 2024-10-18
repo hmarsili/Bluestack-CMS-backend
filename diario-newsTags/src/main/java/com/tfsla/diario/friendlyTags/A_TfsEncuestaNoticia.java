@@ -3,10 +3,10 @@ package com.tfsla.diario.friendlyTags;
 import java.io.IOException;
 import java.util.Date;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.JspTagException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspTagException;
 
 import org.opencms.file.CmsObject;
 import org.opencms.file.CmsUser;

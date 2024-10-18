@@ -16,14 +16,14 @@ import java.io.UnsupportedEncodingException;
 import java.util.Random;
 import java.util.Set;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 
-import com.octo.captcha.service.image.ImageCaptchaService;
+//import com.octo.captcha.service.image.ImageCaptchaService;
 import com.tfsla.data.baseDAO;
 import com.tfsla.diario.ediciones.model.TipoEdicion;
 import com.tfsla.diario.ediciones.services.TipoEdicionBaseService;

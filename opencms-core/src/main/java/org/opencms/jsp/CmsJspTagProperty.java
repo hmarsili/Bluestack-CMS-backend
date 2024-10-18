@@ -41,9 +41,9 @@ import org.opencms.util.CmsStringUtil;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.TagSupport;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.tagext.TagSupport;
 
 import org.apache.commons.logging.Log;
 
@@ -234,7 +234,7 @@ public class CmsJspTagProperty extends TagSupport {
     /**
      * @return SKIP_BODY
      * @throws JspException in case somethins goes wrong
-     * @see javax.servlet.jsp.tagext.Tag#doStartTag()
+     * @see jakarta.servlet.jsp.tagext.Tag#doStartTag()
      */
     @Override
     public int doStartTag() throws JspException {
@@ -256,7 +256,7 @@ public class CmsJspTagProperty extends TagSupport {
                 if (LOG.isErrorEnabled()) {
                     LOG.error(Messages.get().getBundle().key(Messages.ERR_PROCESS_TAG_1, "property"), ex);
                 }
-                throw new javax.servlet.jsp.JspException(ex);
+                throw new jakarta.servlet.jsp.JspException(ex);
             }
         }
         return SKIP_BODY;
@@ -303,7 +303,7 @@ public class CmsJspTagProperty extends TagSupport {
     }
 
     /**
-     * @see javax.servlet.jsp.tagext.Tag#release()
+     * @see jakarta.servlet.jsp.tagext.Tag#release()
      */
     @Override
     public void release() {

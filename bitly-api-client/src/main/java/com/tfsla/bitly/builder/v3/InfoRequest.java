@@ -15,6 +15,7 @@
  */
 package com.tfsla.bitly.builder.v3;
 
+
 import java.lang.reflect.Type;
 import java.util.Collection;
 

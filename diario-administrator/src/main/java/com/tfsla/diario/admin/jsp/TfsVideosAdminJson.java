@@ -8,7 +8,7 @@ import org.opencms.configuration.CPMConfig;
 import org.opencms.configuration.CmsMedios;
 import org.opencms.db.CmsPublishList;
 import java.util.*;
-import javax.servlet.jsp.PageContext;
+import jakarta.servlet.jsp.PageContext;
 
 import org.opencms.file.*;
 

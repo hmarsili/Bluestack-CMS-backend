@@ -54,9 +54,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.tagext.Tag;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.PageContext;
+import jakarta.servlet.jsp.tagext.Tag;
 
 /**
  * Implementation of the <code>&lt;cms:contentload/&gt;</code> tag, 
@@ -318,7 +318,7 @@ public class CmsJspTagContentLoad extends CmsJspScopedVarBodyTagSuport implement
     }
 
     /**
-     * @see javax.servlet.jsp.tagext.BodyTagSupport#doAfterBody()
+     * @see jakarta.servlet.jsp.tagext.BodyTagSupport#doAfterBody()
      */
     @Override
     public int doAfterBody() throws JspException {
@@ -337,7 +337,7 @@ public class CmsJspTagContentLoad extends CmsJspScopedVarBodyTagSuport implement
     }
 
     /**
-     * @see javax.servlet.jsp.tagext.Tag#doEndTag()
+     * @see jakarta.servlet.jsp.tagext.Tag#doEndTag()
      */
     @Override
     public int doEndTag() {
@@ -350,7 +350,7 @@ public class CmsJspTagContentLoad extends CmsJspScopedVarBodyTagSuport implement
     }
 
     /**
-     * @see javax.servlet.jsp.tagext.Tag#doStartTag()
+     * @see jakarta.servlet.jsp.tagext.Tag#doStartTag()
      */
     @Override
     public int doStartTag() throws JspException, CmsIllegalArgumentException {
@@ -601,7 +601,7 @@ public class CmsJspTagContentLoad extends CmsJspScopedVarBodyTagSuport implement
     }
 
     /**
-     * @see javax.servlet.jsp.tagext.Tag#release()
+     * @see jakarta.servlet.jsp.tagext.Tag#release()
      */
     @Override
     public void release() {

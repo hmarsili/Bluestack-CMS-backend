@@ -1,7 +1,7 @@
 package com.tfsla.diario.friendlyTags;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.JspTagException;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspTagException;
 
 import org.opencms.file.CmsObject;
 import org.opencms.flex.CmsFlexController;

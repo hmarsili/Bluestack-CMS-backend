@@ -43,8 +43,8 @@ import org.opencms.xml.page.CmsXmlPageFactory;
 import java.util.List;
 import java.util.Locale;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.jsp.tagext.BodyTagSupport;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.jsp.tagext.BodyTagSupport;
 
 import org.apache.commons.logging.Log;
 
@@ -152,7 +152,7 @@ public class CmsJspTagTemplate extends BodyTagSupport {
     }
 
     /**
-     * @see javax.servlet.jsp.tagext.Tag#doStartTag()
+     * @see jakarta.servlet.jsp.tagext.Tag#doStartTag()
      */
     @Override
     public int doStartTag() {
@@ -215,7 +215,7 @@ public class CmsJspTagTemplate extends BodyTagSupport {
     }
 
     /**
-     * @see javax.servlet.jsp.tagext.Tag#release()
+     * @see jakarta.servlet.jsp.tagext.Tag#release()
      */
     @Override
     public void release() {

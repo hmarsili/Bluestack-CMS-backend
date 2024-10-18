@@ -3,7 +3,7 @@ package com.tfsla.diario.friendlyTags;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspException;
 
 
 public class TfsFechaModificacionVideoTag  extends A_TfsNoticiaCollectionValue {

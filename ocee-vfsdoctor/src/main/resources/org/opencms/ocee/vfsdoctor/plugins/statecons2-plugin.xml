@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE opencms SYSTEM "http://www.alkacon.com/dtd/6.0/vfsdoctor-plugin.dtd">
+<opencms>
+	<vfsdoctor>
+		<plugin>
+			<queries>
+				<query name="SELECT_ALL_WRONG_OFFLINE_ENTRIES" >
+					<default><![CDATA[
+						 SELECT
+							STR1.STRUCTURE_ID,
+							STR1.PARENT_ID,
+							STR1.RESOURCE_ID,
+							STR1.RESOURCE_PATH
+						 FROM
+							CMS_OFFLINE_STRUCTURE STR1
+					     LEFT JOIN 
+					     	CMS_ONLINE_STRUCTURE STR2 
+					     ON 
+						    STR1.STRUCTURE_ID = STR2.STRUCTURE_ID 
+                         WHERE  
+                            STR1.STRUCTURE_STATE <> 2 
+						 AND 
+						    STR2.RESOURCE_PATH IS NULL  
+					]]></default>
+				</query> 
+				<query name="SET_OFFLINE_STATE_NEW" >
+					<default><![CDATA[
+						UPDATE 
+							CMS_OFFLINE_STRUCTURE
+						SET
+							STRUCTURE_STATE = 2
+						WHERE
+							STRUCTURE_ID = ?
+					]]></default>
+				</query>
+				<query name="SELECT_PUBLISH_HISTORY_ENTRIES_BY_STRUCTURE_ID">
+					<default><![CDATA[
+					SELECT 
+						PUBLISH_TAG,
+						RESOURCE_PATH,
+						RESOURCE_STATE, 
+						STRUCTURE_ID 
+					FROM 
+						CMS_PUBLISH_HISTORY 
+					WHERE 
+						STRUCTURE_ID = ?
+					GROUP BY
+						PUBLISH_TAG
+					ORDER BY 
+						PUBLISH_TAG 
+					DESC
+					]]></default>
+				</query> 
+			</queries>
+		</plugin>
+	</vfsdoctor>
+</opencms>

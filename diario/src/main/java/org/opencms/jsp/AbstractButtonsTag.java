@@ -1,7 +1,7 @@
 package org.opencms.jsp;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import com.tfsla.tags.AbstractTag;
 import com.tfsla.utils.Writer;

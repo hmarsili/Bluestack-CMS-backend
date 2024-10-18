@@ -10,8 +10,9 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.Part;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -194,45 +195,35 @@ public abstract class FilesAddWebService extends OfflineProjectService {
 	
 	@SuppressWarnings("rawtypes")
 	protected int processItemsRequest(Hashtable<String, Object> params, String encoding) throws Exception {
-		List items = this.getRequestAsList();
+		//List items = this.getRequestAsList();
 		int itemsCount = 0;
 		
-		if (items != null) {
-			Iterator itr = items.iterator();
-			while (itr.hasNext()) {
-				FileItem item = (FileItem) itr.next();
-				if (item.isFormField()) {
-					params.put(item.getFieldName(), new String(item.getString().getBytes(StringConstants.ENCODING_ISO), encoding));
-					this.mapFileItem(item);
-				} else {
-					params.put(item.getFieldName(), item.getInputStream());
-					itemsCount++;
-				}
-			}
+		Iterator<Part> it = request.getParts().iterator();
+		while (it.hasNext()) {
+			Part part = it.next();
+			params.put(part.getName(), part.getInputStream());
+			itemsCount++;
 		}
+		mapParameters();
 		
 		return itemsCount;
 	}
 
 	@SuppressWarnings("rawtypes")
-	protected Object getPostRequestParam(String paramName) throws FileUploadException, IOException {
-		List items = this.getRequestAsList();
-		if (items != null) {
-			Iterator itr = items.iterator();
-			while (itr.hasNext()) {
-				FileItem item = (FileItem) itr.next();
-				if(item.getFieldName().equals(paramName)) {
-					if (item.isFormField()) {
-						return item.getString();
-					} else {
-						return item.getInputStream();
-					}
-				}
-			}
+	protected Object getPostRequestParam(String paramName) throws FileUploadException, IOException, ServletException {
+		
+		Iterator<Part> it = request.getParts().iterator();
+		while (it.hasNext()) {
+			Part part = it.next();
+			if (part.getName().equals(paramName))
+				return part.getInputStream();
 		}
-		return null;
+		
+		return request.getParameter(paramName);
+		
 	}
 	
+	/*
 	@SuppressWarnings("rawtypes")
 	private List getRequestAsList() throws FileUploadException {
 		if(this.requestAsList == null) {
@@ -244,17 +235,18 @@ public abstract class FilesAddWebService extends OfflineProjectService {
 		}
 		return requestAsList;
 	}
+	*/
 	
-	protected void mapFileItem(FileItem item) {
-		if(item.getFieldName().toLowerCase().equals(StringConstants.PUBLICATION)) {
-			this.publication = item.getString();
-		}
-		if(item.getFieldName().toLowerCase().equals(StringConstants.SITE)) {
-			this.sitename = item.getString();
-		}
-		if(item.getFieldName().toLowerCase().equals(StringConstants.SECTION)) {
-			this.section = item.getString();
-		}
+	protected void mapParameters() {
+		
+		if (request.getParameter(StringConstants.PUBLICATION)!=null)
+			this.publication = request.getParameter(StringConstants.PUBLICATION);
+		
+		if (request.getParameter(StringConstants.SITE)!=null)
+			this.sitename = request.getParameter(StringConstants.SITE);
+		
+		if (request.getParameter(StringConstants.SECTION)!=null)
+			this.section = request.getParameter(StringConstants.SECTION);
 	}
 
 	@SuppressWarnings("rawtypes")

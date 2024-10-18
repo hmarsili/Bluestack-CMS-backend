@@ -184,7 +184,6 @@ public class CmsForm {
     /** Resource type ID of XML content forms. */
     private static final String TYPE_NAME = "emailform";
 
-    private CmsCaptchaField m_captchaField;
 
     private List m_configurationErrors;
     private String m_confirmationMailCheckboxLabel;
@@ -289,16 +288,6 @@ public class CmsForm {
      */
     public boolean captchaFieldIsOnInputPage() {
         return !getShowCheck();
-    }
-
-    /**
-     * Returns the (opt.) captcha field of this form.<p>
-     * 
-     * @return the (opt.) captcha field of this form
-     */
-    public CmsCaptchaField getCaptchaField() {
-        
-        return m_captchaField;
     }
 
     /**
@@ -552,15 +541,6 @@ public class CmsForm {
     }
 
     /**
-     * Tests if a captcha field is configured for this form.<p>
-     * 
-     * @return true, if a captcha field is configured for this form
-     */
-    public boolean hasCaptchaField() {
-        return m_captchaField != null;
-    }
-
-    /**
      * Returns if the form has configuration errors.<p>
      *
      * @return true if the form has configuration errors, otherwise false
@@ -630,13 +610,6 @@ public class CmsForm {
         // initialize the form input fields
         initInputFields(content, jsp, locale, messages, initial);
         
-        // init. the optional captcha field
-        initCaptchaField(jsp, content, locale, initial);
-        
-        // add the captcha field to the list of all fields, if the form has no check page
-        if (captchaFieldIsOnInputPage() && m_captchaField != null) {
-            addField(m_captchaField);
-        }
     }
     
     /**
@@ -677,25 +650,6 @@ public class CmsForm {
         return CmsFormHandler.ACTION_SUBMIT.equals(m_formAction);
     }
 
-    /**
-     * Removes the captcha field from the list of all fields, if present.<p>
-     * 
-     * @return the removed captcha field, or null
-     */
-    public I_CmsField removeCaptchaField() {
-        
-        for (int i = 0, n = m_fields.size(); i < n; i++) {
-            
-            I_CmsField field = (I_CmsField)m_fields.get(i);
-            if (field != null && CmsCaptchaField.class.isAssignableFrom(getClass())) {
-                
-                removeField(field);
-                return field;
-            }
-        }
-
-        return null;
-    }
 
     /**
      * Adds a field to the form.<p>
@@ -1046,50 +1000,6 @@ public class CmsForm {
             return value;
         }
         return defaultValue;
-    }
-    
-    /**
-     * Initializes the optional captcha field.<p>
-     * 
-     * @param jsp the initialized CmsJspActionElement to access the OpenCms API
-     * @param xmlContent the XML configuration content
-     * @param locale the currently active Locale
-     * @param initial if true, field values are filled with values specified in the XML configuration, otherwise values are read from the request
-     */
-    private void initCaptchaField(CmsJspActionElement jsp, CmsXmlContent xmlContent, Locale locale, boolean initial) {
-        
-        boolean captchaFieldIsOnInputPage = captchaFieldIsOnInputPage();
-        boolean displayCheckPage = captchaFieldIsOnCheckPage() && isInputFormSubmitted();
-        boolean submittedCheckPage = captchaFieldIsOnCheckPage() && isCheckPageSubmitted();
-
-        // Todo: read the captcha settings here, don't provide xmlcontent with form!!!
-        if (captchaFieldIsOnInputPage || displayCheckPage || submittedCheckPage) {
-
-            CmsObject cms = jsp.getCmsObject();
-            
-            I_CmsXmlContentValue xmlValueCaptcha = xmlContent.getValue(NODE_CAPTCHA, locale);
-            if (xmlValueCaptcha != null) {
-
-                // get the field label
-                String xPathCaptcha = xmlValueCaptcha.getPath() + "/";
-                String stringValue = xmlContent.getStringValue(cms, xPathCaptcha + NODE_FIELDLABEL, locale);
-                String fieldLabel = getConfigurationValue(stringValue, "");
-
-                // get the field value
-                String fieldValue = "";
-                if (!initial) {
-                    fieldValue = getParameter(CmsCaptchaField.C_PARAM_CAPTCHA_PHRASE);
-                    if (fieldValue == null) {
-                        fieldValue = "";
-                    }
-                }
-
-                // get the image settings from the XML content
-                CmsCaptchaSettings captchaSettings = CmsCaptchaSettings.getInstance(jsp);
-                captchaSettings.init(cms, xmlContent, locale);
-                m_captchaField = new CmsCaptchaField(captchaSettings, fieldLabel, fieldValue);
-            }
-        }
     }
     
     /**

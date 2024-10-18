@@ -1,8 +1,8 @@
 package com.tfsla.tags;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.BodyContent;
-import javax.servlet.jsp.tagext.Tag;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.tagext.BodyContent;
+import jakarta.servlet.jsp.tagext.Tag;
 
 import com.tfsla.utils.Writer;
 
@@ -12,7 +12,7 @@ import com.tfsla.utils.Writer;
  * @author lgassman
  *
  */
-public abstract class BodyTag extends AbstractTag implements javax.servlet.jsp.tagext.BodyTag {
+public abstract class BodyTag extends AbstractTag implements jakarta.servlet.jsp.tagext.BodyTag {
 	
 	private BodyContent content;
 

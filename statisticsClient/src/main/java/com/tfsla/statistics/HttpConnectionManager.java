@@ -2,19 +2,20 @@ package com.tfsla.statistics;
 
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
-import org.apache.axis2.transport.http.HTTPConstants;
-import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethodRetryHandler;
-import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
-import org.apache.commons.httpclient.params.HttpClientParams;
-import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
-import org.apache.commons.httpclient.params.HttpMethodParams;
-import org.apache.log4j.Logger;
+import org.apache.axis2.kernel.http.HTTPConstants;
+//import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
+//import org.apache.commons.httpclient.HttpClient;
+//import org.apache.commons.httpclient.HttpMethodRetryHandler;
+//import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+//import org.apache.commons.httpclient.params.HttpClientParams;
+//import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
+//import org.apache.commons.httpclient.params.HttpMethodParams;
+import org.apache.commons.logging.Log;
+import org.opencms.main.CmsLog;
 
 public class HttpConnectionManager {
 
-	static Logger LOG = Logger.getLogger(HttpConnectionManager.class);
+	static Log LOG = CmsLog.getLog(HttpConnectionManager.class);
 	
 	private static HttpConnectionManager  instance = null;
 	

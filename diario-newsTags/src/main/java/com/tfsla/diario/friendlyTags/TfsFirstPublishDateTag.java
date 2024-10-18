@@ -3,7 +3,7 @@ package com.tfsla.diario.friendlyTags;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspException;
 import org.opencms.file.CmsResource;
 
 import com.tfsla.diario.utils.TfsXmlContentNameProvider;

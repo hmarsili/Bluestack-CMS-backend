@@ -39,10 +39,10 @@ import org.opencms.xml.I_CmsXmlDocument;
 import java.util.List;
 import java.util.Locale;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.JspTagException;
-import javax.servlet.jsp.tagext.Tag;
-import javax.servlet.jsp.tagext.TagSupport;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspTagException;
+import jakarta.servlet.jsp.tagext.Tag;
+import jakarta.servlet.jsp.tagext.TagSupport;
 
 /**
  * Used to loop through the element values of an XML content item.<p>
@@ -100,7 +100,7 @@ public class CmsJspTagContentLoop extends TagSupport implements I_CmsXmlContentC
     }
 
     /**
-     * @see javax.servlet.jsp.tagext.TagSupport#doAfterBody()
+     * @see jakarta.servlet.jsp.tagext.TagSupport#doAfterBody()
      */
     @Override
     public int doAfterBody() {
@@ -114,7 +114,7 @@ public class CmsJspTagContentLoop extends TagSupport implements I_CmsXmlContentC
     }
 
     /**
-     * @see javax.servlet.jsp.tagext.Tag#doEndTag()
+     * @see jakarta.servlet.jsp.tagext.Tag#doEndTag()
      */
     @Override
     public int doEndTag() {
@@ -127,7 +127,7 @@ public class CmsJspTagContentLoop extends TagSupport implements I_CmsXmlContentC
     }
 
     /**
-     * @see javax.servlet.jsp.tagext.Tag#doStartTag()
+     * @see jakarta.servlet.jsp.tagext.Tag#doStartTag()
      */
     @Override
     public int doStartTag() throws JspException {
@@ -248,7 +248,7 @@ public class CmsJspTagContentLoop extends TagSupport implements I_CmsXmlContentC
     }
 
     /**
-     * @see javax.servlet.jsp.tagext.Tag#release()
+     * @see jakarta.servlet.jsp.tagext.Tag#release()
      */
     @Override
     public void release() {

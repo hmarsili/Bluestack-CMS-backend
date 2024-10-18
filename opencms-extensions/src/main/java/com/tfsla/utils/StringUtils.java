@@ -16,7 +16,7 @@ public class StringUtils {
 
     /**
      * <code>
-     * detecta agrupaciones de 2 o más <br> y </br> con espacios, cambios de linea (o no)
+     * detecta agrupaciones de 2 o mï¿½s <br> y </br> con espacios, cambios de linea (o no)
      * en el medio, y lo cambia por <br><br>
      * </code>
      * 
@@ -28,20 +28,20 @@ public class StringUtils {
     }
 
     public static String fromHtml(String string) {
-        string = string.replaceAll("&aacute;", "á");
-        string = string.replaceAll("&eacute;", "é");
-        string = string.replaceAll("&iacute;", "í");
-        string = string.replaceAll("&oacute;", "ó");
-        string = string.replaceAll("&uacute;", "ú");
+        string = string.replaceAll("&aacute;", "ï¿½");
+        string = string.replaceAll("&eacute;", "ï¿½");
+        string = string.replaceAll("&iacute;", "ï¿½");
+        string = string.replaceAll("&oacute;", "ï¿½");
+        string = string.replaceAll("&uacute;", "ï¿½");
         return string;
     }
 
     public static String toHtml(String string) {
-        string = string.replaceAll("á", "&aacute;");
-        string = string.replaceAll("é", "&eacute;");
-        string = string.replaceAll("í", "&iacute;");
-        string = string.replaceAll("ó", "&oacute;");
-        string = string.replaceAll("ú", "&uacute;");
+        string = string.replaceAll("ï¿½", "&aacute;");
+        string = string.replaceAll("ï¿½", "&eacute;");
+        string = string.replaceAll("ï¿½", "&iacute;");
+        string = string.replaceAll("ï¿½", "&oacute;");
+        string = string.replaceAll("ï¿½", "&uacute;");
         return string;
     }
 
@@ -90,12 +90,12 @@ public class StringUtils {
     public static List<String> normalizeToSearch(String string) {
         String out = string;
         // TODO sacar la basura con una regular expresion
-        out = out.replaceAll("Ñ|ñ", "n");
-        out = out.replaceAll("á|Á", "a");
-        out = out.replaceAll("é|É", "e");
-        out = out.replaceAll("í|Í", "i");
-        out = out.replaceAll("ó|Ó", "o");
-        out = out.replaceAll("ú|Ú|Ü|ü", "u");
+        out = out.replaceAll("ï¿½|ï¿½", "n");
+        out = out.replaceAll("ï¿½|ï¿½", "a");
+        out = out.replaceAll("ï¿½|ï¿½", "e");
+        out = out.replaceAll("ï¿½|ï¿½", "i");
+        out = out.replaceAll("ï¿½|ï¿½", "o");
+        out = out.replaceAll("ï¿½|ï¿½|ï¿½|ï¿½", "u");
         out = out.replaceAll("\\W", " ");
         List<String> list = CollectionFactory.createList();
         for (String value : out.toLowerCase().split(" ")) {

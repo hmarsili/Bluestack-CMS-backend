@@ -1,6 +1,6 @@
 package com.tfsla.diario.webservices.core.services;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import com.tfsla.diario.webservices.core.GuestSessionManager;
 

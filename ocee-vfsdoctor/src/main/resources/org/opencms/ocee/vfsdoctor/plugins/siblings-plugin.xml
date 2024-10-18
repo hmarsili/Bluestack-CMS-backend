@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE opencms SYSTEM "http://www.alkacon.com/dtd/6.0/vfsdoctor-plugin.dtd">
+<opencms>
+	<vfsdoctor>
+		<plugin>
+			<queries>
+				<query name="SELECT_ALL_SIBLING_COUNT" >
+					<default><![CDATA[
+						SELECT 
+							RES.RESOURCE_ID, RES.SIBLING_COUNT
+						FROM
+							CMS_${PROJECT}_RESOURCES RES,
+							CMS_${PROJECT}_STRUCTURE STR
+						WHERE
+							 RES.RESOURCE_ID = STR.RESOURCE_ID
+						ORDER BY
+							RES.RESOURCE_ID
+					]]></default>
+				</query> 
+				<query name="CREATE_STRUCTURE_FOR_RESOURCE" >
+					<default><![CDATA[
+						INSERT INTO
+							CMS_${PROJECT}_STRUCTURE
+						    (PARENT_ID, STRUCTURE_ID, RESOURCE_ID, RESOURCE_PATH, STRUCTURE_STATE, DATE_EXPIRED, DATE_RELEASED, STRUCTURE_VERSION)
+						VALUES
+							(?, ?, ?, ?, ?, ?, ?, ?)
+					]]></default>
+				</query> 
+				<query name="SELECT_LOST_FOUND_ID" >
+					<default><![CDATA[
+						SELECT 
+							STRUCTURE_ID
+						FROM
+							CMS_${PROJECT}_STRUCTURE
+						WHERE
+							RESOURCE_PATH=?;
+					]]></default>
+				</query> 
+			</queries>
+		</plugin>
+	</vfsdoctor>
+</opencms>

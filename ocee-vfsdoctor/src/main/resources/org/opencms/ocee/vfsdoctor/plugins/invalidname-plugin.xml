@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE opencms SYSTEM "http://www.alkacon.com/dtd/6.0/vfsdoctor-plugin.dtd">
+<opencms>
+	<vfsdoctor>
+		<plugin>
+			<queries>
+				<query name="SELECT_ALL_STRUCTURES" >
+					<default><![CDATA[
+						SELECT 
+							STR.STRUCTURE_ID, STR.PARENT_ID, 
+							STR.RESOURCE_ID, STR.RESOURCE_PATH
+						FROM 
+							CMS_${PROJECT}_STRUCTURE STR 
+						ORDER BY
+							STR.RESOURCE_PATH
+					]]></default>
+				</query> 
+				<query name="UPDATE_RESOURCE_PATH" >
+					<default><![CDATA[
+						UPDATE
+							CMS_${PROJECT}_STRUCTURE
+						SET 
+							RESOURCE_PATH=?
+						WHERE
+							STRUCTURE_ID = ?
+					]]></default>
+				</query> 
+			</queries>
+		</plugin>
+	</vfsdoctor>
+</opencms>

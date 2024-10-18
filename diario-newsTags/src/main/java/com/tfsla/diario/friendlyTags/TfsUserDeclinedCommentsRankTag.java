@@ -2,7 +2,7 @@ package com.tfsla.diario.friendlyTags;
 
 import java.io.IOException;
 
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspException;
 
 public class TfsUserDeclinedCommentsRankTag extends A_TfsUsuarioValueTag {
 	private static final long serialVersionUID = 8576600911555041179L;

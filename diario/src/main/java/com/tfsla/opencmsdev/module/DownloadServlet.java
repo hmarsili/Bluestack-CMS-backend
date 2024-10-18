@@ -13,10 +13,10 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -122,13 +122,13 @@ public class DownloadServlet extends HttpServlet {
 	}
 
 	private void download(HttpServletResponse res, String file) throws IOException {
-		javax.servlet.ServletOutputStream out = res.getOutputStream();
+		jakarta.servlet.ServletOutputStream out = res.getOutputStream();
 		res.setContentType("application/x-download");
 		res.setHeader("Content-Disposition", "attachment; filename=" + file.substring(file.lastIndexOf('/') + 1));
 		printResourceInResponse(out, file);
 	}
 
-	private void printResourceInResponse(javax.servlet.ServletOutputStream out, String file) throws IOException {
+	private void printResourceInResponse(jakarta.servlet.ServletOutputStream out, String file) throws IOException {
 		InputStream in = new FileInputStream(file);
 		byte[] buf = new byte[4 * 1024]; // 4K buffer
 		int bytesRead;

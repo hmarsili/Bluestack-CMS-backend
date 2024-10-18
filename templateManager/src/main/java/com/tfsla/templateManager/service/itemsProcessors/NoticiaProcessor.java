@@ -2,7 +2,7 @@ package com.tfsla.templateManager.service.itemsProcessors;
 
 import java.io.IOException;
 
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspException;
 
 import org.opencms.flex.CmsFlexController;
 import org.opencms.staticexport.CmsLinkManager;

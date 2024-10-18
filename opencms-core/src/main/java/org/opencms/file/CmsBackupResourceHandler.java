@@ -34,7 +34,7 @@ package org.opencms.file;
 import org.opencms.file.history.CmsHistoryResourceHandler;
 import org.opencms.file.history.I_CmsHistoryResource;
 
-import javax.servlet.ServletRequest;
+import jakarta.servlet.ServletRequest;
 
 /**
  * Resource init handler that loads backup versions of resources.<p>

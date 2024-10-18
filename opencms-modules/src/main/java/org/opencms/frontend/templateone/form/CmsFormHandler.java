@@ -54,9 +54,9 @@ import java.util.StringTokenizer;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.jsp.PageContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.jsp.PageContext;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.logging.Log;
@@ -529,13 +529,6 @@ public class CmsFormHandler extends CmsJspActionElement {
             // input field validation failed
             result = true;
 
-            if (getFormConfiguration().hasCaptchaField() && getFormConfiguration().captchaFieldIsOnCheckPage()) {
-                // if there is a captcha field and a check page configured, we do have to remove the already
-                // initialized captcha field from the form again. the captcha field gets initialized together with
-                // the form, in this moment it is not clear yet whether we have validation errors or and need to
-                // to go back to the input form...
-                getFormConfiguration().removeCaptchaField();
-            }
         } else if (ACTION_CONFIRMED.equalsIgnoreCase(getParameter(PARAM_FORMACTION))
             && getFormConfiguration().captchaFieldIsOnCheckPage()
             && !validate()) {
@@ -573,31 +566,10 @@ public class CmsFormHandler extends CmsJspActionElement {
                 continue;
             }
 
-            if (CmsCaptchaField.class.isAssignableFrom(currentField.getClass())) {
-                // the captcha field doesn't get validated here...
-                continue;
-            }
-
             String validationError = currentField.validate(this);
             if (CmsStringUtil.isNotEmpty(validationError)) {
                 getErrors().put(currentField.getName(), validationError);
                 allOk = false;
-            }
-        }
-
-        CmsCaptchaField captchaField = m_formConfiguration.getCaptchaField();
-        if (captchaField != null) {
-
-            boolean captchaFieldIsOnInputPage = getFormConfiguration().captchaFieldIsOnInputPage()
-                && getFormConfiguration().isInputFormSubmitted();
-            boolean captchaFieldIsOnCheckPage = getFormConfiguration().captchaFieldIsOnCheckPage()
-                && getFormConfiguration().isCheckPageSubmitted();
-
-            if (captchaFieldIsOnInputPage || captchaFieldIsOnCheckPage) {
-                if (!captchaField.validateCaptchaPhrase(this, captchaField.getValue())) {
-                    getErrors().put(captchaField.getName(), ERROR_VALIDATION);
-                    allOk = false;
-                }
             }
         }
 

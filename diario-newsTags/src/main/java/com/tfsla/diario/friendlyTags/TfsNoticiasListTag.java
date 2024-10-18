@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.JspTagException;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspTagException;
 
 import org.apache.commons.logging.Log;
 import org.opencms.configuration.CPMConfig;
@@ -35,7 +35,6 @@ import com.tfsla.diario.newsCollector.A_NewsCollector;
 import com.tfsla.diario.newsCollector.EdicionImpresaHomeNewsCollector;
 import com.tfsla.diario.newsCollector.EdicionImpresaNewsCollector;
 import com.tfsla.diario.newsCollector.LuceneNewsCollector;
-import com.tfsla.diario.newsCollector.RankingNewsCollector;
 import com.tfsla.diario.utils.TfsDirectEditParams;
 
 
@@ -91,6 +90,7 @@ public class TfsNoticiasListTag extends A_XmlContentTag implements I_TfsNoticia,
 					bestCollector = collector;
 		}
 		
+		/*
 		collector = new RankingNewsCollector();
 		if (collector.canCollect(parameters)) {
 				if (collector.canOrder(order))
@@ -98,6 +98,7 @@ public class TfsNoticiasListTag extends A_XmlContentTag implements I_TfsNoticia,
 				else 
 					bestCollector = collector;
 		}
+		*/
 	
 		collector = new EdicionImpresaHomeNewsCollector();
 		if (collector.canCollect(parameters)) {

@@ -4,8 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Map;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.opencms.configuration.CPMConfig;
 import org.opencms.configuration.CmsMedios;
@@ -20,7 +20,6 @@ import com.tfsla.diario.newsCollector.A_NewsCollector;
 import com.tfsla.diario.newsCollector.EdicionImpresaHomeNewsCollector;
 import com.tfsla.diario.newsCollector.EdicionImpresaNewsCollector;
 import com.tfsla.diario.newsCollector.LuceneNewsCollector;
-import com.tfsla.diario.newsCollector.RankingNewsCollector;
 
 public class ServiceHelper {
 	
@@ -105,6 +104,7 @@ public class ServiceHelper {
 					bestCollector = collector;
 		}
 		
+		/*
 		collector = new RankingNewsCollector();
 		if (collector.canCollect(parameters)) {
 				if (collector.canOrder(order))
@@ -112,6 +112,7 @@ public class ServiceHelper {
 				else 
 					bestCollector = collector;
 		}
+		*/
 	
 		collector = new EdicionImpresaHomeNewsCollector();
 		if (collector.canCollect(parameters)) {

@@ -3,7 +3,7 @@ package com.tfsla.diario.webservices;
 import java.util.ArrayList;
 import java.util.Date;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.opencms.xml.content.CmsXmlContent;
 

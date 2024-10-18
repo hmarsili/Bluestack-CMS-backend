@@ -4,7 +4,7 @@ package com.tfsla.diario.friendlyTags;
 import java.io.IOException;
 import java.util.Date;
 
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspException;
 
 import org.opencms.main.OpenCms;
 

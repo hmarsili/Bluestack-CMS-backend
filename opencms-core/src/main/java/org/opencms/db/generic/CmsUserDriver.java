@@ -32,6 +32,7 @@
 package org.opencms.db.generic;
 
 import org.opencms.configuration.CmsConfigurationManager;
+import org.opencms.configuration.CmsParameterConfiguration;
 import org.opencms.db.CmsDbContext;
 import org.opencms.db.CmsDbEntryAlreadyExistsException;
 import org.opencms.db.CmsDbEntryNotFoundException;
@@ -91,7 +92,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.commons.collections.ExtendedProperties;
 import org.apache.commons.logging.Log;
 
 /**
@@ -953,11 +953,11 @@ public class CmsUserDriver implements I_CmsDriver, I_CmsUserDriver {
 
         Map configuration = configurationManager.getConfiguration();
 
-        ExtendedProperties config;
-        if (configuration instanceof ExtendedProperties) {
-            config = (ExtendedProperties)configuration;
+        CmsParameterConfiguration config;
+        if (configuration instanceof CmsParameterConfiguration) {
+            config = (CmsParameterConfiguration)configuration;
         } else {
-            config = new ExtendedProperties();
+            config = new CmsParameterConfiguration();
             config.putAll(configuration);
         }
 

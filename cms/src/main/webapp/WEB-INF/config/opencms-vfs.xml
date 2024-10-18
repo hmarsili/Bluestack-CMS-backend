@@ -101,10 +101,6 @@
 				<collector class="com.tfsla.diario.ediciones.collector.NoticiasHomeImpresaCollector" order="170" />
 				<collector class="com.tfsla.diario.ediciones.collector.NoticiasImpresasCollector" order="180" />
 				<collector class="com.tfsla.diario.ediciones.collector.NoticiasTitularesImpresaCollector" order="220"/>	
-				<collector class="com.tfsla.rankViews.collector.MasVisitadosCollectors" order="190"/> 
-				<collector class="com.tfsla.rankViews.collector.MasComentadosCollectors" order="191"/>
-				<collector class="com.tfsla.rankViews.collector.MasRecomendadosCollectors" order="192"/>
-				<collector class="com.tfsla.rankViews.collector.MasValoradosCollectors" order="193"/>
 				<collector class="com.tfsla.opencms.search.TfsLuceneCollector" order="194"/>
 			</collectors>		
 			<mimetypes>

@@ -1,7 +1,7 @@
 package com.tfsla.diario.friendlyTags;
 
 
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspException;
 
 import com.tfsla.diario.utils.TfsTagsUtil;
 import com.tfsla.diario.utils.TfsXmlContentNameProvider;

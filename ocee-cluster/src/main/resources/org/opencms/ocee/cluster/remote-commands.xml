@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE opencms SYSTEM "http://www.alkacon.com/dtd/6.0/remote-commands.dtd">
+
+<opencms>
+	<remote-commands>
+		<remote-command name="getSearchIndexNames"><![CDATA[
+			List list =  new ArrayList();
+        	Iterator it = org.opencms.main.OpenCms.getSearchManager().getSearchIndexes().iterator();
+        	while (it.hasNext()) {
+        		list.add(((org.opencms.search.CmsSearchIndex)it.next()).getName());
+        	}
+        	list;
+		]]></remote-command>
+		<remote-command name="readSearchIndex"><![CDATA[
+			index = org.opencms.main.OpenCms.getSearchManager().getIndex("${name}");
+			map = org.opencms.ocee.cluster.CmsClusterRemoteStringHelper.objToMap(index, org.opencms.ocee.cluster.CmsClusterRemoteStringHelper.SEARCH_INDEX_PROP_LIST);
+			map.putAll(org.opencms.ocee.cluster.CmsClusterRemoteStringHelper.objToMap(index, "sourceNames,fieldConfiguration.fields(name-stored-indexed-inExcerpt-boost-defaultValue)"));
+			map.put("sourceNames.size", "" + index.getSourceNames().size());
+			if (index.getFieldConfiguration() != null) {
+				map.put("fieldConfiguration.fields.size", "" + index.getFieldConfiguration().getFields().size());
+			} else {
+				map.put("fieldConfiguration.fields.size", "0");
+			}
+			map;
+		]]></remote-command>
+		<remote-command name="getIndexSourceNames"><![CDATA[
+			org.opencms.main.OpenCms.getSearchManager().getSearchIndexSources().keySet();
+		]]></remote-command>
+		<remote-command name="readIndexSource"><![CDATA[
+			idxSource = org.opencms.main.OpenCms.getSearchManager().getIndexSource("${name}");
+			map = org.opencms.ocee.cluster.CmsClusterRemoteStringHelper.objToMap(idxSource, org.opencms.ocee.cluster.CmsClusterRemoteStringHelper.SEARCH_INDEX_SOURCE_PROP_LIST);
+			map.putAll(org.opencms.ocee.cluster.CmsClusterRemoteStringHelper.objToMap(idxSource, "documentTypes,resourcesNames"));
+			map.put("documentTypes.size", "" + (idxSource.getDocumentTypes() == null ? 0 : idxSource.getDocumentTypes().size()));
+			map.put("resourceNames.size", "" + idxSource.getResourcesNames().size());
+			map;
+		]]></remote-command>
+		<remote-command name="getFieldConfigurationNames"><![CDATA[
+			List list =  new ArrayList();
+        	Iterator it = org.opencms.main.OpenCms.getSearchManager().getFieldConfigurations().iterator();
+        	while (it.hasNext()) {
+        		list.add(((org.opencms.search.fields.CmsSearchFieldConfiguration)it.next()).getName());
+        	}
+        	list;
+		]]></remote-command>
+		<remote-command name="getAnalyzerNames"><![CDATA[
+			org.opencms.main.OpenCms.getSearchManager().getAnalyzers().keySet();
+		]]></remote-command>
+		<remote-command name="getAllProjectNames"><![CDATA[
+			List list = new ArrayList();
+        	Iterator it = org.opencms.main.OpenCms.getOrgUnitManager().getAllManageableProjects(cms, "", true).iterator();
+        	while (it.hasNext()) {
+        		list.add(((org.opencms.file.CmsProject)it.next()).getName());
+        	}
+        	list.add(cms.readProject(org.opencms.file.CmsProject.ONLINE_PROJECT_ID).getName());
+        	list;
+		]]></remote-command>
+		<remote-command name="getDocumentTypeConfigs"><![CDATA[
+			List list =  new ArrayList();
+        	Iterator it = org.opencms.main.OpenCms.getSearchManager().getDocumentTypeConfigs().iterator();
+        	while (it.hasNext()) {
+        		list.add(((org.opencms.search.CmsSearchDocumentType)it.next()).getName());
+        	}
+        	list;
+		]]></remote-command>
+		<remote-command name="readDocumentTypeConfig"><![CDATA[
+			docTypeConfig = org.opencms.main.OpenCms.getSearchManager().getDocumentTypeConfig("${name}");
+			map = org.opencms.ocee.cluster.CmsClusterRemoteStringHelper.objToMap(docTypeConfig, org.opencms.ocee.cluster.CmsClusterRemoteStringHelper.DOC_TYPE_CONFIG_PROP_LIST);
+			map;
+		]]></remote-command>
+		<remote-command name="deleteSearchIndex"><![CDATA[
+			searchManager = org.opencms.main.OpenCms.getSearchManager();
+        	indexInfo = searchManager.getIndex("${name}");
+        	searchManager.removeSearchIndex(indexInfo);
+		]]></remote-command>
+		<remote-command name="writeSearchIndex"><![CDATA[
+        	searchManager = org.opencms.main.OpenCms.getSearchManager();
+		    indexInfo = searchManager.getIndex("${name}");
+		    found = true;
+		    if (indexInfo == null) {
+		        found = false;
+	        	indexInfo = org.opencms.ocee.cluster.CmsClusterRemoteStringHelper.createSearchIndex("${name}",${fields.size},0);
+	        }
+	        propsMap = new HashMap();
+        	${propsMap}
+        	org.opencms.ocee.cluster.CmsClusterRemoteStringHelper.mapToObject(propsMap, indexInfo);
+        	${setProps}
+        	if (!found) {
+                searchManager.addSearchIndex(indexInfo);
+            }
+            if (!indexInfo.getFieldConfigurationName().equals(indexInfo.getFieldConfiguration().getName())) {
+                indexInfo.setFieldConfiguration(searchManager.getFieldConfiguration(indexInfo.getFieldConfigurationName()));
+            }
+		]]></remote-command>
+		<remote-command name="rebuildSearchIndexes"><![CDATA[
+			org.opencms.main.OpenCms.getSearchManager().rebuildIndex("${name}", null);
+		]]></remote-command>
+		<remote-command name="writeSearchConfiguration"><![CDATA[
+			org.opencms.main.OpenCms.writeConfiguration(org.opencms.configuration.CmsSearchConfiguration.class);
+		]]></remote-command>
+		<remote-command name="writeScheduledJob"><![CDATA[
+        	jobInfo = org.opencms.ocee.cluster.CmsClusterRemoteStringHelper.createScheduledJob(${id});
+			propsMap = new HashMap();
+        	${propsMap}
+        	org.opencms.ocee.cluster.CmsClusterRemoteStringHelper.mapToObject(propsMap, jobInfo);
+        	org.opencms.main.OpenCms.getScheduleManager().scheduleJob(cms, jobInfo);
+		]]></remote-command>
+		<remote-command name="writeSearchIndexSource"><![CDATA[
+			searchManager = org.opencms.main.OpenCms.getSearchManager();
+		    indexSource = searchManager.getIndexSource("${name}");
+		    found = true;
+		    if (indexSource == null) {
+		    	found = false;
+		    	indexSource = new org.opencms.search.CmsSearchIndexSource();
+		    }
+			propsMap = new HashMap();
+        	${propsMap}
+        	org.opencms.ocee.cluster.CmsClusterRemoteStringHelper.mapToObject(propsMap, indexSource);
+        	if (!found) {
+        		org.opencms.main.OpenCms.getSearchManager().addSearchIndexSource(indexSource);
+        	}
+		]]></remote-command>
+		<remote-command name="overwriteScheduledJob"><![CDATA[
+		    it = org.opencms.main.OpenCms.getScheduleManager().getJobs().iterator();
+		    found = false;
+		    while (it.hasNext()) {
+		       job = (org.opencms.scheduler.CmsScheduledJobInfo)it.next();
+		       if (!job.getJobName().equals("${name}")) {
+		          continue;
+		       }
+		       found = true;
+        	   jobInfo = org.opencms.ocee.cluster.CmsClusterRemoteStringHelper.createScheduledJob(job.getId());
+				propsMap = new HashMap();
+	        	${propsMap}
+	        	org.opencms.ocee.cluster.CmsClusterRemoteStringHelper.mapToObject(propsMap, jobInfo);
+        	   org.opencms.main.OpenCms.getScheduleManager().scheduleJob(cms, jobInfo);
+        	   break;
+        	}
+		]]></remote-command>
+		<remote-command name="createScheduledJobIsMissing"><![CDATA[
+        	if (!found) {
+				jobInfo = org.opencms.ocee.cluster.CmsClusterRemoteStringHelper.createScheduledJob(null);
+				propsMap = new HashMap();
+	        	${propsMap}
+	        	org.opencms.ocee.cluster.CmsClusterRemoteStringHelper.mapToObject(propsMap, jobInfo);
+				org.opencms.main.OpenCms.getScheduleManager().scheduleJob(cms, jobInfo);
+        	}
+		]]></remote-command>
+		<remote-command name="readScheduledJob"><![CDATA[
+			job = org.opencms.main.OpenCms.getScheduleManager().getJob("${id}");
+			map = org.opencms.ocee.cluster.CmsClusterRemoteStringHelper.objToMap(job, org.opencms.ocee.cluster.CmsClusterRemoteStringHelper.SCHEDULED_JOB_PROP_LIST);
+			map.putAll(org.opencms.ocee.cluster.CmsClusterRemoteStringHelper.objToMap(job, "id"));
+			map;
+		]]></remote-command>
+		<remote-command name="getScheduledJobIds"><![CDATA[
+			List list =  new ArrayList();
+        	it = org.opencms.main.OpenCms.getScheduleManager().getJobs().iterator();
+        	while (it.hasNext()) {
+        		list.add(((org.opencms.scheduler.CmsScheduledJobInfo)it.next()).getId());
+        	}
+        	list;
+		]]></remote-command>
+		<remote-command name="getExecutionTimeForJob"><![CDATA[
+            job = (org.opencms.scheduler.CmsScheduledJobInfo)org.opencms.main.OpenCms.getScheduleManager().getJob("${id}");
+            list = new ArrayList();
+            prev = job.getExecutionTimePrevious();
+            if (prev != null) {
+            	list.add(prev.getTime());
+            } else {
+            	list.add(new Long(0));
+            }
+            next = job.getExecutionTimeNext();
+            if (next != null) {
+            	list.add(next.getTime());
+            } else {
+            	list.add(new Long(0));
+            }
+            list;
+		]]></remote-command>
+		<remote-command name="activateScheduledJobs"><![CDATA[
+            job = (org.opencms.scheduler.CmsScheduledJobInfo)(org.opencms.main.OpenCms.getScheduleManager().getJob("${id}").clone());
+            job.setActive(${activate});
+            org.opencms.main.OpenCms.getScheduleManager().scheduleJob(cms, job);
+		]]></remote-command>
+		<remote-command name="deleteScheduledJob"><![CDATA[
+			org.opencms.main.OpenCms.getScheduleManager().unscheduleJob(cms, "${id}");
+		]]></remote-command>
+		<remote-command name="existsScheduledJob"><![CDATA[
+			(org.opencms.main.OpenCms.getScheduleManager().getJob("${id}") != null);
+		]]></remote-command>
+		<remote-command name="getModuleNames"><![CDATA[
+        	org.opencms.main.OpenCms.getModuleManager().getModuleNames();
+		]]></remote-command>
+		<remote-command name="getModules"><![CDATA[
+		    map = new HashMap();
+			it = org.opencms.main.OpenCms.getModuleManager().getModuleNames().iterator();
+			while (it.hasNext()) {
+			   module = org.opencms.main.OpenCms.getModuleManager().getModule((String)it.next());
+			   map.put(module.getName() + ".niceName", module.getNiceName());
+			   map.put(module.getName() + ".version", module.getVersion().getVersion());
+			   map.put(module.getName() + ".group", module.getGroup());
+			}
+			map;
+		]]></remote-command>
+		<remote-command name="readModuleAuthorInfos"><![CDATA[
+		    map = new HashMap();
+			it = org.opencms.main.OpenCms.getModuleManager().getModuleNames().iterator();
+			while (it.hasNext()) {
+			   module = org.opencms.main.OpenCms.getModuleManager().getModule((String)it.next());
+			   map.put(module.getName() + ".authorName", module.getAuthorName());
+			   map.put(module.getName() + ".authorEmail", module.getAuthorEmail());
+			}
+			map;
+		]]></remote-command>
+		<remote-command name="readModuleDependencies"><![CDATA[
+		    map = new HashMap();
+			it = org.opencms.main.OpenCms.getModuleManager().getModuleNames().iterator();
+			while (it.hasNext()) {
+			   module = org.opencms.main.OpenCms.getModuleManager().getModule((String)it.next());
+			   names = "";
+			   versions = "";
+			   it2 = module.getDependencies().iterator();
+			   while (it2.hasNext()) {
+			      dependency = it2.next();
+			      names += dependency.getName();
+			      versions += dependency.getVersion().getVersion();
+			      if (it2.hasNext()) {
+			         names += ",";
+			         versions += ",";
+			      }
+			   }
+			   map.put(module.getName() + ".dependencies.name", names);
+			   map.put(module.getName() + ".dependencies.version", versions);
+			}
+			map;
+		]]></remote-command>
+		<remote-command name="readModuleParameters"><![CDATA[
+			org.opencms.main.OpenCms.getModuleManager().getModule("${name}").getParameters();
+		]]></remote-command>
+		<remote-command name="readAllModuleParameters"><![CDATA[
+		    map = new HashMap();
+			it = org.opencms.main.OpenCms.getModuleManager().getModuleNames().iterator();
+			while (it.hasNext()) {
+			   module = org.opencms.main.OpenCms.getModuleManager().getModule((String)it.next());
+			   keys = "";
+			   values = "";
+			   it2 = module.getParameters().entrySet().iterator();
+			   while (it2.hasNext()) {
+			      entry = it2.next();
+			      keys += entry.getKey();
+			      values += entry.getValue();
+			      if (it2.hasNext()) {
+			         keys += ",";
+			         values += ",";
+			      }
+			   }
+			   map.put(module.getName() + ".parameters.key", keys);
+			   map.put(module.getName() + ".parameters.value", values);
+			}
+			map;
+		]]></remote-command>
+		<remote-command name="setModuleParameters"><![CDATA[
+		    manager = org.opencms.main.OpenCms.getModuleManager();
+	        module = (org.opencms.module.CmsModule)(manager.getModule("${name}").clone());
+			propsMap = new HashMap();
+        	${propsMap}
+        	org.opencms.ocee.cluster.CmsClusterRemoteStringHelper.mapToObject(propsMap, module);
+        	version = module.getVersion().getVersion();
+			manager.updateModule(cms, module);
+			module.getVersion().setVersion(version);
+		]]></remote-command>
+		<remote-command name="existsModule"><![CDATA[
+			(org.opencms.main.OpenCms.getModuleManager().getModule("${name}") != null);
+		]]></remote-command>
+		<remote-command name="readModuleResources"><![CDATA[
+		    map = new HashMap();
+			it = org.opencms.main.OpenCms.getModuleManager().getModuleNames().iterator();
+			while (it.hasNext()) {
+			   module = org.opencms.main.OpenCms.getModuleManager().getModule((String)it.next());
+			   resources = "";
+			   it2 = module.getResources().iterator();
+			   while (it2.hasNext()) {
+			      resources += it2.next();
+			      if (it2.hasNext()) {
+			         resources += ",";
+			      }
+			   }
+			   map.put(module.getName() + ".resources", resources);
+			}
+			map;
+		]]></remote-command>
+		<remote-command name="readModuleResourceTypes"><![CDATA[
+		    map = new HashMap();
+			it = org.opencms.main.OpenCms.getModuleManager().getModuleNames().iterator();
+			while (it.hasNext()) {
+			   module = org.opencms.main.OpenCms.getModuleManager().getModule((String)it.next());
+			   resNames = "";
+			   resIds = "";
+			   it2 = module.getResourceTypes().iterator();
+			   while (it2.hasNext()) {
+			      resType = it2.next();
+			      resNames += resType.getTypeName();
+			      resIds += resType.getTypeId();
+			      if (it2.hasNext()) {
+			         resNames += ",";
+			         resIds += ",";
+			      }
+			   }
+			   expNames = "";
+			   expRefs = "";
+			   it2 = module.getExplorerTypes().iterator();
+			   while (it2.hasNext()) {
+			      expType = it2.next();
+			      expNames += expType.getName();
+			      expRefs += expType.getReference();
+			      if (it2.hasNext()) {
+			         expNames += ",";
+			         expRefs += ",";
+			      }
+			   }
+			   map.put(module.getName() + ".resourceTypes.typeName", resNames);
+			   map.put(module.getName() + ".resourceTypes.typeId", resIds);
+			   map.put(module.getName() + ".explorerTypes.name", expNames);
+			   map.put(module.getName() + ".explorerTypes.reference", expRefs);
+			}
+			map;
+		]]></remote-command>
+		<remote-command name="deleteModule"><![CDATA[
+			manager = org.opencms.main.OpenCms.getModuleManager();
+			if (manager.hasModule("${name}")) {
+		        module = (org.opencms.module.CmsModule)(manager.getModule("${name}").clone());
+		        module.setResources(Collections.EMPTY_LIST);
+		        manager.updateModule(cms, module);
+		        manager.deleteModule(cms, module.getName(), false, new org.opencms.report.CmsShellReport(cms.getRequestContext().getLocale()));
+		    }
+		]]></remote-command>
+		<remote-command name="createModule"><![CDATA[
+        	module = org.opencms.ocee.cluster.CmsClusterRemoteStringHelper.createModule("${version}");
+			propsMap = new HashMap();
+        	${propsMap}
+        	${setProps}
+            deps = new HashMap();
+            itProps = propsMap.entrySet().iterator();
+            while (itProps.hasNext()) {
+                entry = itProps.next();
+                key = (String)entry.getKey();
+                if (key.startsWith("__class[dependencies") || key.equals("dependencies")) {
+                    deps.put(entry.getKey(), entry.getValue());
+                    itProps.remove();
+                }
+            }
+        	org.opencms.ocee.cluster.CmsClusterRemoteStringHelper.mapToObject(deps, module);
+        	itDeps = module.getDependencies().iterator();
+        	while(itDeps.hasNext()) {
+        		dep = itDeps.next();
+        		dep.setVersion(new org.opencms.module.CmsModuleVersion("1"));
+        	}
+        	org.opencms.ocee.cluster.CmsClusterRemoteStringHelper.mapToObject(propsMap, module);
+        	manager = org.opencms.main.OpenCms.getModuleManager();
+        	if (manager.getModule(module.getName()) == null) {
+	        	manager.addModule(cms, module);
+	        } else {
+	        	version = module.getVersion().getVersion();
+				manager.updateModule(cms, module);
+				module.getVersion().setVersion(version);
+	        }
+	        java.util.Set exportPoints = new java.util.HashSet(module.getExportPoints());
+        java.util.List exportFolders = new java.util.ArrayList();
+        java.util.List exportFiles = new java.util.ArrayList();
+        java.util.Iterator pointsIt = exportPoints.iterator();
+        while (pointsIt.hasNext()) {
+            org.opencms.db.CmsExportPoint exportPoint = (org.opencms.db.CmsExportPoint)pointsIt.next();
+            org.opencms.ocee.cluster.CmsClusterEventHandler.LOG.info("Found export point: " + exportPoint.getUri());
+            try {
+                org.opencms.file.CmsResource resource = cms.readResource(exportPoint.getUri());
+                if (resource.isFolder()) {
+                    exportFolders.add(resource);
+                    java.util.Iterator it = cms.readResources(
+                        exportPoint.getUri(),
+                        org.opencms.file.CmsResourceFilter.DEFAULT,
+                        true).iterator();
+                    while (it.hasNext()) {
+                        org.opencms.file.CmsResource sub = (org.opencms.file.CmsResource)it.next();
+                        if (sub.isFolder()) {
+                            exportFolders.add(sub);
+                        } else {
+                            exportFiles.add(cms.readFile(sub));
+                        }
+                    }
+                } else {
+                    exportFiles.add(cms.readFile(resource));
+                }
+            } catch (Exception e) {
+                org.opencms.ocee.cluster.CmsClusterEventHandler.LOG.error("Error reading module resources: " + e.getMessage());
+                org.opencms.ocee.cluster.CmsClusterEventHandler.LOG.error("Error reading module resources: " +e.getLocalizedMessage(), e);
+            }
+        }
+        org.opencms.db.CmsExportPointDriver exportPointDriver = new org.opencms.db.CmsExportPointDriver(exportPoints);
+        java.util.Iterator folderIt = exportFolders.iterator();
+        org.opencms.ocee.cluster.CmsClusterEventHandler.LOG.info("Writing export points for module: " + module.getName());
+        while (folderIt.hasNext()) {
+            org.opencms.file.CmsResource folder = (org.opencms.file.CmsResource)folderIt.next();
+            String currentExportPoint = exportPointDriver.getExportPoint(folder.getRootPath());
+            org.opencms.ocee.cluster.CmsClusterEventHandler.LOG.info("Exporting folder: " + folder.getRootPath());
+            try {
+                exportPointDriver.createFolder(folder.getRootPath(), currentExportPoint);
+            } catch (Exception e) {
+               org.opencms.ocee.cluster.CmsClusterEventHandler.LOG.error(e.getLocalizedMessage(), e);
+            }
+        }
+
+        java.util.Iterator fileIt = exportFiles.iterator();
+        while (fileIt.hasNext()) {
+            org.opencms.file.CmsFile file = (org.opencms.file.CmsFile)fileIt.next();
+            String currentExportPoint = exportPointDriver.getExportPoint(file.getRootPath());
+            org.opencms.ocee.cluster.CmsClusterEventHandler.LOG.info("Exporting file: " + file.getRootPath());
+            try {
+                exportPointDriver.writeFile(file.getRootPath(), currentExportPoint, file.getContents());
+            } catch (Exception e) {
+                org.opencms.ocee.cluster.CmsClusterEventHandler.LOG.error(e.getLocalizedMessage(), e);
+            }
+        }
+        System.out.println("DONE");
+		]]></remote-command>
+		<remote-command name="writeSystemConfiguration"><![CDATA[
+			org.opencms.main.OpenCms.writeConfiguration(org.opencms.configuration.CmsSystemConfiguration.class);
+		]]></remote-command>
+		<remote-command name="writeModuleConfiguration"><![CDATA[
+			org.opencms.main.OpenCms.writeConfiguration(org.opencms.configuration.CmsModuleConfiguration.class);
+		]]></remote-command>
+		<remote-command name="System.currentTimeMillis"><![CDATA[
+			System.currentTimeMillis();
+		]]></remote-command>
+		<remote-command name="Map.put"><![CDATA[
+			${name}.put(${key}, ${value});
+		]]></remote-command>
+	</remote-commands>
+</opencms>

@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.JspTagException;
-import javax.servlet.jsp.tagext.DynamicAttributes;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspTagException;
+import jakarta.servlet.jsp.tagext.DynamicAttributes;
 
 import org.apache.commons.logging.Log;
 import org.opencms.configuration.CPMConfig;
@@ -23,7 +23,6 @@ import org.opencms.main.OpenCms;
 import com.tfsla.diario.model.TfsListaUsuarios;
 import com.tfsla.diario.model.TfsUsuario;
 import com.tfsla.diario.usersCollector.DataUsersCollector;
-import com.tfsla.diario.usersCollector.RankingUsersCollector;
 
 
 public class TfsUserListTag extends BaseTag implements I_TfsUser,I_TfsCollectionListTag, DynamicAttributes{
@@ -193,6 +192,8 @@ public class TfsUserListTag extends BaseTag implements I_TfsUser,I_TfsCollection
 	
 	@Override
 	public int doStartTag() throws JspException {
+		findUsers("opencms");
+		/*
 		//determinar si el typepedata se trata de datos si se trata de ranking de usuarios
 		if (order==null){
 			findUsers("opencms");
@@ -204,6 +205,7 @@ public class TfsUserListTag extends BaseTag implements I_TfsUser,I_TfsCollection
 				findUsers("opencms");	
 			}
 		}
+		*/
 		return (hasMoreContent() ? EVAL_BODY_INCLUDE : SKIP_BODY );		
 	}
 
@@ -213,14 +215,14 @@ public class TfsUserListTag extends BaseTag implements I_TfsUser,I_TfsCollection
 		Map<String,Object> parameters = createParameterMap();
 	    CmsObject cms = CmsFlexController.getCmsObject(pageContext.getRequest());
 	    saveUser();
-		if(typedata=="opencms"){
+		//if(typedata=="opencms"){
 			DataUsersCollector collector= new DataUsersCollector();
 			users = collector.collectUsers(parameters, cms, true);
-		}
-		if (typedata=="stats"){
-			RankingUsersCollector collector=new RankingUsersCollector();
-			users=collector.collectUsers(parameters, cms);
-		}
+		//}
+		//if (typedata=="stats"){
+		//	RankingUsersCollector collector=new RankingUsersCollector();
+		//	users=collector.collectUsers(parameters, cms);
+		//}
 	}
 	
 	protected Map<String,Object> createParameterMap() {

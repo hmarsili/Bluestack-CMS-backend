@@ -1,6 +1,6 @@
 package org.opencms.jsp;
 
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspException;
 
 import org.opencms.file.CmsObject;
 import org.opencms.flex.CmsFlexController;

@@ -31,6 +31,7 @@
 
 package org.opencms.loader;
 
+import org.opencms.configuration.CmsParameterConfiguration;
 import org.opencms.file.CmsFile;
 import org.opencms.file.CmsObject;
 import org.opencms.file.CmsPropertyDefinition;
@@ -74,14 +75,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
-import org.apache.commons.collections.ExtendedProperties;
-import org.apache.commons.collections.map.LRUMap;
+import org.apache.commons.collections4.map.LRUMap;
 import org.apache.commons.logging.Log;
 
 /**
@@ -254,7 +254,7 @@ public class CmsJspLoader implements I_CmsResourceLoader, I_CmsFlexCacheEnabledL
     }
 
     /**
-     * @see org.opencms.loader.I_CmsResourceLoader#dump(org.opencms.file.CmsObject, org.opencms.file.CmsResource, java.lang.String, java.util.Locale, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     * @see org.opencms.loader.I_CmsResourceLoader#dump(org.opencms.file.CmsObject, org.opencms.file.CmsResource, java.lang.String, java.util.Locale, jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse)
      */
     public byte[] dump(
         CmsObject cms,
@@ -300,7 +300,7 @@ public class CmsJspLoader implements I_CmsResourceLoader, I_CmsFlexCacheEnabledL
     }
 
     /**
-     * @see org.opencms.loader.I_CmsResourceLoader#export(org.opencms.file.CmsObject, org.opencms.file.CmsResource, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     * @see org.opencms.loader.I_CmsResourceLoader#export(org.opencms.file.CmsObject, org.opencms.file.CmsResource, jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse)
      */
     public byte[] export(CmsObject cms, CmsResource resource, HttpServletRequest req, HttpServletResponse res)
     throws ServletException, IOException {
@@ -385,10 +385,10 @@ public class CmsJspLoader implements I_CmsResourceLoader, I_CmsFlexCacheEnabledL
      */
     public void initConfiguration() {
 
-        ExtendedProperties config = new ExtendedProperties();
+    	CmsParameterConfiguration config = new CmsParameterConfiguration();
         config.putAll(m_configuration);
 
-        m_jspRepository = config.getString(PARAM_JSP_REPOSITORY);
+        m_jspRepository = config.get(PARAM_JSP_REPOSITORY);
         if (m_jspRepository == null) {
             m_jspRepository = OpenCms.getSystemInfo().getWebApplicationRfsPath();
         }
@@ -398,7 +398,7 @@ public class CmsJspLoader implements I_CmsResourceLoader, I_CmsFlexCacheEnabledL
         }
         m_jspRepository = CmsFileUtil.normalizePath(m_jspRepository + m_jspWebAppRepository);
 
-        String maxAge = config.getString(PARAM_CLIENT_CACHE_MAXAGE);
+        String maxAge = config.get(PARAM_CLIENT_CACHE_MAXAGE);
         if (maxAge == null) {
             m_clientCacheMaxAge = -1;
         } else {
@@ -409,7 +409,7 @@ public class CmsJspLoader implements I_CmsResourceLoader, I_CmsFlexCacheEnabledL
         m_errorPagesAreNotCommitted = config.getBoolean(PARAM_JSP_ERRORPAGE_COMMITTED, true);
 
         int cacheSize = -1;
-        String cacheSizeStr = config.getString(PARAM_JSP_CACHE_SIZE);
+        String cacheSizeStr = config.get(PARAM_JSP_CACHE_SIZE);
         if (cacheSizeStr != null) {
             cacheSize = Integer.parseInt(cacheSizeStr);
         }
@@ -470,7 +470,7 @@ public class CmsJspLoader implements I_CmsResourceLoader, I_CmsFlexCacheEnabledL
     }
 
     /**
-     * @see org.opencms.loader.I_CmsResourceLoader#load(org.opencms.file.CmsObject, org.opencms.file.CmsResource, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     * @see org.opencms.loader.I_CmsResourceLoader#load(org.opencms.file.CmsObject, org.opencms.file.CmsResource, jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse)
      */
     public void load(CmsObject cms, CmsResource file, HttpServletRequest req, HttpServletResponse res)
     throws ServletException, IOException, CmsException {
@@ -541,7 +541,7 @@ public class CmsJspLoader implements I_CmsResourceLoader, I_CmsFlexCacheEnabledL
     }
 
     /**
-     * @see org.opencms.loader.I_CmsResourceLoader#service(org.opencms.file.CmsObject, org.opencms.file.CmsResource, javax.servlet.ServletRequest, javax.servlet.ServletResponse)
+     * @see org.opencms.loader.I_CmsResourceLoader#service(org.opencms.file.CmsObject, org.opencms.file.CmsResource, jakarta.servlet.ServletRequest, jakarta.servlet.ServletResponse)
      */
     public void service(CmsObject cms, CmsResource resource, ServletRequest req, ServletResponse res)
     throws ServletException, IOException, CmsLoaderException {

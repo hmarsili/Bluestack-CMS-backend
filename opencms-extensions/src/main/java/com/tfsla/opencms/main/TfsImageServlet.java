@@ -1,24 +1,21 @@
 package com.tfsla.opencms.main;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.*;  
-import java.util.Date;
 import java.awt.*;  
 import java.awt.image.*;  
 
 import javax.imageio.*;  
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.opencms.configuration.CmsMediosInit;
-import org.opencms.db.CmsDefaultUsers;
 import org.opencms.file.CmsObject;
 import org.opencms.file.CmsResource;
 import org.opencms.main.CmsException;
@@ -26,11 +23,8 @@ import org.opencms.main.CmsLog;
 import org.opencms.main.OpenCms;
 import org.opencms.workplace.CmsWorkplaceAction;
 
-import com.octo.captcha.service.CaptchaServiceException;
-import com.tfsla.capcha.CaptchaManager;
-import com.tfsla.utils.TfsAdminUserProvider;
 
-
+@Deprecated
 public class TfsImageServlet extends HttpServlet {
 
 	/**
@@ -102,52 +96,7 @@ public class TfsImageServlet extends HttpServlet {
 			}  
 		}
 		else {
-			byte[] captchaChallengeAsJpeg = null;
-
-			ByteArrayOutputStream jpegOutputStream = new ByteArrayOutputStream();
-
-			try
-			{
-
-				String captchaId = request.getSession().getId() + extraId;
-
-				BufferedImage challenge = CaptchaManager.getInstance(currentSiteRoot,currentPublication).getImageChallengeForID(captchaId);
-
-				ImageIO.write(challenge, "jpg", jpegOutputStream);
-			}
-			catch (IllegalArgumentException e)
-			{
-				LOG.error("Illegal Argument Exception while creating the captcha image",e);
-				return;
-			}
-			catch (CaptchaServiceException e)
-			{
-				LOG.error("Captcha Service Exception while creating the captcha image",e);
-				return;
-			}
-			catch (Exception e)
-			{
-				LOG.error("Exception while creating the captcha image",e);
-				return;
-			}
-
-			captchaChallengeAsJpeg = jpegOutputStream.toByteArray();
-			
-			
-			response.setHeader("Cache-Control", "no-store");
-			response.setHeader("Pragma", "no-cache");
-			response.setDateHeader("Expires", 0);
-			response.setContentType("image/jpeg");
-			ServletOutputStream responseOutputStream;
-			try {
-				responseOutputStream = response.getOutputStream();
-				responseOutputStream.write(captchaChallengeAsJpeg);
-				responseOutputStream.flush();
-				responseOutputStream.close();
-			} catch (IOException e) {
-				LOG.error("IOException while creating the captcha image",e);
-				return;
-			}
+			return;
 		}
 
 	}

@@ -22,7 +22,8 @@ import org.opencms.report.CmsLogReport;
 import org.opencms.workplace.CmsWorkplaceAction;
 import org.opencms.xml.content.CmsXmlContent;
 import org.opencms.xml.content.CmsXmlContentFactory;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.Part;
 
 //import java.text.SimpleDateFormat;
 import java.util.*;
@@ -35,7 +36,7 @@ public class AdsPublisherManager{
 	String SITE = "";
 	private CmsObject cmsObject = null;
 	private HttpServletRequest request = null;
-	List<FileItem> images = new ArrayList<FileItem>();
+	List<Part> images = new ArrayList<Part>();
 	List<String> videos = new ArrayList<String>();
 	List<CmsResource> publishList = new ArrayList<CmsResource>();
 
@@ -81,9 +82,35 @@ public class AdsPublisherManager{
 			FileItemFactory factory = new DiskFileItemFactory();
 			ServletFileUpload upload = new ServletFileUpload(factory);
 			upload.setHeaderEncoding("UTF-8");
-    	
-	    	List items = upload.parseRequest(request);
+			
+			Collection<Part> items = request.getParts();
+			Iterator itr = items.iterator();
+			
+	    	//List items = upload.parseRequest(request);
 	    	
+			while (request.getParameterNames().asIterator().hasNext()) {
+				String atrName = request.getParameterNames().asIterator().next();
+			
+				if (atrName.indexOf("video") >= 0)
+				{
+					//String codigo = item.getFieldName();
+					
+					if (atrName != null && atrName.indexOf("<script") < 0 && atrName.indexOf("</script>") < 0 && !atrName.equals(""))
+						videos.add(request.getParameter(atrName));
+				}
+				else
+					map.put(atrName, request.getParameter(atrName));
+			}
+			
+			while (itr.hasNext()) {
+				Part item = (Part)itr.next();
+				String fileName = cmsObject.getRequestContext().getFileTranslator().translateResource(item.getSubmittedFileName());
+				if (fileName != null && !fileName.equals("")) {
+					images.add(item);
+				}
+			}
+			
+			/*
 	    	if (items != null) {
 				Iterator itr = items.iterator();
 				String fileName = "";
@@ -108,9 +135,10 @@ public class AdsPublisherManager{
 							images.add(item);
 					}
 				}
-				map.put("images", images);
-				map.put("videos", videos);
 	    	}
+	    	*/
+    		map.put("images", images);
+			map.put("videos", videos);
         }
     	catch (Exception e) {
     		throw e;

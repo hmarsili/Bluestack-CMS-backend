@@ -1,12 +1,8 @@
 /*
- * File   : $Source: /alkacon/cvs/opencms/src/org/opencms/scheduler/CmsScheduledJobInfo.java,v $
- * Date   : $Date: 2011/03/23 14:52:59 $
- * Version: $Revision: 1.31 $
- *
  * This library is part of OpenCms -
  * the Open Source Content Management System
  *
- * Copyright (c) 2002 - 2011 Alkacon Software GmbH (http://www.alkacon.com)
+ * Copyright (c) Alkacon Software GmbH & Co. KG (http://www.alkacon.com)
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,12 +14,12 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  *
- * For further information about Alkacon Software GmbH, please see the
+ * For further information about Alkacon Software GmbH & Co. KG, please see the
  * company website: http://www.alkacon.com
  *
  * For further information about OpenCms, please see the
  * project website: http://www.opencms.org
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -31,6 +27,7 @@
 
 package org.opencms.scheduler;
 
+import org.opencms.configuration.CmsParameterConfiguration;
 import org.opencms.configuration.I_CmsConfigurationParameterHandler;
 import org.opencms.i18n.CmsMessageContainer;
 import org.opencms.main.CmsContextInfo;
@@ -40,34 +37,36 @@ import org.opencms.main.CmsRuntimeException;
 import org.opencms.main.OpenCms;
 import org.opencms.util.CmsStringUtil;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
 
-import org.quartz.CronTrigger;
+import org.quartz.CronExpression;
 import org.quartz.Trigger;
+
+import jakarta.validation.Valid;
 
 /**
  * Describes a scheduled job for the OpenCms scheduler.<p>
- * 
+ *
  * <p>
  * The time the scheduled job is executed is defined with Unix 'cron-like' definitions.
  * </p>
- * 
+ *
  * <p>
  * For those unfamiliar with "cron", this means being able to create a firing
  * schedule such as: "At 8:00am every Monday through Friday" or "At 1:30am
  * every last Friday of the month".
  * </p>
- * 
+ *
  * <p>
  * A "Cron-Expression" is a string comprised of 6 or 7 fields separated by
  * white space. The 6 mandatory and 1 optional fields are as follows: <br>
- * 
+ *
  * <table cellspacing="8">
  * <tr>
  * <th align="left">Field Name</th>
@@ -127,30 +126,30 @@ import org.quartz.Trigger;
  * </tr>
  * </table>
  * </p>
- * 
+ *
  * <p>
  * The '*' character is used to specify all values. For example, "*" in the
  * minute field means "every minute".
  * </p>
- * 
+ *
  * <p>
  * The '?' character is allowed for the day-of-month and day-of-week fields. It
  * is used to specify 'no specific value'. This is useful when you need to
  * specify something in one of the two fields, but not the other. See the
  * examples below for clarification.
  * </p>
- * 
+ *
  * <p>
  * The '-' character is used to specify ranges For example "10-12" in the hour
  * field means "the hours 10, 11 and 12".
  * </p>
- * 
+ *
  * <p>
  * The ',' character is used to specify additional values. For example
  * "MON,WED,FRI" in the day-of-week field means "the days Monday, Wednesday,
  * and Friday".
  * </p>
- * 
+ *
  * <p>
  * The '/' character is used to specify increments. For example "0/15" in the
  * seconds field means "the seconds 0, 15, 30, and 45". And "5/15" in the
@@ -158,7 +157,7 @@ import org.quartz.Trigger;
  * '/' after the '*' character - in this case '*' is equivalent to having '0'
  * before the '/'.
  * </p>
- * 
+ *
  * <p>
  * The 'L' character is allowed for the day-of-month and day-of-week fields.
  * This character is short-hand for "last", but it has different meaning in
@@ -170,36 +169,36 @@ import org.quartz.Trigger;
  * "the last friday of the month". When using the 'L' option, it is important
  * not to specify lists, or ranges of values, as you'll get confusing results.
  * </p>
- * 
+ *
  * <p>
- * The 'W' character is allowed for the day-of-month field.  This character 
- * is used to specify the weekday (Monday-Friday) nearest the given day.  As an 
- * example, if you were to specify "15W" as the value for the day-of-month 
+ * The 'W' character is allowed for the day-of-month field.  This character
+ * is used to specify the weekday (Monday-Friday) nearest the given day.  As an
+ * example, if you were to specify "15W" as the value for the day-of-month
  * field, the meaning is: "the nearest weekday to the 15th of the month".  So
  * if the 15th is a Saturday, the trigger will fire on Friday the 14th.  If the
  * 15th is a Sunday, the trigger will fire on Monday the 16th.  If the 15th is
  * a Tuesday, then it will fire on Tuesday the 15th.  However if you specify
  * "1W" as the value for day-of-month, and the 1st is a Saturday, the trigger
- * will fire on Monday the 3rd, as it will not 'jump' over the boundary of a 
- * month's days.  The 'W' character can only be specified when the day-of-month 
- * is a single day, not a range or list of days.  
+ * will fire on Monday the 3rd, as it will not 'jump' over the boundary of a
+ * month's days.  The 'W' character can only be specified when the day-of-month
+ * is a single day, not a range or list of days.
  * </p>
- * 
+ *
  * <p>
- * The 'L' and 'W' characters can also be combined for the day-of-month 
+ * The 'L' and 'W' characters can also be combined for the day-of-month
  * expression to yield 'LW', which translates to "last weekday of the month".
  * </p>
- * 
+ *
  * <p>
  * The '#' character is allowed for the day-of-week field. This character is
- * used to specify "the nth" XXX day of the month. For example, the value of
+ * used to specify "the nth" day of the month. For example, the value of
  * "6#3" in the day-of-week field means the third Friday of the month (day 6 =
  * Friday and "#3" = the 3rd one in the month). Other examples: "2#1" = the
  * first Monday of the month and "4#5" = the fifth Wednesday of the month. Note
  * that if you specify "#5" and there is not 5 of the given day-of-week in the
  * month, then no firing will occur that month.
  * </p>
- * 
+ *
  * <p>
  * The 'C' character is allowed for the day-of-month and day-of-week fields.
  * This character is short-hand for "calendar". This means values are
@@ -209,12 +208,12 @@ import org.quartz.Trigger;
  * calendar on or after the 5th". A value of "1C" in the day-of-week field
  * means "the first day included by the calendar on or after sunday".
  * </p>
- * 
+ *
  * <p>
  * The legal characters and the names of months and days of the week are not
  * case sensitive.
  * </p>
- * 
+ *
  * <p>
  * Here are some full examples: <br><table cellspacing="8">
  * <tr>
@@ -322,12 +321,12 @@ import org.quartz.Trigger;
  * </tr>
  * </table>
  * </p>
- * 
+ *
  * <p>
  * Pay attention to the effects of '?' and '*' in the day-of-week and
  * day-of-month fields!
  * </p>
- * 
+ *
  * <p>
  * <b>NOTES:</b>
  * <ul>
@@ -341,18 +340,17 @@ import org.quartz.Trigger;
  * time moves back or jumps forward.</li>
  * </ul>
  * </p>
- * 
  *
- * @author Alexander Kandzior 
- * 
- * @version $Revision: 1.31 $ 
- * 
- * @since 6.0.0 
+ *
+ * @since 6.0.0
  */
-public class CmsScheduledJobInfo implements I_CmsConfigurationParameterHandler {
+public class CmsScheduledJobInfo implements I_CmsConfigurationParameterHandler, Serializable {
 
     /** The log object for this class. */
     private static final Log LOG = CmsLog.getLog(CmsScheduledJobInfo.class);
+
+    /** The serial version id. */
+    private static final long serialVersionUID = 7621446065755519582L;
 
     /** Indicates if this job is currently active in the scheduler or not. */
     private boolean m_active;
@@ -373,13 +371,19 @@ public class CmsScheduledJobInfo implements I_CmsConfigurationParameterHandler {
     private String m_id;
 
     /** Instance object of the scheduled job (only required when instance is re-used). */
-    private I_CmsScheduledJob m_jobInstance;
+    private transient I_CmsScheduledJob m_jobInstance;
 
     /** The name of the job (for information purposes). */
     private String m_jobName;
 
+    /** Stores the next execution time. */
+    private Date m_nextFireTime;
+
     /** The parameters used for this job entry. */
-    private SortedMap m_parameters;
+    private SortedMap<String, String> m_parameters;
+
+    /** Stores the last job execution time. */
+    private Date m_previousFireTime;
 
     /** Indicates if the job instance should be re-used if the job is run. */
     private boolean m_reuseInstance;
@@ -394,17 +398,17 @@ public class CmsScheduledJobInfo implements I_CmsConfigurationParameterHandler {
 
         m_reuseInstance = false;
         m_frozen = false;
-        // parameters are stored in a tree map 
-        m_parameters = new TreeMap();
+        // parameters are stored in a tree map
+        m_parameters = new TreeMap<String, String>();
         // a job is active by default
         m_active = true;
     }
 
     /**
-     * Constructor for creating a new job with all required parameters.<p> 
-     * 
+     * Constructor for creating a new job with all required parameters.<p>
+     *
      * @param id the id of the job of <code>null</code> if a new id should be automatically generated
-     * @param jobName the display name of the job 
+     * @param jobName the display name of the job
      * @param className the class name of the job, must be an instance of <code>{@link I_CmsScheduledJob}</code>
      * @param context the OpenCms user context information to use when executing the job
      * @param cronExpression the cron expression for scheduling the job
@@ -420,7 +424,7 @@ public class CmsScheduledJobInfo implements I_CmsConfigurationParameterHandler {
         String cronExpression,
         boolean reuseInstance,
         boolean active,
-        SortedMap parameters) {
+        SortedMap<String, String> parameters) {
 
         m_frozen = false;
         setId(id);
@@ -445,17 +449,18 @@ public class CmsScheduledJobInfo implements I_CmsConfigurationParameterHandler {
         // add the configured parameter
         m_parameters.put(paramName, paramValue);
         if (LOG.isDebugEnabled()) {
-            LOG.debug(org.opencms.configuration.Messages.get().getBundle().key(
-                org.opencms.configuration.Messages.LOG_ADD_CONFIG_PARAM_3,
-                paramName,
-                paramValue,
-                this));
+            LOG.debug(
+                org.opencms.configuration.Messages.get().getBundle().key(
+                    org.opencms.configuration.Messages.LOG_ADD_CONFIG_PARAM_3,
+                    paramName,
+                    paramValue,
+                    this));
         }
     }
 
     /**
      * Clears the id of the job.<p>
-     * 
+     *
      * This is useful if you want to create a copy of a job without keeping the job id.
      * Use <code>{@link CmsScheduledJobInfo#clone()}</code> first to create the copy,
      * and then clear the id of the clone.<p>
@@ -467,18 +472,18 @@ public class CmsScheduledJobInfo implements I_CmsConfigurationParameterHandler {
 
     /**
      * Creates a clone of this scheduled job.<p>
-     * 
+     *
      * The clone will not be active in the scheduler until it is scheduled
-     * with <code>{@link CmsScheduleManager#scheduleJob(org.opencms.file.CmsObject, CmsScheduledJobInfo)}</code>. 
+     * with <code>{@link CmsScheduleManager#scheduleJob(org.opencms.file.CmsObject, CmsScheduledJobInfo)}</code>.
      * The job id returned by <code>{@link #getId()}</code> will be the same.
-     * The <code>{@link #isActive()}</code> flag will be set to false. 
-     * The clones job instance class will be the same 
+     * The <code>{@link #isActive()}</code> flag will be set to false.
+     * The clones job instance class will be the same
      * if the <code>{@link #isReuseInstance()}</code> flag is set.<p>
-     * 
+     *
      * @see java.lang.Object#clone()
      */
     @Override
-    public Object clone() {
+    public CmsScheduledJobInfo clone() {
 
         CmsScheduledJobInfo result = new CmsScheduledJobInfo();
 
@@ -493,7 +498,7 @@ public class CmsScheduledJobInfo implements I_CmsConfigurationParameterHandler {
         result.m_context = (CmsContextInfo)m_context.clone();
         result.m_cronExpression = m_cronExpression;
         result.m_jobName = m_jobName;
-        result.m_parameters = new TreeMap(m_parameters);
+        result.m_parameters = new TreeMap<String, String>(m_parameters);
         result.m_trigger = null;
 
         return result;
@@ -501,7 +506,7 @@ public class CmsScheduledJobInfo implements I_CmsConfigurationParameterHandler {
 
     /**
      * Returns the name of the class to schedule.<p>
-     * 
+     *
      * @return the name of the class to schedule
      */
     public String getClassName() {
@@ -512,15 +517,17 @@ public class CmsScheduledJobInfo implements I_CmsConfigurationParameterHandler {
     /**
      * @see org.opencms.configuration.I_CmsConfigurationParameterHandler#getConfiguration()
      */
-    public Map getConfiguration() {
+    public CmsParameterConfiguration getConfiguration() {
 
         // this configuration does not support parameters
         if (LOG.isDebugEnabled()) {
-            LOG.debug(org.opencms.configuration.Messages.get().getBundle().key(
-                org.opencms.configuration.Messages.LOG_GET_CONFIGURATION_1,
-                this));
+            LOG.debug(
+                org.opencms.configuration.Messages.get().getBundle().key(
+                    org.opencms.configuration.Messages.LOG_GET_CONFIGURATION_1,
+                    this));
         }
-        return getParameters();
+
+        return new CmsParameterConfiguration(getParameters());
     }
 
     /**
@@ -528,11 +535,12 @@ public class CmsScheduledJobInfo implements I_CmsConfigurationParameterHandler {
      *
      * Please note: The context time returned by {@link org.opencms.file.CmsRequestContext#getRequestTime()}
      * will be set to the time when this job was created.
-     * This can be relevant in case you want to perform VFS operations, because it will 
+     * This can be relevant in case you want to perform VFS operations, because it will
      * affect how resources are processed that have date released / date expired attributes set.<p>
      *
      * @return the context information for the user executing this job
      */
+    @Valid
     public CmsContextInfo getContextInfo() {
 
         return m_context;
@@ -540,7 +548,7 @@ public class CmsScheduledJobInfo implements I_CmsConfigurationParameterHandler {
 
     /**
      * Returns the cron expression for this job entry.<p>
-     * 
+     *
      * @return the cron expression for this job entry
      */
     public String getCronExpression() {
@@ -550,9 +558,9 @@ public class CmsScheduledJobInfo implements I_CmsConfigurationParameterHandler {
 
     /**
      * Returns the next time at which this job will be executed, after the given time.<p>
-     * 
+     *
      * If this job will not be executed after the given time, <code>null</code> will be returned..<p>
-     * 
+     *
      * @param date the after which the next execution time should be calculated
      * @return the next time at which this job will be executed, after the given time
      */
@@ -567,10 +575,10 @@ public class CmsScheduledJobInfo implements I_CmsConfigurationParameterHandler {
     }
 
     /**
-     * Returns the next time at which this job will be executed.<p> 
-     * 
+     * Returns the next time at which this job will be executed.<p>
+     *
      * If the job will not execute again, <code>null</code> will be returned.<p>
-     * 
+     *
      * @return the next time at which this job will be executed
      */
     public Date getExecutionTimeNext() {
@@ -579,15 +587,21 @@ public class CmsScheduledJobInfo implements I_CmsConfigurationParameterHandler {
             // if the job is not active, no time can be calculated
             return null;
         }
-
-        return m_trigger.getNextFireTime();
+        if (m_nextFireTime == null) {
+            // in case next time is not set, check if the trigger supplies a valid next fire time
+            Date next = m_trigger.getNextFireTime();
+            if (System.currentTimeMillis() < next.getTime()) {
+                m_nextFireTime = next;
+            }
+        }
+        return m_nextFireTime;
     }
 
     /**
      * Returns the previous time at which this job will be executed.<p>
-     * 
+     *
      * If this job has not yet been executed, <code>null</code> will be returned.
-     * 
+     *
      * @return the previous time at which this job will be executed
      */
     public Date getExecutionTimePrevious() {
@@ -597,15 +611,15 @@ public class CmsScheduledJobInfo implements I_CmsConfigurationParameterHandler {
             return null;
         }
 
-        return m_trigger.getPreviousFireTime();
+        return m_previousFireTime;
     }
 
     /**
      * Returns the internal id of this job in the scheduler.<p>
-     * 
-     * Can be used to remove this job from the scheduler with 
-     * <code>{@link CmsScheduleManager#unscheduleJob(org.opencms.file.CmsObject, String)}</code>.<p> 
-     * 
+     *
+     * Can be used to remove this job from the scheduler with
+     * <code>{@link CmsScheduleManager#unscheduleJob(org.opencms.file.CmsObject, String)}</code>.<p>
+     *
      * @return the internal id of this job in the scheduler
      */
     public String getId() {
@@ -615,8 +629,8 @@ public class CmsScheduledJobInfo implements I_CmsConfigurationParameterHandler {
 
     /**
      * Returns an instance of the configured job class.<p>
-     * 
-     * If any error occurs during class invocaion, the error 
+     *
+     * If any error occurs during class invocaion, the error
      * is written to the OpenCms log and <code>null</code> is returned.<p>
      *
      * @return an instance of the configured job class, or null if an error occurred
@@ -626,9 +640,10 @@ public class CmsScheduledJobInfo implements I_CmsConfigurationParameterHandler {
         if (m_jobInstance != null) {
 
             if (LOG.isDebugEnabled()) {
-                LOG.debug(Messages.get().getBundle().key(
-                    Messages.LOG_REUSING_INSTANCE_1,
-                    m_jobInstance.getClass().getName()));
+                LOG.debug(
+                    Messages.get().getBundle().key(
+                        Messages.LOG_REUSING_INSTANCE_1,
+                        m_jobInstance.getClass().getName()));
             }
 
             // job instance already initialized
@@ -659,8 +674,8 @@ public class CmsScheduledJobInfo implements I_CmsConfigurationParameterHandler {
             LOG.debug(Messages.get().getBundle().key(Messages.LOG_JOB_CREATED_1, getClassName()));
         }
 
-        // this should not flood the log files: if class name is wrong or jar files missing this will 
-        // most likely persist until restart. 
+        // this should not flood the log files: if class name is wrong or jar files missing this will
+        // most likely persist until restart.
         if (job == null) {
             setActive(false);
         }
@@ -682,27 +697,28 @@ public class CmsScheduledJobInfo implements I_CmsConfigurationParameterHandler {
      *
      * @return the parameters
      */
-    public SortedMap getParameters() {
+    public SortedMap<String, String> getParameters() {
 
         return m_parameters;
     }
 
     /**
      * Finalizes (freezes) the configuration of this scheduler job entry.<p>
-     * 
-     * After this job entry has been frozen, any attempt to change the 
+     *
+     * After this job entry has been frozen, any attempt to change the
      * configuration of this entry with one of the "set..." methods
-     * will lead to a <code>RuntimeException</code>.<p> 
-     * 
+     * will lead to a <code>RuntimeException</code>.<p>
+     *
      * @see org.opencms.configuration.I_CmsConfigurationParameterHandler#initConfiguration()
      */
     public void initConfiguration() {
 
         // simple default configuration does not need to be initialized
         if (LOG.isDebugEnabled()) {
-            LOG.debug(org.opencms.configuration.Messages.get().getBundle().key(
-                org.opencms.configuration.Messages.LOG_INIT_CONFIGURATION_1,
-                this));
+            LOG.debug(
+                org.opencms.configuration.Messages.get().getBundle().key(
+                    org.opencms.configuration.Messages.LOG_INIT_CONFIGURATION_1,
+                    this));
         }
         setFrozen(true);
     }
@@ -740,12 +756,16 @@ public class CmsScheduledJobInfo implements I_CmsConfigurationParameterHandler {
 
     /**
      * Sets the name of the class to schedule.<p>
-     * 
+     *
      * @param className the class name to set
      */
     public void setClassName(String className) {
 
         checkFrozen();
+        if (className != null) {
+            // remove leading or trailing white space
+            className = className.trim();
+        }
         if (!CmsStringUtil.isValidJavaClassName(className)) {
             CmsMessageContainer message = Messages.get().container(Messages.ERR_BAD_JOB_CLASS_NAME_1, className);
             if (OpenCms.getRunLevel() > OpenCms.RUNLEVEL_2_INITIALIZING) {
@@ -754,7 +774,7 @@ public class CmsScheduledJobInfo implements I_CmsConfigurationParameterHandler {
                 LOG.warn(message.key());
             }
         } else {
-            Class jobClass;
+            Class<?> jobClass;
             try {
                 jobClass = Class.forName(className);
                 if (!I_CmsScheduledJob.class.isAssignableFrom(jobClass)) {
@@ -794,7 +814,7 @@ public class CmsScheduledJobInfo implements I_CmsConfigurationParameterHandler {
      * This will also "freeze" the context information that is set.<p>
      *
      * @param contextInfo the context information for the user executing the job
-     * 
+     *
      * @see CmsContextInfo#freeze()
      */
     public void setContextInfo(CmsContextInfo contextInfo) {
@@ -808,21 +828,20 @@ public class CmsScheduledJobInfo implements I_CmsConfigurationParameterHandler {
 
     /**
      * Sets the cron expression for this job entry.<p>
-     * 
+     *
      * @param cronExpression the cron expression to set
      */
+    @SuppressWarnings("unused")
     public void setCronExpression(String cronExpression) {
 
         checkFrozen();
 
         try {
             // check if the cron expression is valid
-            new CronTrigger().setCronExpression(cronExpression);
+            new CronExpression(cronExpression);
         } catch (Exception e) {
-            throw new CmsIllegalArgumentException(Messages.get().container(
-                Messages.ERR_BAD_CRON_EXPRESSION_2,
-                getJobName(),
-                cronExpression));
+            throw new CmsIllegalArgumentException(
+                Messages.get().container(Messages.ERR_BAD_CRON_EXPRESSION_2, getJobName(), cronExpression));
         }
 
         m_cronExpression = cronExpression;
@@ -848,20 +867,20 @@ public class CmsScheduledJobInfo implements I_CmsConfigurationParameterHandler {
      *
      * @param parameters the parameters to set
      */
-    public void setParameters(SortedMap parameters) {
+    public void setParameters(SortedMap<String, String> parameters) {
 
         checkFrozen();
         if (parameters == null) {
             throw new CmsIllegalArgumentException(Messages.get().container(Messages.ERR_BAD_JOB_PARAMS_0));
         }
         // make sure the parameters are a sorted map
-        m_parameters = new TreeMap(parameters);
+        m_parameters = new TreeMap<String, String>(parameters);
     }
 
     /**
      * Controls if the job instance class is reused for this job,
      * of if a new instance is generated every time the job is run.<p>
-     * 
+     *
      * @param reuseInstance must be true if the job instance class is to be reused
      */
     public void setReuseInstance(boolean reuseInstance) {
@@ -872,7 +891,7 @@ public class CmsScheduledJobInfo implements I_CmsConfigurationParameterHandler {
 
     /**
      * Checks if this job info configuration is frozen.<p>
-     * 
+     *
      * @throws CmsRuntimeException in case the configuration is already frozen
      */
     protected void checkFrozen() throws CmsRuntimeException {
@@ -885,9 +904,9 @@ public class CmsScheduledJobInfo implements I_CmsConfigurationParameterHandler {
     /**
      * Returns the Quartz trigger used for scheduling this job.<p>
      *
-     * This is an internal operation that should only by performed by the 
+     * This is an internal operation that should only by performed by the
      * <code>{@link CmsScheduleManager}</code>, never by using this API directly.<p>
-     * 
+     *
      * @return the Quartz trigger used for scheduling this job
      */
     protected Trigger getTrigger() {
@@ -911,7 +930,7 @@ public class CmsScheduledJobInfo implements I_CmsConfigurationParameterHandler {
             m_frozen = true;
         } else if (!frozen && m_frozen) {
             // "unfreeze" the job configuration
-            m_parameters = new TreeMap(m_parameters);
+            m_parameters = new TreeMap<String, String>(m_parameters);
             m_frozen = false;
         }
     }
@@ -919,9 +938,9 @@ public class CmsScheduledJobInfo implements I_CmsConfigurationParameterHandler {
     /**
      * Sets the is used for scheduling this job.<p>
      *
-     * This is an internal operation that should only by performed by the 
+     * This is an internal operation that should only by performed by the
      * <code>{@link CmsScheduleManager}</code>, never by using this API directly.<p>
-     * 
+     *
      * @param id the id to set
      */
     protected void setId(String id) {
@@ -931,11 +950,31 @@ public class CmsScheduledJobInfo implements I_CmsConfigurationParameterHandler {
     }
 
     /**
+     * Sets the next execution time.<p>
+     *
+     * @param nextFire the next execution time
+     */
+    protected void setNextFireTime(Date nextFire) {
+
+        m_nextFireTime = nextFire;
+    }
+
+    /**
+     * Sets the previous execution time.<p>
+     *
+     * @param fireTime the previous execution time
+     */
+    protected void setPreviousFireTime(Date fireTime) {
+
+        m_previousFireTime = fireTime;
+    }
+
+    /**
      * Sets the Quartz trigger used for scheduling this job.<p>
      *
-     * This is an internal operation that should only by performed by the 
+     * This is an internal operation that should only by performed by the
      * <code>{@link CmsScheduleManager}</code>, never by using this API directly.<p>
-     * 
+     *
      * @param trigger the Quartz trigger to set
      */
     protected void setTrigger(Trigger trigger) {
@@ -946,7 +985,7 @@ public class CmsScheduledJobInfo implements I_CmsConfigurationParameterHandler {
 
     /**
      * Updates the request time in the internal context information of the user with the current system time.<p>
-     * 
+     *
      * This is required before executing the job, otherwise the context information request time would be the time
      * the context object was initially created.<p>
      */

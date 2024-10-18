@@ -31,6 +31,7 @@
 
 package org.opencms.workplace.help;
 
+import org.opencms.configuration.CmsParameterConfiguration;
 import org.opencms.file.CmsProject;
 import org.opencms.file.CmsProperty;
 import org.opencms.file.CmsPropertyDefinition;
@@ -48,7 +49,6 @@ import org.opencms.main.OpenCms;
 import org.opencms.security.CmsRole;
 import org.opencms.security.CmsRoleViolationException;
 import org.opencms.util.CmsMacroResolver;
-import org.opencms.util.CmsPropertyUtils;
 import org.opencms.util.CmsStringUtil;
 import org.opencms.workplace.CmsDialog;
 import org.opencms.workplace.CmsWorkplace;
@@ -60,9 +60,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.jsp.PageContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.jsp.PageContext;
 
 import org.apache.commons.collections.ExtendedProperties;
 import org.apache.commons.logging.Log;
@@ -819,7 +819,7 @@ public class CmsHelpTemplateBean extends CmsDialog {
                         // try to read the mappings from the current module
                         String absolutePath = OpenCms.getSystemInfo().getAbsoluteRfsPathRelativeToWebInf(
                             resolveMacros(RFS_HELPMAPPINGS));
-                        ExtendedProperties props = CmsPropertyUtils.loadProperties(absolutePath);
+                        CmsParameterConfiguration props = new CmsParameterConfiguration(absolutePath);
 
                         if (wpResource.startsWith(OpenCms.getSystemInfo().getOpenCmsContext())) {
                             // remove context from workplace path
@@ -855,7 +855,7 @@ public class CmsHelpTemplateBean extends CmsDialog {
     }
 
     /**
-     * @see org.opencms.workplace.CmsWorkplace#initWorkplaceRequestValues(org.opencms.workplace.CmsWorkplaceSettings, javax.servlet.http.HttpServletRequest)
+     * @see org.opencms.workplace.CmsWorkplace#initWorkplaceRequestValues(org.opencms.workplace.CmsWorkplaceSettings, jakarta.servlet.http.HttpServletRequest)
      */
     @Override
     protected void initWorkplaceRequestValues(CmsWorkplaceSettings settings, HttpServletRequest request) {

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE opencms SYSTEM "http://www.alkacon.com/dtd/6.0/vfsdoctor-plugin.dtd">
+<opencms>
+	<vfsdoctor>
+		<plugin>
+			<queries>
+				<query name="SELECT_ALL_USERS" >
+					<default><![CDATA[
+						SELECT USER_ID, USER_OU, USER_NAME 
+						FROM CMS_USERS
+					]]></default>
+				</query> 
+				<query name="DELETE_USER_BY_NAME" >
+					<default><![CDATA[
+						DELETE FROM CMS_USERS 
+						WHERE USER_NAME = ? AND USER_OU = ?
+					]]></default>
+				</query> 
+				<query name="SELECT_ALL_GROUPS_FOR_USER" >
+					<default><![CDATA[
+						SELECT GROUP_ID 
+						FROM CMS_GROUPUSERS 
+						WHERE USER_ID = ?
+					]]></default>
+				</query> 
+				<query name="REPLACE_USER_IN_GROUP" >
+					<default><![CDATA[
+						UPDATE CMS_GROUPUSERS 
+						SET USER_ID = ? 
+						WHERE GROUP_ID = ? AND USER_ID = ?
+					]]></default>
+				</query> 
+				<query name="DELETE_USER_IN_GROUP" >
+					<default><![CDATA[
+						DELETE FROM CMS_GROUPUSERS 
+						WHERE GROUP_ID = ? AND USER_ID = ?
+					]]></default>
+				</query> 
+				<query name="SELECT_ALL_RESOURCES_FOR_USER" >
+					<default><![CDATA[
+						SELECT RESOURCE_ID 
+						FROM CMS_${PROJECT}_ACCESSCONTROL
+						WHERE PRINCIPAL_ID = ?
+					]]></default>
+				</query> 
+				<query name="REPLACE_USER_IN_ACE" >
+					<default><![CDATA[
+						UPDATE CMS_${PROJECT}_ACCESSCONTROL 
+						SET PRINCIPAL_ID = ? 
+						WHERE RESOURCE_ID = ? AND PRINCIPAL_ID = ?
+					]]></default>
+				</query> 
+				<query name="DELETE_USER_IN_ACE" >
+					<default><![CDATA[
+						DELETE FROM CMS_${PROJECT}_ACCESSCONTROL
+						WHERE RESOURCE_ID = ? AND PRINCIPAL_ID = ?
+					]]></default>
+				</query> 
+				<query name="REPLACE_USER_FOR_RESOURCE_CREATE" >
+					<default><![CDATA[
+						UPDATE CMS_${PROJECT}_RESOURCES 
+						SET USER_CREATED = ? 
+						WHERE USER_CREATED = ?
+					]]></default>
+				</query> 
+				<query name="REPLACE_USER_FOR_RESOURCE_LASTMOD" >
+					<default><![CDATA[
+						UPDATE CMS_${PROJECT}_RESOURCES 
+						SET USER_LASTMODIFIED = ? 
+						WHERE USER_LASTMODIFIED = ?
+					]]></default>
+				</query> 
+				<query name="REPLACE_USER_FOR_PROJECT" >
+					<default><![CDATA[
+						UPDATE CMS_PROJECTS 
+						SET USER_ID = ? 
+						WHERE USER_ID = ?
+					]]></default>
+				</query> 
+			</queries>
+		</plugin>
+	</vfsdoctor>
+</opencms>

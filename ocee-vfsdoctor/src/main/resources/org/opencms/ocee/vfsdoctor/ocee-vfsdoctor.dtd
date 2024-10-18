@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+# The root configuration node is called <opencms> for all OpenCms configurations.
+-->
+<!ELEMENT opencms (vfsdoctor)>
+
+<!--
+# <vfsdoctor> 
+# The configuration of VFS-Doctor OpenCms OCEE module is done here.
+-->
+<!ELEMENT vfsdoctor (plugins, sqlconsole, rfsbrowser?)>
+<!--
+# The OpenCms pool to use to access the db
+-->
+<!ATTLIST vfsdoctor pool CDATA #REQUIRED>
+
+<!--
+# <plugins> 
+# List of vfs-doctor plugins.
+-->
+<!ELEMENT plugins (plugin*)>
+
+<!--
+# <plugins> 
+# List of vfs-doctor plugins.
+-->
+<!ELEMENT plugin EMPTY>
+
+<!--
+# The class of the plugin
+-->
+<!ATTLIST plugin class CDATA #REQUIRED>
+
+<!--
+# <sqlconsole> 
+# SQL console options.
+-->
+<!ELEMENT sqlconsole (allowedsentences, disallowedsentences)>
+
+<!--
+# <allowedsentences> 
+# List of allowed sentences.
+-->
+<!ELEMENT allowedsentences (sentence*)>
+
+<!--
+# <disallowedsentences> 
+# List of disallowed sentences.
+-->
+<!ELEMENT disallowedsentences (sentence*)>
+
+<!--
+# <sentence> 
+# a sql sentence.
+-->
+<!ELEMENT sentence EMPTY>
+
+<!--
+# The name of the sql sentence
+-->
+<!ATTLIST sentence name CDATA #REQUIRED>
+
+<!--
+# <rfsbrowser> 
+# RFS browser options.
+-->
+<!ELEMENT rfsbrowser (initial-dir, restrict-paths, command-interpreter, forbidden-drives?)>
+
+<!--
+# The read-only flag for the RFS browser
+-->
+<!ATTLIST rfsbrowser read-only (true|false) "true">
+
+<!--
+# The initial directory.
+-->
+<!ELEMENT initial-dir (#PCDATA)>
+
+<!--
+# <command-interpreter> 
+# RFS browser command interpreter.
+-->
+<!ELEMENT command-interpreter (command, exe-param)>
+<!--
+# If the command interpreter is enabled
+-->
+<!ATTLIST command-interpreter enabled (true|false) "false"
+							  maxtime CDATA "30">
+
+
+<!--
+# The command interpreter name.
+-->
+<!ELEMENT command (#PCDATA)>
+
+<!--
+# The command interpreter execution parameter.
+-->
+<!ELEMENT exe-param (#PCDATA)>
+
+<!--
+# <restrict-paths> 
+# RFS browser list of restricted paths.
+-->
+<!ELEMENT restrict-paths (path*)>
+<!--
+# The whitelist flag for the RFS browser
+-->
+<!ATTLIST restrict-paths whitelist (true|false) "true">
+
+<!--
+# The restricted path entry.
+-->
+<!ELEMENT path (#PCDATA)>
+
+<!--
+# <forbidden-drives> 
+# RFS browser list of forbidden drives.
+-->
+<!ELEMENT forbidden-drives (drive*)>
+
+<!--
+# The forbidden drive entry.
+-->
+<!ELEMENT drive (#PCDATA)>

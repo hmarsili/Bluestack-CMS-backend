@@ -1,6 +1,6 @@
 package com.tfsla.diario.webservices;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.opencms.file.CmsFile;
 import org.opencms.file.CmsObject;

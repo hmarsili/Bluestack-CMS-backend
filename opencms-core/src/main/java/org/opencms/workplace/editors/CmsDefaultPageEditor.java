@@ -52,8 +52,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
-import javax.servlet.ServletException;
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.jsp.JspException;
 
 import org.apache.commons.logging.Log;
 

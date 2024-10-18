@@ -22,16 +22,16 @@ import org.opencms.main.OpenCms;
 import org.opencms.main.CmsException;
 import org.opencms.configuration.CPMConfig;
 import org.opencms.configuration.CmsMedios;
-import org.opencms.db.CmsDefaultUsers;
 import org.opencms.db.CmsPublishList;
 
 import com.tfsla.diario.ediciones.services.ImageOrientationFixer;
 import com.tfsla.diario.ediciones.services.ImagenService;
 import com.tfsla.diario.ediciones.services.UploadService;
-import com.tfsla.utils.TfsAdminUserProvider;
+
+import jakarta.servlet.http.Part;
+
 import com.tfsla.utils.CmsResourceUtils;
 
-import org.apache.commons.fileupload.FileItem;
 import org.opencms.report.CmsLogReport;
 import org.opencms.util.CmsFileUtil;
 import org.opencms.workplace.CmsWorkplaceAction;
@@ -82,7 +82,7 @@ public class UploadImageManager {
 			return null;
 	}
 	
-	public String upload(FileItem item) throws Exception {
+	public String upload(Part item) throws Exception {
 		String folderName = this.processFolders();
 		String fileName = uploadImage(folderName, item);
 		
@@ -137,22 +137,19 @@ public class UploadImageManager {
 		return fileName;
 	}
 	
-	public String uploadImage(String folderName, FileItem item) throws Exception {
-        String fileName = null;
+	public String uploadImage(String folderName, Part item) throws Exception {
         
-		if (!item.isFormField()) {
-			byte[] buffer = null;
-			InputStream stream = item.getInputStream();
-			try {
-				stream = ImageOrientationFixer.transformImage(stream);
-			} catch(Exception e) {
-				e.printStackTrace();
-			}
-			
-			buffer = CmsFileUtil.readFully(stream, false);
-			return this.uploadImage(folderName, item.getName(), buffer);
-        }
-        return fileName;
+		byte[] buffer = null;
+		InputStream stream = item.getInputStream();
+		try {
+			stream = ImageOrientationFixer.transformImage(stream);
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		buffer = CmsFileUtil.readFully(stream, false);
+		return this.uploadImage(folderName, item.getName(), buffer);
+    
 	}	
 	
 	public void setSite(String site) {

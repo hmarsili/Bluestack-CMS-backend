@@ -1,6 +1,6 @@
 package com.tfsla.diario.friendlyTags;
 
-import javax.servlet.jsp.JspTagException;
+import jakarta.servlet.jsp.JspTagException;
 import java.util.ArrayList;
 
 public abstract class A_TfsNoticiaCollectionWithBlanks extends A_TfsNoticiaCollection {

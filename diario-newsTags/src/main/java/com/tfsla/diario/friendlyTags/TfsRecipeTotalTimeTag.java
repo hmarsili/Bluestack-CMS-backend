@@ -5,7 +5,7 @@ import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
 import java.util.Locale;
 
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspException;
 
 import org.opencms.i18n.CmsLocaleManager;
 import org.opencms.workplace.CmsWorkplaceManager;

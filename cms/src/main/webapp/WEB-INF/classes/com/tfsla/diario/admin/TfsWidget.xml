@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widgets>
+  <widget class="com.tfsla.diario.admin.widgets.TfsPreviewConfWidget" />
+  <widget class="com.tfsla.diario.admin.widgets.TfsLabelWidget" />
+  <widget class="com.tfsla.diario.admin.widgets.TfsTextWidget" />
+  <widget class="com.tfsla.diario.admin.widgets.TfsHTMLWidget" />
+  <widget class="com.tfsla.diario.admin.widgets.TfsCheckBoxWidget" />
+  <widget class="com.tfsla.diario.admin.widgets.TfsVfsFileWidget" />
+  <widget class="com.tfsla.diario.admin.widgets.TfsLinkGalleryWidget" />
+  <widget class="com.tfsla.diario.admin.widgets.TfsSelectWidget" />
+  <widget class="com.tfsla.diario.admin.widgets.TfsEstadoWidget" />
+  <widget class="com.tfsla.diario.admin.widgets.TfsSeccionesWidget" />
+  <widget class="com.tfsla.diario.admin.widgets.TfsZonasWidget" />
+  <widget class="com.tfsla.diario.admin.widgets.TfsCategoryWidget" />
+  <widget class="com.tfsla.diario.admin.widgets.TfsContentMultiSelectWidget" />
+  <widget class="com.tfsla.diario.admin.widgets.TfsCalendarWidget" />
+  <widget class="com.tfsla.diario.admin.widgets.TfsTextAreaWidget" />
+  <widget class="com.tfsla.diario.admin.widgets.TfsEncuestaWidget" />
+  <widget class="com.tfsla.diario.admin.widgets.TfsTipoEdicionWidget" />
+  <widget class="com.tfsla.diario.admin.widgets.TfsGroupsWidget" />
+  <widget class="com.tfsla.diario.admin.widgets.TfsUserWidget" />
+  <widget class="com.tfsla.diario.admin.widgets.TfsPeriodTimeWidget" />
+  <widget class="com.tfsla.diario.admin.widgets.TfsAutoCompleteBoxWidget" />
+  <widget class="com.tfsla.genericImport.widgets.TfsDbTableNameWidget" />
+  <widget class="com.tfsla.genericImport.widgets.TfsXmlContentTypesWidget" />
+  <widget class="com.tfsla.genericImport.widgets.TfsDbColumnNameWidget" />
+  <widget class="com.tfsla.genericImport.widgets.TfsXmlContentElementWidget" />
+  <widget class="com.tfsla.genericImport.widgets.TfsPropertySelectorWidget" />
+  <widget class="com.tfsla.genericImport.widgets.TfsDataTransformationWidget" />
+  <widget class="com.tfsla.diario.admin.widgets.TfsAuthorWidget" />
+  <widget class="com.tfsla.diario.admin.widgets.TfsJqueryBuilderWidget" />
+  <widget class="com.tfsla.diario.admin.widgets.TfsNoticiasRelacionadasComboWidget" />
+  <widget class="com.tfsla.diario.admin.widgets.TfsTriviaClassificationWidget"/>
+  <widget class="com.tfsla.diario.admin.widgets.TfsQuantityUnityWidget" />
+  <widget class="com.tfsla.diario.admin.widgets.TfsPatternedFieldWidget"/>
+  <widget class="com.tfsla.diario.admin.widgets.TfsTotalCookingTimeWidget" />
+  <widget class="com.tfsla.diario.admin.widgets.TfsFocalPointWidget" />
+</widgets>

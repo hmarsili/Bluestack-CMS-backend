@@ -31,10 +31,10 @@
 
 package org.opencms.main;
 
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.http.HttpSessionEvent;
-import javax.servlet.http.HttpSessionListener;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.http.HttpSessionEvent;
+import jakarta.servlet.http.HttpSessionListener;
 
 import org.apache.commons.logging.Log;
 
@@ -60,7 +60,7 @@ public class OpenCmsListener implements ServletContextListener, HttpSessionListe
     private static final Log LOG = CmsLog.getLog(OpenCmsListener.class);
 
     /**
-     * @see javax.servlet.ServletContextListener#contextDestroyed(javax.servlet.ServletContextEvent)
+     * @see jakarta.servlet.ServletContextListener#contextDestroyed(jakarta.servlet.ServletContextEvent)
      */
     public void contextDestroyed(ServletContextEvent event) {
 
@@ -78,7 +78,7 @@ public class OpenCmsListener implements ServletContextListener, HttpSessionListe
     }
 
     /**
-     * @see javax.servlet.ServletContextListener#contextInitialized(javax.servlet.ServletContextEvent)
+     * @see jakarta.servlet.ServletContextListener#contextInitialized(jakarta.servlet.ServletContextEvent)
      */
     public void contextInitialized(ServletContextEvent event) {
 
@@ -99,7 +99,7 @@ public class OpenCmsListener implements ServletContextListener, HttpSessionListe
     }
 
     /**
-     * @see javax.servlet.http.HttpSessionListener#sessionCreated(javax.servlet.http.HttpSessionEvent)
+     * @see jakarta.servlet.http.HttpSessionListener#sessionCreated(jakarta.servlet.http.HttpSessionEvent)
      */
     public void sessionCreated(HttpSessionEvent event) {
 
@@ -117,7 +117,7 @@ public class OpenCmsListener implements ServletContextListener, HttpSessionListe
     }
 
     /**
-     * @see javax.servlet.http.HttpSessionListener#sessionDestroyed(javax.servlet.http.HttpSessionEvent)
+     * @see jakarta.servlet.http.HttpSessionListener#sessionDestroyed(jakarta.servlet.http.HttpSessionEvent)
      */
     public void sessionDestroyed(HttpSessionEvent event) {
 

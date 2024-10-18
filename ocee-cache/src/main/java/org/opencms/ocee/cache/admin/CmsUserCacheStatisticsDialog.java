@@ -2,17 +2,17 @@
  * Decompiled with CFR 0_123.
  * 
  * Could not load the following classes:
- *  javax.servlet.http.HttpServletRequest
- *  javax.servlet.http.HttpServletResponse
- *  javax.servlet.jsp.PageContext
+ *  jakarta.servlet.http.HttpServletRequest
+ *  jakarta.servlet.http.HttpServletResponse
+ *  jakarta.servlet.jsp.PageContext
  *  org.opencms.jsp.CmsJspActionElement
  */
 package org.opencms.ocee.cache.admin;
 
 import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.jsp.PageContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.jsp.PageContext;
 import org.opencms.jsp.CmsJspActionElement;
 import org.opencms.ocee.cache.I_CmsCacheInstanceType;
 import org.opencms.ocee.cache.admin.A_CmsCacheStatisticsDialog;

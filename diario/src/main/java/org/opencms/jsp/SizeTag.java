@@ -2,7 +2,7 @@ package org.opencms.jsp;
 
 import java.io.IOException;
 
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspException;
 
 import com.tfsla.exceptions.ApplicationException;
 

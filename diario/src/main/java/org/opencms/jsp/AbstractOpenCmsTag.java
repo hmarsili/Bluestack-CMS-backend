@@ -2,9 +2,9 @@ package org.opencms.jsp;
 
 import java.util.Locale;
 
-import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.tagext.Tag;
-import javax.servlet.jsp.tagext.TagSupport;
+import jakarta.servlet.jsp.PageContext;
+import jakarta.servlet.jsp.tagext.Tag;
+import jakarta.servlet.jsp.tagext.TagSupport;
 
 import org.apache.commons.logging.Log;
 import org.opencms.file.CmsObject;
@@ -87,7 +87,7 @@ public abstract class AbstractOpenCmsTag extends AbstractTag {
 	}
 
 	/**
-	 * @see javax.servlet.jsp.tagext.Tag#release()
+	 * @see jakarta.servlet.jsp.tagext.Tag#release()
 	 */
 	public void release() {
 		this.m_element = null;

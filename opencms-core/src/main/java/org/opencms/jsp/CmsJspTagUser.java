@@ -41,8 +41,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.jsp.tagext.TagSupport;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.jsp.tagext.TagSupport;
 
 import org.apache.commons.logging.Log;
 
@@ -152,12 +152,12 @@ public class CmsJspTagUser extends TagSupport {
     }
 
     /**
-     * @see javax.servlet.jsp.tagext.Tag#doStartTag()
+     * @see jakarta.servlet.jsp.tagext.Tag#doStartTag()
      */
     @Override
-    public int doStartTag() throws javax.servlet.jsp.JspException {
+    public int doStartTag() throws jakarta.servlet.jsp.JspException {
 
-        javax.servlet.ServletRequest req = pageContext.getRequest();
+        jakarta.servlet.ServletRequest req = pageContext.getRequest();
 
         // This will always be true if the page is called through OpenCms 
         if (CmsFlexController.isCmsRequest(req)) {
@@ -170,7 +170,7 @@ public class CmsJspTagUser extends TagSupport {
                 if (LOG.isErrorEnabled()) {
                     LOG.error(Messages.get().getBundle().key(Messages.ERR_PROCESS_TAG_1, "user"), ex);
                 }
-                throw new javax.servlet.jsp.JspException(ex);
+                throw new jakarta.servlet.jsp.JspException(ex);
             }
         }
         return SKIP_BODY;
@@ -187,7 +187,7 @@ public class CmsJspTagUser extends TagSupport {
     }
 
     /**
-     * @see javax.servlet.jsp.tagext.Tag#release()
+     * @see jakarta.servlet.jsp.tagext.Tag#release()
      */
     @Override
     public void release() {

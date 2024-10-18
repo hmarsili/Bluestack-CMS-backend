@@ -2,7 +2,7 @@ package com.tfsla.diario.friendlyTags;
 
 import java.util.Scanner;
 
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspException;
 
 import com.tfsla.diario.model.TfsEdicion;
 import com.tfsla.diario.model.TfsPublicacion;

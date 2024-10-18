@@ -1,9 +1,10 @@
 package com.tfsla.statistics;
 
-import javax.servlet.*; 
-import javax.servlet.http.*; 
+import jakarta.servlet.*; 
+import jakarta.servlet.http.*;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.opencms.main.CmsLog;
 
 
 public class TfsStatsServlet extends HttpServlet {
@@ -15,7 +16,7 @@ public class TfsStatsServlet extends HttpServlet {
 
 	private MonitorThread monitor = null;
 	
-	static Logger LOG = Logger.getLogger(TfsStatsServlet.class);
+	static Log LOG = CmsLog.getLog(TfsStatsServlet.class);
 
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config); 

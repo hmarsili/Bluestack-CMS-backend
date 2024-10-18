@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE opencms SYSTEM "http://www.alkacon.com/dtd/6.0/vfsdoctor-plugin.dtd">
+<opencms>
+	<vfsdoctor>
+		<plugin>
+			<queries>
+				<query name="SELECT_ALL_ACCESS_STRUCTURE" >
+					<default><![CDATA[
+						SELECT 
+							CMS_${PROJECT}_ACCESSCONTROL.PRINCIPAL_ID, CMS_${PROJECT}_STRUCTURE.RESOURCE_PATH
+						FROM
+							CMS_${PROJECT}_ACCESSCONTROL,
+							CMS_${PROJECT}_STRUCTURE
+						WHERE
+							CMS_${PROJECT}_ACCESSCONTROL.RESOURCE_ID = CMS_${PROJECT}_STRUCTURE.RESOURCE_ID
+					]]></default>
+				</query> 
+				<query name="SELECT_ALL_USERS" >
+					<default><![CDATA[
+						SELECT 
+							CMS_USERS.USER_ID 
+						FROM
+							CMS_USERS
+					]]></default>
+				</query> 
+				<query name="SELECT_ALL_GROUPS" >
+					<default><![CDATA[
+						SELECT 
+							CMS_GROUPS.GROUP_ID 
+						FROM
+							CMS_GROUPS
+					]]></default>
+				</query> 
+				<query name="RECOVER_ACCESS_RESOURCE" >
+					<default><![CDATA[
+						DELETE 
+						FROM
+							CMS_${PROJECT}_ACCESSCONTROL
+						WHERE
+							PRINCIPAL_ID = ? 
+					]]></default>
+				</query> 
+			</queries>
+		</plugin>
+	</vfsdoctor>
+</opencms>

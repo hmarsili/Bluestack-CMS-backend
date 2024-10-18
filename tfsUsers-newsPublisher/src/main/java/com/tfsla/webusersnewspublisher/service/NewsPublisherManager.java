@@ -31,7 +31,8 @@ import org.opencms.xml.content.CmsXmlContent;
 import org.opencms.xml.content.CmsXmlContentFactory;
 import org.opencms.xml.content.CmsXmlContentValueSequence;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.Part;
 
 import java.util.*;
 
@@ -84,47 +85,77 @@ public class NewsPublisherManager{
 			FileItemFactory factory = new DiskFileItemFactory();
 			ServletFileUpload upload = new ServletFileUpload(factory);
 			upload.setHeaderEncoding("UTF-8");
-	    	List items = upload.parseRequest(request);
+			Collection<Part> items = request.getParts();
+	    	//List items = upload.parseRequest(request);
 	    	
-	    	if (items != null) {
-				Iterator itr = items.iterator();
-				List<FileItem> images = new ArrayList<FileItem>();
-				List<String> imagesBase64 = new ArrayList<String>();
-				List<String> imagesBase64Names = new ArrayList<String>();
-				List<String> videos = new ArrayList<String>();
-				List<String> fuentes = new ArrayList<String>();
-				List<String> categories = new ArrayList<String>();
-				String fileName = "";
+	    	
+			Iterator itr = items.iterator();
+			List<Part> images = new ArrayList<Part>();
+			List<String> imagesBase64 = new ArrayList<String>();
+			List<String> imagesBase64Names = new ArrayList<String>();
+			List<String> videos = new ArrayList<String>();
+			List<String> fuentes = new ArrayList<String>();
+			List<String> categories = new ArrayList<String>();
+			String fileName = "";
+			
+			while (request.getParameterNames().asIterator().hasNext()) {
+				String atrName = request.getParameterNames().asIterator().next();
 				
-				while (itr.hasNext()) {
-					FileItem item = (FileItem) itr.next();
-					
-					if (item.isFormField()) {
-						if (item.getFieldName().indexOf("video") >= 0) {
-							String codigo = item.getFieldName();
-							if (codigo != null && codigo.indexOf("<script") < 0 && codigo.indexOf("</script>") < 0 && !codigo.equals("")) {
-								videos.add(item.getString());
-							}
-						} else if (item.getFieldName().indexOf("fuente") >= 0) {
-							fuentes.add(item.getString());
-						} else if (item.getFieldName().indexOf("imagen.data64") >= 0) {
-							imagesBase64.add(item.getString());
-						} else if (item.getFieldName().indexOf("imagen.name") >= 0) {
-							imagesBase64Names.add(item.getString());
-						} else if (item.getFieldName().indexOf("categoria") >= 0) {
-							if (item.getString() != null && !item.getString().equals("")) {
-								categories.add(item.getString());	
-							}
-						} else {
-							map.put(item.getFieldName(), item);
+				if (atrName.indexOf("video") >= 0) {
+					if (atrName != null && atrName.indexOf("<script") < 0 && atrName.indexOf("</script>") < 0 && !atrName.equals("")) {
+						videos.add(request.getParameter(atrName));
+					}
+				} else if (atrName.indexOf("fuente") >= 0) {
+					fuentes.add(request.getParameter(atrName));
+				} else if (atrName.indexOf("imagen.data64") >= 0) {
+					imagesBase64.add(request.getParameter(atrName));
+				} else if (atrName.indexOf("imagen.name") >= 0) {
+					imagesBase64Names.add(request.getParameter(atrName));
+				} else if (atrName.indexOf("categoria") >= 0) {
+					if (request.getParameter(atrName) != null && !request.getParameter(atrName).equals("")) {
+						categories.add(request.getParameter(atrName));	
+					}
+				} else {
+					map.put(atrName, request.getParameter(atrName));
+				}
+
+			}
+			
+			while (itr.hasNext()) {
+				Part item = (Part)itr.next();
+				fileName = cmsObject.getRequestContext().getFileTranslator().translateResource(item.getSubmittedFileName());
+				if (fileName != null && !fileName.equals("")) {
+					images.add(item);
+				}
+				
+				/*
+				if (item.isFormField()) {
+					if (item.getFieldName().indexOf("video") >= 0) {
+						String codigo = item.getFieldName();
+						if (codigo != null && codigo.indexOf("<script") < 0 && codigo.indexOf("</script>") < 0 && !codigo.equals("")) {
+							videos.add(item.getString());
+						}
+					} else if (item.getFieldName().indexOf("fuente") >= 0) {
+						fuentes.add(item.getString());
+					} else if (item.getFieldName().indexOf("imagen.data64") >= 0) {
+						imagesBase64.add(item.getString());
+					} else if (item.getFieldName().indexOf("imagen.name") >= 0) {
+						imagesBase64Names.add(item.getString());
+					} else if (item.getFieldName().indexOf("categoria") >= 0) {
+						if (item.getString() != null && !item.getString().equals("")) {
+							categories.add(item.getString());	
 						}
 					} else {
-						fileName = cmsObject.getRequestContext().getFileTranslator().translateResource(item.getName());
-						if (fileName != null && !fileName.equals("")) {
-							images.add(item);
-						}
+						map.put(item.getFieldName(), item);
+					}
+				} else {
+					fileName = cmsObject.getRequestContext().getFileTranslator().translateResource(item.getName());
+					if (fileName != null && !fileName.equals("")) {
+						images.add(item);
 					}
 				}
+				*/
+		
 				map.put("images", images);
 				map.put("images64.data", imagesBase64);
 				map.put("images64.names", imagesBase64Names);

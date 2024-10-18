@@ -40,22 +40,25 @@ import org.opencms.main.OpenCms;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
+
+import org.apache.commons.fileupload2.core.DiskFileItem;
+import org.apache.commons.fileupload2.core.DiskFileItemFactory;
+import org.apache.commons.fileupload2.core.FileItem;
+import org.apache.commons.fileupload2.core.FileUploadException;
+import org.apache.commons.fileupload2.jakarta.JakartaServletFileUpload;
 import org.apache.commons.logging.Log;
 
 /**
@@ -580,17 +583,21 @@ public final class CmsRequestUtil {
      */
     public static List readMultipartFileItems(HttpServletRequest request) {
 
-        if (!ServletFileUpload.isMultipartContent(request)) {
+        if (!JakartaServletFileUpload.isMultipartContent(request)) {
             return null;
         }
-        DiskFileItemFactory factory = new DiskFileItemFactory();
+        DiskFileItemFactory factory = DiskFileItemFactory.builder().setPath(OpenCms.getSystemInfo().getPackagesRfsPath()).setBufferSize(4096).get();
+        //DiskFileItemFactory factory = DiskFileItemFactory.builder().get();
+        
         // maximum size that will be stored in memory
-        factory.setSizeThreshold(4096);
+        //factory.setSizeThreshold(4096);
         // the location for saving data that is larger than getSizeThreshold()
-        factory.setRepository(new File(OpenCms.getSystemInfo().getPackagesRfsPath()));
-        ServletFileUpload fu = new ServletFileUpload(factory);
+        //factory.setRepository(new File(OpenCms.getSystemInfo().getPackagesRfsPath()));
+        JakartaServletFileUpload fu = new JakartaServletFileUpload(factory);
         // set encoding to correctly handle special chars (e.g. in filenames)
-        fu.setHeaderEncoding(request.getCharacterEncoding());
+        //fu.setHeaderEncoding(request.getCharacterEncoding());
+        fu.setHeaderCharset(Charset.forName(request.getCharacterEncoding()));
+        
         List result = new ArrayList();
         try {
             List items = fu.parseRequest(request);
@@ -625,11 +632,14 @@ public final class CmsRequestUtil {
             if ((name != null) && (item.getName() == null)) {
                 // only put to map if current item is no file and not null
                 try {
-                    value = item.getString(encoding);
+                    value = item.getString(Charset.forName(encoding));
                 } catch (UnsupportedEncodingException e) {
                     LOG.error(Messages.get().getBundle().key(Messages.LOG_ENC_MULTIPART_REQ_ERROR_0), e);
                     value = item.getString();
-                }
+                } catch (IOException e) {
+                	LOG.error(Messages.get().getBundle().key(Messages.LOG_ENC_MULTIPART_REQ_ERROR_0), e);
+                    value = item.getString();
+				}
                 if (parameterMap.containsKey(name)) {
 
                     // append value to parameter values array
@@ -668,7 +678,7 @@ public final class CmsRequestUtil {
     /**
      * Redirects the response to the target link.<p>
      * 
-     * Use this method instead of {@link javax.servlet.http.HttpServletResponse#sendRedirect(java.lang.String)}
+     * Use this method instead of {@link jakarta.servlet.http.HttpServletResponse#sendRedirect(java.lang.String)}
      * to avoid relative links with secure sites (and issues with apache).<p>
      * 
      * @param jsp the OpenCms JSP context

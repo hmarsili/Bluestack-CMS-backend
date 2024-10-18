@@ -110,6 +110,7 @@ public class CmsExplorerTypeSettings implements Comparable {
         m_showNavigation = false;
         m_addititionalModuleExplorerType = false;
         m_newResourceOrder = new Integer(0);
+        
     }
 
     /**

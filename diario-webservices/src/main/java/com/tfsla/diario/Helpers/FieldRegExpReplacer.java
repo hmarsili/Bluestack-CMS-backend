@@ -15,7 +15,7 @@ import com.tfsla.diario.webservices.ImagesAddWebService;
 import com.tfsla.diario.webservices.core.SessionManager;
 import com.tfsla.utils.CmsObjectUtils;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;

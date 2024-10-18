@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.JspTagException;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspTagException;
 
 import org.apache.commons.logging.Log;
 import org.opencms.file.CmsObject;
@@ -20,7 +20,6 @@ import com.tfsla.diario.model.TfsReceta;
 import com.tfsla.diario.newsCollector.A_NewsCollector;
 import com.tfsla.diario.recipeCollector.A_RecipeCollector;
 import com.tfsla.diario.recipeCollector.LuceneRecipeCollector;
-import com.tfsla.diario.recipeCollector.RankingRecipeCollector;
 
 public class TfsRecipeListTag extends A_XmlContentTag implements I_TfsNoticia, I_TfsCollectionListTag {
 
@@ -391,6 +390,7 @@ public class TfsRecipeListTag extends A_XmlContentTag implements I_TfsNoticia, I
 						bestMatchCollector = collector;
 			}
 			
+			/*
 			collector = new RankingRecipeCollector();
 			if (collector.canCollect(parameters)) {
 					if (collector.canOrder(order))
@@ -398,6 +398,7 @@ public class TfsRecipeListTag extends A_XmlContentTag implements I_TfsNoticia, I
 					else 
 						bestMatchCollector = collector;
 			}
+			*/
 			
 			return bestMatchCollector;
 		}

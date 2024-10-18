@@ -42,9 +42,9 @@ import org.opencms.xml.I_CmsXmlDocument;
 
 import java.util.Locale;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.JspTagException;
-import javax.servlet.jsp.tagext.Tag;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspTagException;
+import jakarta.servlet.jsp.tagext.Tag;
 
 /**
  * Used to access XML content item information from the current open <code>&lt;cms:contentload&gt;</code> 
@@ -74,7 +74,7 @@ public class CmsJspTagContentAccess extends CmsJspScopedVarBodyTagSuport {
     private Locale m_locale;
 
     /**
-     * @see javax.servlet.jsp.tagext.Tag#doEndTag()
+     * @see jakarta.servlet.jsp.tagext.Tag#doEndTag()
      */
     @Override
     public int doEndTag() {
@@ -87,7 +87,7 @@ public class CmsJspTagContentAccess extends CmsJspScopedVarBodyTagSuport {
     }
 
     /**
-     * @see javax.servlet.jsp.tagext.Tag#doStartTag()
+     * @see jakarta.servlet.jsp.tagext.Tag#doStartTag()
      */
     @Override
     public int doStartTag() throws JspException {
@@ -133,7 +133,7 @@ public class CmsJspTagContentAccess extends CmsJspScopedVarBodyTagSuport {
     }
 
     /**
-     * @see javax.servlet.jsp.tagext.Tag#release()
+     * @see jakarta.servlet.jsp.tagext.Tag#release()
      */
     @Override
     public void release() {

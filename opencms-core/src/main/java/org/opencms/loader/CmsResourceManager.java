@@ -69,11 +69,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 
@@ -89,6 +89,9 @@ import org.apache.commons.logging.Log;
  */
 public class CmsResourceManager {
 
+    public void prueba(String value) {
+    	System.out.println("CmsResourceManager - Prueba --> " + value);
+    }
     /**
      * Contains the part of the resource manager configuration that can be changed 
      * during runtime by the import / deletion of a module.<p>

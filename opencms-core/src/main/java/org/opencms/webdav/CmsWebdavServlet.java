@@ -95,12 +95,12 @@ import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.Vector;
 
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.UnavailableException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.UnavailableException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.URLCodec;
@@ -199,7 +199,7 @@ public class CmsWebdavServlet extends HttpServlet {
     protected static final BitSet URL_SAFE_CHARS;
 
     /** Name of the servlet attribute to get the path to the temp directory. */
-    private static final String ATT_SERVLET_TEMPDIR = "javax.servlet.context.tempdir";
+    private static final String ATT_SERVLET_TEMPDIR = "jakarta.servlet.context.tempdir";
 
     /** The text to use as basic realm. */
     private static final String BASIC_REALM = "OpenCms WebDAV Servlet";

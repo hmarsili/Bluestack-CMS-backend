@@ -38,11 +38,11 @@ import org.opencms.util.CmsFileUtil;
 import java.io.File;
 import java.net.URL;
 
-import org.apache.commons.collections.ExtendedProperties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.PropertyConfigurator;
-import org.apache.log4j.helpers.Loader;
+import org.apache.logging.log4j.core.config.ConfigurationSource;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.core.util.Loader;
 
 /**
  * Provides the OpenCms logging mechanism.<p>
@@ -92,7 +92,7 @@ public final class CmsLog {
     static {
         try {
             // look for the log4j.properties that shipped with OpenCms
-            URL url = Loader.getResource("log4j.properties");
+            URL url = Loader.getResource("log4j.properties",null);
             if (url != null) {
                 // found some log4j properties, let's see if these are the ones used by OpenCms
                 String path = CmsFileUtil.normalizePath(url, '/');
@@ -104,10 +104,12 @@ public final class CmsLog {
                     + CmsConfigurationManager.DEFAULT_XML_FILE_NAME;
                 File configFile = new File(configFilePath);
                 if (configFile.exists()) {
+                	
+                	
                     // assume this is a default OpenCms log configuration                
-                    ExtendedProperties configuration = new ExtendedProperties(path);
+                    //ExtendedProperties configuration = new ExtendedProperties(path);
                     // check if OpenCms should set the log file environment variable
-                    boolean setLogFile = configuration.getBoolean("opencms.set.logfile", false);
+                    boolean setLogFile = Boolean.parseBoolean(System.getProperty("opencms.set.logfile", "true"));
                     if (setLogFile) {
                         // set "opencms.log" variable 
                         String logFilePath = CmsFileUtil.normalizePath(webInfPath + FOLDER_LOGS + FILE_LOG, '/');
@@ -115,7 +117,10 @@ public final class CmsLog {
                         m_logFileRfsPath = logFile.getAbsolutePath();
                         System.setProperty("opencms.logfile", m_logFileRfsPath);
                         // re-read the configuration with the new environment variable available
-                        PropertyConfigurator.configure(path);
+                        ConfigurationSource source = ConfigurationSource.fromUri(url.toURI());
+                        Configurator.initialize(null, source);
+                        
+                        //PropertyConfigurator.configure(path);
                     }
                 }
                 // can't localize this message since this would end in an endless logger init loop

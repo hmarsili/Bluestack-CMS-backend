@@ -51,10 +51,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.tagext.BodyTag;
-import javax.servlet.jsp.tagext.Tag;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.PageContext;
+import jakarta.servlet.jsp.tagext.BodyTag;
+import jakarta.servlet.jsp.tagext.Tag;
 
 /**
  * Implementation of the <code>&lt;cms:contentload/&gt;</code> tag, used to access and display XML content
@@ -294,7 +294,7 @@ public class TfsContentLoadTag extends CmsJspTagContentLoad {
 	}
 
 	/**
-	 * @see javax.servlet.jsp.tagext.BodyTagSupport#doAfterBody()
+	 * @see jakarta.servlet.jsp.tagext.BodyTagSupport#doAfterBody()
 	 */
 	public int doAfterBody() throws JspException {
 
@@ -310,7 +310,7 @@ public class TfsContentLoadTag extends CmsJspTagContentLoad {
 	}
 
 	/**
-	 * @see javax.servlet.jsp.tagext.Tag#doEndTag()
+	 * @see jakarta.servlet.jsp.tagext.Tag#doEndTag()
 	 */
 	public int doEndTag() {
 
@@ -320,7 +320,7 @@ public class TfsContentLoadTag extends CmsJspTagContentLoad {
 	}
 
 	/**
-	 * @see javax.servlet.jsp.tagext.Tag#doStartTag()
+	 * @see jakarta.servlet.jsp.tagext.Tag#doStartTag()
 	 */
 	
 	@SuppressWarnings("static-access")
@@ -594,7 +594,7 @@ public class TfsContentLoadTag extends CmsJspTagContentLoad {
 	}
 
 	/**
-	 * @see javax.servlet.jsp.tagext.Tag#release()
+	 * @see jakarta.servlet.jsp.tagext.Tag#release()
 	 */
 	public void release() {
 

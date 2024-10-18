@@ -61,14 +61,19 @@
     	<artifactId>opencms-core</artifactId>
     	<version>0.0.1-SNAPSHOT</version>
     </dependency>
-    
- 
+   
+   <dependency>
+	  <groupId>blueStack</groupId>
+      <artifactId>ocee-base</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency> 
+ <!-- 
     <dependency>
     	<groupId>Alkacon</groupId>
     	<artifactId>org.opencms.ocee.base</artifactId>
     	<version>0.0.1-SNAPSHOT</version>
     </dependency>
-
+-->
 	<dependency>
 		<groupId>blueStack</groupId>
 		<artifactId>opencms-modules</artifactId>
@@ -76,22 +81,22 @@
 	</dependency>
 
 
-    <!-- https://mvnrepository.com/artifact/javax.servlet/servlet-api -->
-	<dependency>
-	    <groupId>javax.servlet</groupId>
-	    <artifactId>servlet-api</artifactId>
-	    <version>3.0-alpha-1</version>
-	    <scope>provided</scope>
-	</dependency>
-	
-		<!-- https://mvnrepository.com/artifact/javax.servlet/jsp-api -->
-	<dependency>
-	    <groupId>javax.servlet</groupId>
-	    <artifactId>jsp-api</artifactId>
-	    <version>2.0</version>
-	    <scope>provided</scope>
-	</dependency>
-  </dependencies>
+<!-- https://mvnrepository.com/artifact/jakarta.servlet/jakarta.servlet-api -->
+<dependency>
+    <groupId>jakarta.servlet</groupId>
+    <artifactId>jakarta.servlet-api</artifactId>
+    <version>6.0.0</version>
+    <scope>provided</scope>
+</dependency>
+
+<!-- https://mvnrepository.com/artifact/jakarta.servlet.jsp/jakarta.servlet.jsp-api -->
+<dependency>
+    <groupId>jakarta.servlet.jsp</groupId>
+    <artifactId>jakarta.servlet.jsp-api</artifactId>
+    <version>3.1.1</version>
+    <scope>provided</scope>
+</dependency>
+</dependencies>
 
   <build>
     <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->

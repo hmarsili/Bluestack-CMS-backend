@@ -10,7 +10,7 @@ import org.opencms.db.CmsResourceState;
 
 import java.util.*;
 
-import javax.servlet.jsp.PageContext;
+import jakarta.servlet.jsp.PageContext;
 
 import org.opencms.file.*;
 

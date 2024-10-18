@@ -3,7 +3,7 @@ package com.tfsla.diario.friendlyTags;
 import java.io.IOException;
 import java.util.List;
 
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspException;
 
 import com.tfsla.diario.terminos.data.PersonsDAO;
 import com.tfsla.diario.terminos.model.Persons;

@@ -53,8 +53,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.digester.Digester;
-
+import org.apache.commons.digester3.Digester;
 import org.dom4j.Element;
 
 /**
@@ -214,7 +213,7 @@ public class CmsVfsConfiguration extends A_CmsXmlConfiguration {
     public static void addResourceTypeXmlRules(Digester digester) {
 
         // add rules for resource types
-        digester.addFactoryCreate("*/" + N_RESOURCETYPES + "/" + N_TYPE, CmsDigesterResourceTypeCreationFactory.class);
+    	digester.addFactoryCreate("*/" + N_RESOURCETYPES + "/" + N_TYPE, CmsDigesterResourceTypeCreationFactory.class);
         digester.addSetNext("*/" + N_RESOURCETYPES + "/" + N_TYPE, I_CmsResourceType.ADD_RESOURCE_TYPE_METHOD);
 
         // please note: the order of the rules is very important here,
@@ -440,13 +439,13 @@ public class CmsVfsConfiguration extends A_CmsXmlConfiguration {
     }
 
     /**
-     * @see org.opencms.configuration.I_CmsXmlConfiguration#addXmlDigesterRules(org.apache.commons.digester.Digester)
+     * @see org.opencms.configuration.I_CmsXmlConfiguration#addXmlDigesterRules(org.apache.commons.digester3.Digester)
      */
     public void addXmlDigesterRules(Digester digester) {
 
         // add finish rule
         digester.addCallMethod("*/" + N_VFS, "initializeFinished");
-
+     
         // creation of the resource manager
         digester.addObjectCreate("*/" + N_VFS + "/" + N_RESOURCES, CmsResourceManager.class);
         digester.addCallMethod(
@@ -454,20 +453,26 @@ public class CmsVfsConfiguration extends A_CmsXmlConfiguration {
             I_CmsConfigurationParameterHandler.INIT_CONFIGURATION_METHOD);
         digester.addSetNext("*/" + N_VFS + "/" + N_RESOURCES, "setResourceManager");
 
+        
+      //AGREGADO PRUEBA
+    	digester.addCallMethod("*/" + N_VFS + "/" + N_RESOURCES + "/" + N_RESOURCELOADERS + "/" + N_LOADER, "prueba", 1);
+    	digester.addCallParam("*/" + N_VFS + "/" + N_RESOURCES + "/" + N_RESOURCELOADERS + "/" + N_LOADER, 0,  A_CLASS);
+    	// FIN AGREGADO PRUEBA
+    	
         // add rules for resource loaders
         digester.addObjectCreate(
             "*/" + N_VFS + "/" + N_RESOURCES + "/" + N_RESOURCELOADERS + "/" + N_LOADER,
-            A_CLASS,
-            CmsConfigurationException.class);
+            CmsConfigurationException.class.getName(),
+            A_CLASS);
         digester.addCallMethod(
             "*/" + N_VFS + "/" + N_RESOURCES + "/" + N_RESOURCELOADERS + "/" + N_LOADER,
             I_CmsConfigurationParameterHandler.INIT_CONFIGURATION_METHOD);
         digester.addSetNext("*/" + N_VFS + "/" + N_RESOURCES + "/" + N_RESOURCELOADERS + "/" + N_LOADER, "addLoader");
-
-        // add rules for resource types
+//
+//        // add rules for resource types
         addResourceTypeXmlRules(digester);
-
-        // add rules for VFS content collectors
+//
+//        // add rules for VFS content collectors
         digester.addCallMethod(
             "*/" + N_VFS + "/" + N_RESOURCES + "/" + N_COLLECTORS + "/" + N_COLLECTOR,
             "addContentCollector",

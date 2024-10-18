@@ -1,7 +1,7 @@
 package com.tfsla.diario.friendlyTags;
 
 import java.io.IOException;
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspException;
 import org.opencms.file.CmsUser;
 public class TfsUsuarioStateTag extends A_TfsUsuarioValueTag {
 	private static final long serialVersionUID = 4413654015466156899L;

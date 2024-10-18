@@ -1,6 +1,6 @@
 package com.tfsla.opencms.webusers.openauthorization;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.opencms.configuration.CPMConfig;
 import org.opencms.configuration.CmsMedios;

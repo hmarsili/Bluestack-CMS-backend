@@ -1,6 +1,6 @@
 package com.tfsla.opencms.webusers.openauthorization;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;

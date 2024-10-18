@@ -74,9 +74,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections.map.LRUMap;
 import org.apache.commons.logging.Log;
@@ -127,16 +127,16 @@ public class CmsStaticExportManager implements I_CmsEventListener {
     }
 
     /** Marker for error message attribute. */
-    public static final String EXPORT_ATTRIBUTE_ERROR_MESSAGE = "javax.servlet.error.message";
+    public static final String EXPORT_ATTRIBUTE_ERROR_MESSAGE = "jakarta.servlet.error.message";
 
     /** Marker for error request uri attribute. */
-    public static final String EXPORT_ATTRIBUTE_ERROR_REQUEST_URI = "javax.servlet.error.request_uri";
+    public static final String EXPORT_ATTRIBUTE_ERROR_REQUEST_URI = "jakarta.servlet.error.request_uri";
 
     /** Marker for error servlet name attribute. */
-    public static final String EXPORT_ATTRIBUTE_ERROR_SERVLET_NAME = "javax.servlet.error.servlet_name";
+    public static final String EXPORT_ATTRIBUTE_ERROR_SERVLET_NAME = "jakarta.servlet.error.servlet_name";
 
     /** Marker for error status code attribute. */
-    public static final String EXPORT_ATTRIBUTE_ERROR_STATUS_CODE = "javax.servlet.error.status_code";
+    public static final String EXPORT_ATTRIBUTE_ERROR_STATUS_CODE = "jakarta.servlet.error.status_code";
 
     /** Name for the backup folder default name. */
     public static final String EXPORT_BACKUP_FOLDER_NAME = "backup";

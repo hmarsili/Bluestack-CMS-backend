@@ -14,3 +14,4 @@ public class CmsLdapAccessException extends CmsDataAccessException {
         super(container, cause);
     }
 }
+

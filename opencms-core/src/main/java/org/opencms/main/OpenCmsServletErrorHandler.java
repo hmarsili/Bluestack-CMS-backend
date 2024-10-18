@@ -36,10 +36,10 @@ import org.opencms.util.CmsStringUtil;
 
 import java.io.IOException;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * This the error handler servlet of the OpenCms system.<p>
@@ -68,7 +68,7 @@ public class OpenCmsServletErrorHandler extends OpenCmsServlet {
     /**
      * OpenCms servlet main request handling method.<p>
      * 
-     * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     * @see jakarta.servlet.http.HttpServlet#doGet(jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse)
      */
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
@@ -102,7 +102,7 @@ public class OpenCmsServletErrorHandler extends OpenCmsServlet {
     }
 
     /**
-     * @see javax.servlet.Servlet#init(javax.servlet.ServletConfig)
+     * @see jakarta.servlet.Servlet#init(jakarta.servlet.ServletConfig)
      */
     @Override
     public void init(ServletConfig config) {

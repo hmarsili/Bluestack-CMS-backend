@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE opencms SYSTEM "http://www.alkacon.com/dtd/6.0/vfsdoctor-plugin.dtd">
+<opencms>
+	<vfsdoctor>
+		<plugin>
+			<queries>
+				<query name="SELECT_ACTUAL_SIBLING_COUNT" >
+					<default><![CDATA[
+						SELECT 
+							COUNT(*) 
+						FROM
+							CMS_${PROJECT}_STRUCTURE STR
+						WHERE
+							STR.RESOURCE_ID=?
+					]]></default>
+				</query> 
+				<query name="SET_SIBLING_COUNT" >
+					<default><![CDATA[
+						UPDATE
+							CMS_${PROJECT}_RESOURCES
+						SET
+							SIBLING_COUNT=?
+						WHERE
+							RESOURCE_ID=?
+					]]></default>
+				</query> 
+				<query name="DELETE_STRUCTURE" >
+					<default><![CDATA[
+						DELETE 
+						FROM 
+							CMS_${PROJECT}_STRUCTURE
+						WHERE
+							STRUCTURE_ID=?
+					]]></default>
+				</query> 
+				<query name="DELETE_RESOURCE" >
+					<default><![CDATA[
+						DELETE 
+						FROM 
+							CMS_${PROJECT}_RESOURCES
+						WHERE
+							RESOURCE_ID=?
+					]]></default>
+				</query> 
+				<query name="DELETE_PROPERTIES" >
+					<default><![CDATA[
+						DELETE 
+						FROM 
+							CMS_${PROJECT}_PROPERTIES
+						WHERE
+							PROPERTY_MAPPING_ID=?
+					]]></default>
+				</query> 
+				<query name="DELETE_ACES" >
+					<default><![CDATA[
+						DELETE 
+						FROM 
+							CMS_${PROJECT}_ACCESSCONTROL
+						WHERE
+							RESOURCE_ID=?
+					]]></default>
+				</query> 
+				<query name="DELETE_OFFLINE_CONTENT" >
+					<default><![CDATA[
+						DELETE 
+						FROM 
+							CMS_OFFLINE_CONTENTS
+						WHERE
+							RESOURCE_ID=?
+					]]></default>
+				</query> 
+				<query name="DELETE_ONLINE_CONTENT" >
+					<default><![CDATA[
+						DELETE 
+						FROM 
+							CMS_CONTENTS
+						WHERE
+							RESOURCE_ID=?
+							AND ONLINE_FLAG=1
+					]]></default>
+				</query> 
+				<query name="UPDATE_STRUCTURE_STATE_BY_RES_ID" >
+					<default><![CDATA[
+						UPDATE 
+							CMS_${PROJECT}_STRUCTURE
+						SET
+							STRUCTURE_STATE = ?
+						WHERE
+							RESOURCE_ID=?
+					]]></default>
+				</query> 
+			</queries>
+		</plugin>
+	</vfsdoctor>
+</opencms>

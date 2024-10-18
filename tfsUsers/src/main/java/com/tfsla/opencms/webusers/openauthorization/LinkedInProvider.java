@@ -1,6 +1,6 @@
 package com.tfsla.opencms.webusers.openauthorization;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;

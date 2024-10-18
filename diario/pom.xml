@@ -15,8 +15,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
   </properties>
 
 	<repositories>
@@ -74,14 +74,23 @@
       <groupId>blueStack</groupId>
       <artifactId>opencms-extensions</artifactId>
       <version>0.0.1-SNAPSHOT</version>
-    </dependency>
 
+    </dependency>
+    
+    <!-- https://mvnrepository.com/artifact/commons-httpclient/commons-httpclient -->
+<dependency>
+    <groupId>commons-httpclient</groupId>
+    <artifactId>commons-httpclient</artifactId>
+    <version>3.1</version>
+</dependency>
+
+    <!--
     <dependency>
       <groupId>blueStack</groupId>
       <artifactId>statisticsClient</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
-    
+    -->
     <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
 	<dependency>
 	    <groupId>org.apache.httpcomponents</groupId>
@@ -274,21 +283,21 @@
     <version>1.47.1</version>
 </dependency>
 
-	<!-- https://mvnrepository.com/artifact/javax.servlet/servlet-api -->
-	<dependency>
-	    <groupId>javax.servlet</groupId>
-	    <artifactId>servlet-api</artifactId>
-	    <version>3.0-alpha-1</version>
-	    <scope>provided</scope>
-	</dependency>
-	
-		<!-- https://mvnrepository.com/artifact/javax.servlet/jsp-api -->
-	<dependency>
-	    <groupId>javax.servlet</groupId>
-	    <artifactId>jsp-api</artifactId>
-	    <version>2.0</version>
-	    <scope>provided</scope>
-	</dependency>
+<!-- https://mvnrepository.com/artifact/jakarta.servlet/jakarta.servlet-api -->
+<dependency>
+    <groupId>jakarta.servlet</groupId>
+    <artifactId>jakarta.servlet-api</artifactId>
+    <version>6.0.0</version>
+    <scope>provided</scope>
+</dependency>
+
+<!-- https://mvnrepository.com/artifact/jakarta.servlet.jsp/jakarta.servlet.jsp-api -->
+<dependency>
+    <groupId>jakarta.servlet.jsp</groupId>
+    <artifactId>jakarta.servlet.jsp-api</artifactId>
+    <version>3.1.1</version>
+    <scope>provided</scope>
+</dependency>
 
 
   </dependencies>

@@ -79,7 +79,7 @@ public class BitlyService {
 		ShortenRequest req = client.shorten();		
 		req.setLongUrl(fullUrl); 		
 		Response<ShortenResponse> respShort = req.call();
-
+		
 		LOG.debug("resultado creacion de url short para noticia " + fullUrl + "(  " + respShort.status_code + " / "  + respShort.status_txt + ")");
 		
 		if (respShort.status_code!=200)

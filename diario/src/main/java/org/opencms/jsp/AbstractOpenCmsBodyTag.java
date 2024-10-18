@@ -1,8 +1,8 @@
 package org.opencms.jsp;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.BodyContent;
-import javax.servlet.jsp.tagext.BodyTag;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.tagext.BodyContent;
+import jakarta.servlet.jsp.tagext.BodyTag;
 
 import org.apache.commons.logging.Log;
 import org.opencms.db.CmsSecurityManager;

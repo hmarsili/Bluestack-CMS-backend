@@ -51,8 +51,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.PageContext;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.PageContext;
 
 import org.apache.commons.logging.Log;
 

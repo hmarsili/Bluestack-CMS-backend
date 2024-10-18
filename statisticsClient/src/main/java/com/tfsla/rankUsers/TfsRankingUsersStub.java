@@ -8,7 +8,7 @@
         package com.tfsla.rankUsers;
 
 import org.apache.axis2.Constants;
-import org.apache.axis2.transport.http.HTTPConstants;
+import org.apache.axis2.kernel.http.HTTPConstants;
 
 import com.tfsla.statistics.HttpConnectionManager;
 import com.tfsla.statistics.SoapRankUserConfig;

@@ -51,8 +51,8 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.jsp.PageContext;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.jsp.PageContext;
 
 /**
  * Provides utility methods to be used as functions from a JSP with the EL.<p>

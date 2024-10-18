@@ -6,11 +6,11 @@ import java.util.Map;
 import java.util.Iterator;
 import java.util.TreeMap;
 
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.opencms.file.CmsFile;
 import org.opencms.file.CmsObject;
@@ -226,7 +226,7 @@ public class TfsCommentLoader implements I_CmsResourceLoader {
     }
 
     /**
-     * @see org.opencms.loader.I_CmsResourceLoader#service(org.opencms.file.CmsObject, org.opencms.file.CmsResource, javax.servlet.ServletRequest, javax.servlet.ServletResponse)
+     * @see org.opencms.loader.I_CmsResourceLoader#service(org.opencms.file.CmsObject, org.opencms.file.CmsResource, jakarta.servlet.ServletRequest, jakarta.servlet.ServletResponse)
      */
     public void service(CmsObject cms, CmsResource resource, ServletRequest req, ServletResponse res)
     throws CmsException, IOException {

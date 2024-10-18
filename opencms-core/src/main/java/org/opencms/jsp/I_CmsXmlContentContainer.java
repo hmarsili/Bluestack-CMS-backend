@@ -36,7 +36,7 @@ import org.opencms.xml.I_CmsXmlDocument;
 import java.util.List;
 import java.util.Locale;
 
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspException;
 
 /**
  * Provides access to a <code>{@link org.opencms.xml.I_CmsXmlDocument}</code> document that was previously loaded by a parent tag.<p> 

@@ -11,7 +11,7 @@ import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.servlet.jsp.PageContext;
+import jakarta.servlet.jsp.PageContext;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.logging.Log;
@@ -40,9 +40,6 @@ import com.tfsla.diario.ediciones.services.OpenCmsBaseService;
 import com.tfsla.diario.ediciones.services.SeccionesService;
 import com.tfsla.diario.ediciones.services.TipoEdicionService;
 import com.tfsla.diario.utils.TfsXmlContentNameProvider;
-import com.tfsla.rankViews.model.TfsRankResults;
-import com.tfsla.rankViews.service.RankService;
-import com.tfsla.statistics.model.TfsStatisticsOptions;
 import com.tfsla.utils.CmsResourceUtils;
 import com.tfsla.utils.UrlLinkHelper;
 import com.tfsla.diario.utils.TfsTagsUtil;
@@ -1124,74 +1121,6 @@ public class TfsNoticia {
 		this.resource = resource;
 	}
 	
-	private void loadNewsStats()
-	{
-		RankService rank = new RankService();
-
-		//Options rank processor
-		TfsStatisticsOptions options = new TfsStatisticsOptions();
-		options.setTags(new String[0]);
-		options.setUrl(getLocalpath());
-		options.setShowValoracion(true);
-		options.setShowCantidadValoracion(true);
-		options.setShowHits(true);
-		options.setShowRecomendacion(true);
-		options.setShowGeneralRank(true);
-		
-		options.setRankMode(TfsStatisticsOptions.RANK_HITS);
-
-		TfsRankResults res = rank.getStatistics(cms, options);
-		if ( res != null && res.getRank() != null && res.getRank().length > 0 ) {
-			positevalorations = res.getRank()[0].getValoracion();
-			totalvalorations = res.getRank()[0].getCantidadValoracion();
-			views = res.getRank()[0].getCantidad();
-			recommendations = res.getRank()[0].getRecomendacion();
-			generalrank = res.getRank()[0].getGeneralRank();
-		}
-		else
-		{
-			positevalorations = 0;
-			totalvalorations = 0;
-			views = 0;
-			recommendations = 0;
-			generalrank = 0;
-		}
-	}
-
-	public int getPositevalorations() {
-		if (positevalorations==-1)
-			loadNewsStats();
-			
-		return positevalorations;
-	}
-
-	public int getTotalvalorations() {
-		if (totalvalorations==-1)
-			loadNewsStats();
-		return totalvalorations;
-	}
-
-	public int getViews() {
-		if (views==-1)
-			loadNewsStats();
-		
-		return views;
-	}
-
-	public int getRecommendations() {
-		if (recommendations==-1)
-			loadNewsStats();
-		
-		return recommendations;
-	}
-
-	public float getGeneralrank() {
-		if (generalrank==-1)
-			loadNewsStats();
-		
-		return generalrank;
-	}
-
 	public I_CmsXmlDocument getContent() {
 		return m_content;
 	}

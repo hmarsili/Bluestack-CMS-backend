@@ -15,9 +15,10 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>1.7</maven.compiler.source>
-    <maven.compiler.target>1.7</maven.compiler.target>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
   </properties>
+  
 
   <dependencies>
     <dependency>
@@ -33,11 +34,6 @@
     <dependency>
     	<groupId>blueStack</groupId>
     	<artifactId>opencms-extensions</artifactId>
-    	<version>0.0.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-    	<groupId>blueStack</groupId>
-    	<artifactId>searchExtensions</artifactId>
     	<version>0.0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
@@ -70,7 +66,6 @@
     	<artifactId>imageVariants</artifactId>
     	<version>0.0.1-SNAPSHOT</version>
     </dependency>
-    
     <!-- https://mvnrepository.com/artifact/backport-util-concurrent/backport-util-concurrent -->
 	<dependency>
 	    <groupId>backport-util-concurrent</groupId>
@@ -78,20 +73,22 @@
 	    <version>2.1</version>
 	</dependency>
 
-	    <!-- https://mvnrepository.com/artifact/javax.servlet/servlet-api -->
-	<dependency>
-	    <groupId>javax.servlet</groupId>
-	    <artifactId>servlet-api</artifactId>
-	    <version>3.0-alpha-1</version>
-	    <scope>provided</scope>
-	</dependency>
-	<!-- https://mvnrepository.com/artifact/javax.servlet/jsp-api -->
-	<dependency>
-	    <groupId>javax.servlet</groupId>
-	    <artifactId>jsp-api</artifactId>
-	    <version>2.0</version>
-	    <scope>provided</scope>
-	</dependency>
+
+<!-- https://mvnrepository.com/artifact/jakarta.servlet/jakarta.servlet-api -->
+<dependency>
+    <groupId>jakarta.servlet</groupId>
+    <artifactId>jakarta.servlet-api</artifactId>
+    <version>6.0.0</version>
+    <scope>provided</scope>
+</dependency>
+
+<!-- https://mvnrepository.com/artifact/jakarta.servlet.jsp/jakarta.servlet.jsp-api -->
+<dependency>
+    <groupId>jakarta.servlet.jsp</groupId>
+    <artifactId>jakarta.servlet.jsp-api</artifactId>
+    <version>3.1.1</version>
+    <scope>provided</scope>
+</dependency>
 	
   </dependencies>
 

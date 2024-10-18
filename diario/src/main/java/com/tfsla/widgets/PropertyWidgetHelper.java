@@ -2,7 +2,7 @@ package com.tfsla.widgets;
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.opencms.file.CmsObject;
 import org.opencms.main.CmsLog;

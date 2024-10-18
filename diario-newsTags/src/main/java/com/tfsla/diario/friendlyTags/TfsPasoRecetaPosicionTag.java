@@ -1,5 +1,5 @@
 package com.tfsla.diario.friendlyTags;
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspException;
 
 import com.tfsla.diario.model.TfsRecipeInstruction;
 

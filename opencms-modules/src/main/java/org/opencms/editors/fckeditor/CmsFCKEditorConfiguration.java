@@ -31,7 +31,7 @@
 
 package org.opencms.editors.fckeditor;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * The configuration is passed to the external FCKeditor Javascript configuration file.<p>

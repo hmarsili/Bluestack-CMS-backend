@@ -44,8 +44,8 @@ import org.opencms.util.CmsMacroResolver;
 import org.opencms.workplace.CmsWorkplace;
 import org.opencms.workplace.editors.Messages;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.PageContext;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.PageContext;
 
 import org.apache.commons.logging.Log;
 
@@ -154,7 +154,7 @@ public class CmsDirectEditDefaultProvider extends A_CmsDirectEditProvider {
     }
 
     /**
-     * @see org.opencms.workplace.editors.directedit.I_CmsDirectEditProvider#insertDirectEditEnd(javax.servlet.jsp.PageContext)
+     * @see org.opencms.workplace.editors.directedit.I_CmsDirectEditProvider#insertDirectEditEnd(jakarta.servlet.jsp.PageContext)
      */
     public void insertDirectEditEnd(PageContext context) throws JspException {
 
@@ -175,7 +175,7 @@ public class CmsDirectEditDefaultProvider extends A_CmsDirectEditProvider {
     }
 
     /**
-     * @see org.opencms.workplace.editors.directedit.I_CmsDirectEditProvider#insertDirectEditIncludes(javax.servlet.jsp.PageContext, org.opencms.workplace.editors.directedit.CmsDirectEditParams)
+     * @see org.opencms.workplace.editors.directedit.I_CmsDirectEditProvider#insertDirectEditIncludes(jakarta.servlet.jsp.PageContext, org.opencms.workplace.editors.directedit.CmsDirectEditParams)
      */
     public void insertDirectEditIncludes(PageContext context, CmsDirectEditParams params) throws JspException {
 
@@ -183,7 +183,7 @@ public class CmsDirectEditDefaultProvider extends A_CmsDirectEditProvider {
     }
 
     /**
-     * @see org.opencms.workplace.editors.directedit.I_CmsDirectEditProvider#insertDirectEditStart(javax.servlet.jsp.PageContext, org.opencms.workplace.editors.directedit.CmsDirectEditParams)
+     * @see org.opencms.workplace.editors.directedit.I_CmsDirectEditProvider#insertDirectEditStart(jakarta.servlet.jsp.PageContext, org.opencms.workplace.editors.directedit.CmsDirectEditParams)
      */
     public boolean insertDirectEditStart(PageContext context, CmsDirectEditParams params) throws JspException {
 

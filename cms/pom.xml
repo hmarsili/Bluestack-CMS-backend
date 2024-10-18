@@ -29,8 +29,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>1.7</maven.compiler.source>
-    <maven.compiler.target>1.7</maven.compiler.target>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
   </properties>
 
   <dependencies>
@@ -51,24 +51,48 @@
       <groupId>blueStack</groupId>
       <artifactId>diario</artifactId>
       <version>0.0.1-SNAPSHOT</version>
+      <exclusions>
+		  <exclusion>
+			  <groupId>poi</groupId>
+			  <artifactId>poi-2.5.1-final</artifactId>
+		  </exclusion>
+	  </exclusions>
     </dependency>
     
    <dependency>
       <groupId>blueStack</groupId>
       <artifactId>imageVariants</artifactId>
       <version>0.0.1-SNAPSHOT</version>
+      <exclusions>
+		  <exclusion>
+			  <groupId>poi</groupId>
+			  <artifactId>poi-2.5.1-final</artifactId>
+		  </exclusion>
+	  </exclusions>
     </dependency>
     
     <dependency>
       <groupId>blueStack</groupId>
       <artifactId>opencms-extensions</artifactId>
       <version>0.0.1-SNAPSHOT</version>
+      <exclusions>
+		  <exclusion>
+			  <groupId>poi</groupId>
+			  <artifactId>poi-2.5.1-final</artifactId>
+		  </exclusion>
+	  </exclusions>
     </dependency>
     
     <dependency>
       <groupId>blueStack</groupId>
       <artifactId>opencms-components</artifactId>
       <version>0.0.1-SNAPSHOT</version>
+      <exclusions>
+		  <exclusion>
+			  <groupId>poi</groupId>
+			  <artifactId>poi-2.5.1-final</artifactId>
+		  </exclusion>
+	  </exclusions>
     </dependency>
 
     <dependency>
@@ -81,90 +105,180 @@
       <groupId>blueStack</groupId>
       <artifactId>diario-administrator</artifactId>
       <version>0.0.1-SNAPSHOT</version>
+      <exclusions>
+		  <exclusion>
+			  <groupId>poi</groupId>
+			  <artifactId>poi-2.5.1-final</artifactId>
+		  </exclusion>
+	  </exclusions>
     </dependency>
 
    <dependency>
       <groupId>blueStack</groupId>
       <artifactId>diario-comentarios</artifactId>
       <version>0.0.1-SNAPSHOT</version>
+      <exclusions>
+		  <exclusion>
+			  <groupId>poi</groupId>
+			  <artifactId>poi-2.5.1-final</artifactId>
+		  </exclusion>
+	  </exclusions>
     </dependency> 
     
        <dependency>
       <groupId>blueStack</groupId>
       <artifactId>diario-encuestas</artifactId>
       <version>0.0.1-SNAPSHOT</version>
+      <exclusions>
+		  <exclusion>
+			  <groupId>poi</groupId>
+			  <artifactId>poi-2.5.1-final</artifactId>
+		  </exclusion>
+	  </exclusions>
     </dependency>   
     
        <dependency>
       <groupId>blueStack</groupId>
       <artifactId>diario-genericImport</artifactId>
       <version>0.0.1-SNAPSHOT</version>
+      <exclusions>
+		  <exclusion>
+			  <groupId>poi</groupId>
+			  <artifactId>poi-2.5.1-final</artifactId>
+		  </exclusion>
+	  </exclusions>
     </dependency>
     
        <dependency>
       <groupId>blueStack</groupId>
       <artifactId>diario-newsTags</artifactId>
       <version>0.0.1-SNAPSHOT</version>
+      <exclusions>
+		  <exclusion>
+			  <groupId>poi</groupId>
+			  <artifactId>poi-2.5.1-final</artifactId>
+		  </exclusion>
+	  </exclusions>
     </dependency>
     
        <dependency>
       <groupId>blueStack</groupId>
       <artifactId>diario-webservices</artifactId>
       <version>0.0.1-SNAPSHOT</version>
+      <exclusions>
+		  <exclusion>
+			  <groupId>poi</groupId>
+			  <artifactId>poi-2.5.1-final</artifactId>
+		  </exclusion>
+	  </exclusions>
     </dependency>
     
        <dependency>
       <groupId>blueStack</groupId>
       <artifactId>ocee-cache</artifactId>
       <version>0.0.1-SNAPSHOT</version>
+      <exclusions>
+		  <exclusion>
+			  <groupId>poi</groupId>
+			  <artifactId>poi-2.5.1-final</artifactId>
+		  </exclusion>
+	  </exclusions>
     </dependency>
     
        <dependency>
       <groupId>blueStack</groupId>
       <artifactId>ocee-ldap</artifactId>
       <version>0.0.1-SNAPSHOT</version>
+      <exclusions>
+		  <exclusion>
+			  <groupId>poi</groupId>
+			  <artifactId>poi-2.5.1-final</artifactId>
+		  </exclusion>
+	  </exclusions>
     </dependency>
-    
+    <!-- 
        <dependency>
       <groupId>blueStack</groupId>
       <artifactId>statisticsClient</artifactId>
       <version>0.0.1-SNAPSHOT</version>
+      <exclusions>
+		  <exclusion>
+			  <groupId>poi</groupId>
+			  <artifactId>poi-2.5.1-final</artifactId>
+		  </exclusion>
+	  </exclusions>
     </dependency>
-    
+    -->
        <dependency>
       <groupId>blueStack</groupId>
       <artifactId>simapi</artifactId>
       <version>0.0.1-SNAPSHOT</version>
+      <exclusions>
+		  <exclusion>
+			  <groupId>poi</groupId>
+			  <artifactId>poi-2.5.1-final</artifactId>
+		  </exclusion>
+	  </exclusions>
     </dependency>
     
        <dependency>
       <groupId>blueStack</groupId>
       <artifactId>tfsUsers</artifactId>
       <version>0.0.1-SNAPSHOT</version>
+      <exclusions>
+		  <exclusion>
+			  <groupId>poi</groupId>
+			  <artifactId>poi-2.5.1-final</artifactId>
+		  </exclusion>
+	  </exclusions>
     </dependency>
     
        <dependency>
       <groupId>blueStack</groupId>
       <artifactId>tfsUsers-newsPublisher</artifactId>
       <version>0.0.1-SNAPSHOT</version>
+      <exclusions>
+		  <exclusion>
+			  <groupId>poi</groupId>
+			  <artifactId>poi-2.5.1-final</artifactId>
+		  </exclusion>
+	  </exclusions>
     </dependency>
     
        <dependency>
       <groupId>blueStack</groupId>
       <artifactId>otp</artifactId>
       <version>0.0.1-SNAPSHOT</version>
+      <exclusions>
+		  <exclusion>
+			  <groupId>poi</groupId>
+			  <artifactId>poi-2.5.1-final</artifactId>
+		  </exclusion>
+	  </exclusions>
     </dependency>
     
        <dependency>
       <groupId>blueStack</groupId>
       <artifactId>templateManager</artifactId>
       <version>0.0.1-SNAPSHOT</version>
+      <exclusions>
+		  <exclusion>
+			  <groupId>poi</groupId>
+			  <artifactId>poi-2.5.1-final</artifactId>
+		  </exclusion>
+	  </exclusions>
     </dependency>
 
        <dependency>
       <groupId>blueStack</groupId>
       <artifactId>searchExtensions</artifactId>
       <version>0.0.1-SNAPSHOT</version>
+      <exclusions>
+		  <exclusion>
+			  <groupId>poi</groupId>
+			  <artifactId>poi-2.5.1-final</artifactId>
+		  </exclusion>
+	  </exclusions>
     </dependency>
     
            <dependency>
@@ -180,18 +294,31 @@
     </dependency>
 
     <dependency>
+	  <groupId>blueStack</groupId>
+      <artifactId>ocee-base</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+<!-- 
+    <dependency>
       <groupId>Alkacon</groupId>
       <artifactId>org.opencms.ocee.base</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
+-->
 
-    
+    <dependency>
+	  <groupId>blueStack</groupId>
+      <artifactId>ocee-cluster</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+
+<!--    
     <dependency>
       <groupId>Alkacon</groupId>
       <artifactId>org.opencms.ocee.cluster</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
-
+-->
     <dependency>
       <groupId>Alkacon</groupId>
       <artifactId>org.opencms.ocee.replication</artifactId>
@@ -203,26 +330,33 @@
       <artifactId>org.opencms.ocee.transaction</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
-    
-    <dependency>
+   
+       <dependency>
+      <groupId>blueStack</groupId>
+      <artifactId>ocee-vfsdoctor</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+ 
+<!--    <dependency>
       <groupId>Alkacon</groupId>
       <artifactId>org.opencms.ocee.vfsdoctor</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
-    
-  <!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
+-->    
+<!-- https://mvnrepository.com/artifact/jakarta.servlet/jakarta.servlet-api -->
 <dependency>
-    <groupId>javax.servlet</groupId>
-    <artifactId>javax.servlet-api</artifactId>
-    <version>4.0.1</version>
+    <groupId>jakarta.servlet</groupId>
+    <artifactId>jakarta.servlet-api</artifactId>
+    <version>6.0.0</version>
     <scope>provided</scope>
 </dependency>
+
 
 <!-- https://mvnrepository.com/artifact/jakarta.servlet.jsp/jakarta.servlet.jsp-api -->
 <dependency>
     <groupId>jakarta.servlet.jsp</groupId>
     <artifactId>jakarta.servlet.jsp-api</artifactId>
-    <version>4.0.0</version>
+    <version>3.1.1</version>
     <scope>provided</scope>
 </dependency>
 

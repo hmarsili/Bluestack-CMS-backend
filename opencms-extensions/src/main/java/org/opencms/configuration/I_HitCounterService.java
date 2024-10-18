@@ -1,6 +1,6 @@
 package org.opencms.configuration;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
 import org.opencms.file.CmsObject;
 import org.opencms.file.CmsResource;

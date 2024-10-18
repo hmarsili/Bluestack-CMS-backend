@@ -2,7 +2,7 @@ package com.tfsla.diario.friendlyTags;
 
 import java.util.List;
 
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspException;
 
 import org.opencms.file.CmsUser;
 import org.opencms.main.OpenCms;

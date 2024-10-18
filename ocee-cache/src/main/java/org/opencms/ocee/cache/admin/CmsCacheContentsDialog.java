@@ -2,11 +2,11 @@
  * Decompiled with CFR 0_123.
  * 
  * Could not load the following classes:
- *  javax.servlet.http.HttpServletRequest
- *  javax.servlet.http.HttpServletResponse
- *  javax.servlet.jsp.JspException
- *  javax.servlet.jsp.JspWriter
- *  javax.servlet.jsp.PageContext
+ *  jakarta.servlet.http.HttpServletRequest
+ *  jakarta.servlet.http.HttpServletResponse
+ *  jakarta.servlet.jsp.JspException
+ *  jakarta.servlet.jsp.JspWriter
+ *  jakarta.servlet.jsp.PageContext
  *  org.opencms.i18n.CmsEncoder
  *  org.opencms.i18n.CmsMessages
  *  org.opencms.jsp.CmsJspActionElement
@@ -27,11 +27,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.JspWriter;
-import javax.servlet.jsp.PageContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspWriter;
+import jakarta.servlet.jsp.PageContext;
 import org.opencms.i18n.CmsEncoder;
 import org.opencms.i18n.CmsMessages;
 import org.opencms.jsp.CmsJspActionElement;

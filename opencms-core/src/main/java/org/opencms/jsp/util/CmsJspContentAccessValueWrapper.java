@@ -46,8 +46,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.commons.collections.Transformer;
-import org.apache.commons.collections.map.LazyMap;
+import org.apache.commons.collections4.Transformer;
+import org.apache.commons.collections4.map.LazyMap;
 
 import org.dom4j.Node;
 
@@ -307,7 +307,7 @@ public final class CmsJspContentAccessValueWrapper {
     public Map getHasValue() {
 
         if (m_hasValue == null) {
-            m_hasValue = LazyMap.decorate(new HashMap(), new CmsHasValueTransformer());
+            m_hasValue = LazyMap.lazyMap(new HashMap(), new CmsHasValueTransformer());
         }
         return m_hasValue;
     }
@@ -518,7 +518,7 @@ public final class CmsJspContentAccessValueWrapper {
     public Map getValue() {
 
         if (m_value == null) {
-            m_value = LazyMap.decorate(new HashMap(), new CmsValueTransformer());
+            m_value = LazyMap.lazyMap(new HashMap(), new CmsValueTransformer());
         }
         return m_value;
     }
@@ -546,7 +546,7 @@ public final class CmsJspContentAccessValueWrapper {
     public Map getValueList() {
 
         if (m_valueList == null) {
-            m_valueList = LazyMap.decorate(new HashMap(), new CmsValueListTransformer());
+            m_valueList = LazyMap.lazyMap(new HashMap(), new CmsValueListTransformer());
         }
         return m_valueList;
     }
@@ -560,7 +560,7 @@ public final class CmsJspContentAccessValueWrapper {
     public Map getXmlText() {
 
         if (m_xml == null) {
-            m_xml = LazyMap.decorate(new HashMap(), new CmsXmlValueTransformer());
+            m_xml = LazyMap.lazyMap(new HashMap(),new CmsXmlValueTransformer());
         }
         return m_xml;
     }

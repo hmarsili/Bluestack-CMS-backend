@@ -2,7 +2,7 @@
  * Decompiled with CFR 0_123.
  * 
  * Could not load the following classes:
- *  org.apache.commons.digester.Digester
+ *  org.apache.commons.digester3.Digester
  *  org.apache.commons.logging.Log
  *  org.dom4j.Element
  *  org.opencms.configuration.A_CmsXmlConfiguration
@@ -20,7 +20,7 @@ package org.opencms.ocee.cache;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.digester.Digester;
+import org.apache.commons.digester3.Digester;
 import org.apache.commons.logging.Log;
 import org.dom4j.Element;
 import org.opencms.configuration.A_CmsXmlConfiguration;

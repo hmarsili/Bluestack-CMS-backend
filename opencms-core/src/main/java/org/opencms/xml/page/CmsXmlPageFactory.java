@@ -52,7 +52,7 @@ import org.opencms.xml.types.I_CmsXmlSchemaType;
 import java.io.UnsupportedEncodingException;
 import java.util.Locale;
 
-import javax.servlet.ServletRequest;
+import jakarta.servlet.ServletRequest;
 
 import org.apache.commons.logging.Log;
 

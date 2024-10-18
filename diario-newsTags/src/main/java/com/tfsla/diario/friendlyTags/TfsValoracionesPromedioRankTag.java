@@ -1,6 +1,6 @@
 package com.tfsla.diario.friendlyTags;
 
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspException;
 import org.opencms.flex.CmsFlexController;
 
 public class TfsValoracionesPromedioRankTag extends A_TfsNoticiaValue {

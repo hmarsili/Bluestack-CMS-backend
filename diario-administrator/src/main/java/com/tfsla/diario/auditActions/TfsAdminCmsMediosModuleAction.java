@@ -52,8 +52,9 @@ public class TfsAdminCmsMediosModuleAction extends A_CmsModuleAction {
 		digester.push(this);
 		digester.addObjectCreate(
 				"widgets/widget",
-				I_TfsWidget.A_CLASS,
-	            Exception.class);
+				Exception.class.getName(),
+				I_TfsWidget.A_CLASS
+	            );
 		
 	    digester.addSetNext("widgets/widget", "addTfsWidget");
 

@@ -37,8 +37,8 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 
 /**
  * Wrapper for static export requests, required for parameter based requests.<p>
@@ -67,7 +67,7 @@ public class CmsStaticExportRequest extends HttpServletRequestWrapper {
     }
 
     /**
-     * @see javax.servlet.http.HttpServletRequest#getDateHeader(java.lang.String)
+     * @see jakarta.servlet.http.HttpServletRequest#getDateHeader(java.lang.String)
      */
     @Override
     public long getDateHeader(String name) {
@@ -81,7 +81,7 @@ public class CmsStaticExportRequest extends HttpServletRequestWrapper {
     }
 
     /**
-     * @see javax.servlet.ServletRequest#getParameter(java.lang.String)
+     * @see jakarta.servlet.ServletRequest#getParameter(java.lang.String)
      */
     @Override
     public String getParameter(String name) {
@@ -94,7 +94,7 @@ public class CmsStaticExportRequest extends HttpServletRequestWrapper {
     }
 
     /**
-     * @see javax.servlet.ServletRequest#getParameterMap()
+     * @see jakarta.servlet.ServletRequest#getParameterMap()
      */
     @Override
     public Map getParameterMap() {
@@ -103,7 +103,7 @@ public class CmsStaticExportRequest extends HttpServletRequestWrapper {
     }
 
     /**
-     * @see javax.servlet.ServletRequest#getParameterNames()
+     * @see jakarta.servlet.ServletRequest#getParameterNames()
      */
     @Override
     public Enumeration getParameterNames() {
@@ -112,7 +112,7 @@ public class CmsStaticExportRequest extends HttpServletRequestWrapper {
     }
 
     /**
-     * @see javax.servlet.ServletRequest#getParameterValues(java.lang.String)
+     * @see jakarta.servlet.ServletRequest#getParameterValues(java.lang.String)
      */
     @Override
     public String[] getParameterValues(String name) {

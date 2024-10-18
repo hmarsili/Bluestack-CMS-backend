@@ -32,6 +32,7 @@
 package org.opencms.db;
 
 import org.opencms.configuration.CmsConfigurationManager;
+import org.opencms.configuration.CmsParameterConfiguration;
 import org.opencms.configuration.CmsSystemConfiguration;
 import org.opencms.db.generic.CmsUserDriver;
 import org.opencms.file.CmsDataAccessException;
@@ -142,9 +143,6 @@ import java.util.TreeSet;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import javax.json.JsonObject;
-
-import org.apache.commons.collections.ExtendedProperties;
 import org.apache.commons.dbcp.PoolingDriver;
 import org.apache.commons.logging.Log;
 import org.apache.commons.pool.ObjectPool;
@@ -347,7 +345,7 @@ public final class CmsDriverManager implements I_CmsEventListener {
     private I_CmsProjectDriver m_projectDriver;
 
     /** The the configuration read from the <code>opencms.properties</code> file. */
-    private ExtendedProperties m_propertyConfiguration;
+    private CmsParameterConfiguration m_propertyConfiguration;
 
     /* the publish engine. */
     private CmsPublishEngine m_publishEngine;
@@ -401,7 +399,7 @@ public final class CmsDriverManager implements I_CmsEventListener {
         CmsPublishEngine publishEngine) throws CmsInitException {
 
         // read the opencms.properties from the configuration
-        ExtendedProperties config = (ExtendedProperties)configurationManager.getConfiguration();
+    	CmsParameterConfiguration config = configurationManager.getConfiguration();
 
         List drivers = null;
         String driverName = null;
@@ -449,18 +447,18 @@ public final class CmsDriverManager implements I_CmsEventListener {
         }
 
         // read the pool names to initialize
-        String[] driverPoolNames = config.getStringArray(CmsDriverManager.CONFIGURATION_DB + ".pools");
+        List<String> driverPoolNames = config.getList(CmsDriverManager.CONFIGURATION_DB + ".pools");
         if (CmsLog.INIT.isInfoEnabled()) {
             String names = "";
-            for (int p = 0; p < driverPoolNames.length; p++) {
-                names += driverPoolNames[p] + " ";
+            for (int p = 0; p < driverPoolNames.size(); p++) {
+                names += driverPoolNames.get(p) + " ";
             }
             CmsLog.INIT.info(Messages.get().getBundle().key(Messages.INIT_DRIVER_MANAGER_START_POOLS_1, names));
         }
 
         // initialize each pool
-        for (int p = 0; p < driverPoolNames.length; p++) {
-            driverManager.newPoolInstance(config, driverPoolNames[p]);
+        for (int p = 0; p < driverPoolNames.size(); p++) {
+            driverManager.newPoolInstance(config, driverPoolNames.get(p));
         }
 
         // initialize the runtime info factory with the generated driver manager
@@ -473,9 +471,9 @@ public final class CmsDriverManager implements I_CmsEventListener {
         }
 
         // read the vfs driver class properties and initialize a new instance 
-        drivers = Arrays.asList(config.getStringArray(CmsDriverManager.CONFIGURATION_VFS));
+        drivers = config.getList(CmsDriverManager.CONFIGURATION_VFS);
         String driverKey = (String)drivers.get(0) + ".vfs.driver";
-        driverName = config.getString(driverKey);
+        driverName = config.get(driverKey);
         drivers = (drivers.size() > 1) ? drivers.subList(1, drivers.size()) : null;
         if (driverName == null) {
             CmsLog.INIT.error(Messages.get().getBundle().key(Messages.INIT_DRIVER_FAILED_1, driverKey));
@@ -483,9 +481,9 @@ public final class CmsDriverManager implements I_CmsEventListener {
         vfsDriver = (I_CmsVfsDriver)driverManager.newDriverInstance(configurationManager, driverName, drivers);
 
         // read the user driver class properties and initialize a new instance 
-        drivers = Arrays.asList(config.getStringArray(CmsDriverManager.CONFIGURATION_USER));
+        drivers = config.getList(CmsDriverManager.CONFIGURATION_USER);
         driverKey = (String)drivers.get(0) + ".user.driver";
-        driverName = config.getString(driverKey);
+        driverName = config.get(driverKey);
         drivers = (drivers.size() > 1) ? drivers.subList(1, drivers.size()) : null;
         if (driverName == null) {
             CmsLog.INIT.error(Messages.get().getBundle().key(Messages.INIT_DRIVER_FAILED_1, driverKey));
@@ -493,9 +491,9 @@ public final class CmsDriverManager implements I_CmsEventListener {
         userDriver = (I_CmsUserDriver)driverManager.newDriverInstance(configurationManager, driverName, drivers);
 
         // read the project driver class properties and initialize a new instance 
-        drivers = Arrays.asList(config.getStringArray(CmsDriverManager.CONFIGURATION_PROJECT));
+        drivers = config.getList(CmsDriverManager.CONFIGURATION_PROJECT);
         driverKey = (String)drivers.get(0) + ".project.driver";
-        driverName = config.getString(driverKey);
+        driverName = config.get(driverKey);
         drivers = (drivers.size() > 1) ? drivers.subList(1, drivers.size()) : null;
         if (driverName == null) {
             CmsLog.INIT.error(Messages.get().getBundle().key(Messages.INIT_DRIVER_FAILED_1, driverKey));
@@ -504,9 +502,9 @@ public final class CmsDriverManager implements I_CmsEventListener {
 
         // read the history driver class properties and initialize a new instance 
         if (config.get(CmsDriverManager.CONFIGURATION_HISTORY) != null) {
-            drivers = Arrays.asList(config.getStringArray(CmsDriverManager.CONFIGURATION_HISTORY));
+            drivers = config.getList(CmsDriverManager.CONFIGURATION_HISTORY);
             driverKey = (String)drivers.get(0) + ".history.driver";
-            driverName = config.getString(driverKey);
+            driverName = config.get(driverKey);
             drivers = (drivers.size() > 1) ? drivers.subList(1, drivers.size()) : null;
             if (driverName == null) {
                 CmsLog.INIT.error(Messages.get().getBundle().key(Messages.INIT_DRIVER_FAILED_1, driverKey));
@@ -516,9 +514,9 @@ public final class CmsDriverManager implements I_CmsEventListener {
                 driverName,
                 drivers);
         } else {
-            drivers = Arrays.asList(config.getStringArray(CmsDriverManager.CONFIGURATION_BACKUP));
+            drivers = config.getList(CmsDriverManager.CONFIGURATION_BACKUP);
             driverKey = (String)drivers.get(0) + ".backup.driver";
-            driverName = config.getString(driverKey);
+            driverName = config.get(driverKey);
             drivers = (drivers.size() > 1) ? drivers.subList(1, drivers.size()) : null;
             if (driverName == null) {
                 CmsLog.INIT.error(Messages.get().getBundle().key(Messages.INIT_DRIVER_FAILED_1, driverKey));
@@ -4120,7 +4118,7 @@ public final class CmsDriverManager implements I_CmsEventListener {
      *
      * @return the configuration read from the <code>opencms.properties</code> file
      */
-    public ExtendedProperties getPropertyConfiguration() {
+    public CmsParameterConfiguration getPropertyConfiguration() {
 
         return m_propertyConfiguration;
     }
@@ -5293,7 +5291,7 @@ public final class CmsDriverManager implements I_CmsEventListener {
 		}
 		return twoFactor;
 	}
-	
+
 	private HMACAlgorithm getOtpAlgorithm(String algorithm) {
 		if (algorithm.equals(CmsTwoFactorLoginConfiguration.OTP_ALGORITHM_SHA1))
 			return HMACAlgorithm.SHA1;
@@ -5304,7 +5302,7 @@ public final class CmsDriverManager implements I_CmsEventListener {
 		else 
 			return HMACAlgorithm.SHA1;
 	}
-    
+
     public String createToken(CmsDbContext dbc, CmsUser user, String browserId) 
     	throws CmsDataAccessException {
     	
@@ -6035,7 +6033,7 @@ public final class CmsDriverManager implements I_CmsEventListener {
      * 
      * @throws CmsInitException if the pools could not be initialized
      */
-    public void newPoolInstance(Map configuration, String poolName) throws CmsInitException {
+    public void newPoolInstance(CmsParameterConfiguration configuration, String poolName) throws CmsInitException {
 
         PoolingDriver driver;
 

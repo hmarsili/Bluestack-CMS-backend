@@ -52,7 +52,7 @@ package org.opencms.webdav;
 
 import java.util.Hashtable;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Contains all possible return values for the WebDAV/HTTP protocol.<p>

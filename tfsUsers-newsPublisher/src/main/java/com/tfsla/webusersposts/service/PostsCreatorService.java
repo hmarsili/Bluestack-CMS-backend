@@ -5,9 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.jsp.PageContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
+import jakarta.servlet.jsp.PageContext;
 
 import org.opencms.configuration.CPMConfig;
 import org.opencms.configuration.CmsMedios;
@@ -121,7 +122,7 @@ public class PostsCreatorService {
 		String imagesPreview = "";
 		Boolean isPreview = false;
 
-		String path = ((FileItem)map.get("path")).getString();
+		String path = (String)map.get("path");
 		if(path != null && !path.equals("") && !path.trim().equals("null")) {
 			path = site + path;
 		} else {
@@ -135,7 +136,7 @@ public class PostsCreatorService {
 		String keywords = this.getStringValueFromMap("temas");
 		String section = this.getStringValueFromMap("seccion");
 		String imagespaths = this.getStringValueFromMap("imagesPreload");
-		List<FileItem> images = (ArrayList<FileItem>)map.get("images");
+		List<Part> images = (ArrayList<Part>)map.get("images");
 		List<String> images64_data = (ArrayList<String>)map.get("images64.data");
 		List<String> images64_names = (ArrayList<String>)map.get("images64.names");
 		List<String> videos = (ArrayList<String>)map.get("videos");
@@ -158,7 +159,7 @@ public class PostsCreatorService {
 
 		//cuento la cantidad de imgs que voy a subir
 		int cantImagesUpload = 0;
-		for (FileItem item : images) {
+		for (Part item : images) {
 			imagesNames.add(uploadManager.upload(item));
 			cantImagesUpload++;
 		}
@@ -298,7 +299,7 @@ public class PostsCreatorService {
 	
 	private String getStringValueFromMap(String key) {
 		if(!map.containsKey(key)) return "";
-		return ((FileItem)map.get(key)).getString();
+		return ((String)map.get(key));
 	}
 
 	private static CPMConfig CONFIG = CmsMedios.getInstance().getCmsParaMediosConfiguration();

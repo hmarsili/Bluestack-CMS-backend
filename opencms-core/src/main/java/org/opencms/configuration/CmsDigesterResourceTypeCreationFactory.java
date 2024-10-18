@@ -35,7 +35,7 @@ import org.opencms.file.types.CmsResourceTypeUnknown;
 import org.opencms.file.types.I_CmsResourceType;
 import org.opencms.main.CmsLog;
 
-import org.apache.commons.digester.AbstractObjectCreationFactory;
+import org.apache.commons.digester3.AbstractObjectCreationFactory;
 import org.apache.commons.logging.Log;
 
 import org.xml.sax.Attributes;
@@ -54,7 +54,7 @@ import org.xml.sax.Attributes;
  * 
  * @since 6.0.2
  */
-public class CmsDigesterResourceTypeCreationFactory extends AbstractObjectCreationFactory {
+public class CmsDigesterResourceTypeCreationFactory extends AbstractObjectCreationFactory<I_CmsResourceType> {
 
     /** The log object of this class. */
     private static final Log LOG = CmsLog.getLog(CmsDigesterResourceTypeCreationFactory.class);
@@ -68,10 +68,10 @@ public class CmsDigesterResourceTypeCreationFactory extends AbstractObjectCreati
     }
 
     /**
-     * @see org.apache.commons.digester.ObjectCreationFactory#createObject(org.xml.sax.Attributes)
+     * @see org.apache.commons.digester3.ObjectCreationFactory#createObject(org.xml.sax.Attributes)
      */
     @Override
-    public Object createObject(Attributes attributes) throws Exception {
+    public I_CmsResourceType createObject(Attributes attributes) throws Exception {
 
         // get the class name attribute
         String className = attributes.getValue(I_CmsXmlConfiguration.A_CLASS);
@@ -86,10 +86,12 @@ public class CmsDigesterResourceTypeCreationFactory extends AbstractObjectCreati
             // resource type is unknown, use dummy class to import the module resources
             type = new CmsResourceTypeUnknown();
             // write an error to the log
-            LOG.error(Messages.get().getBundle().key(
-                Messages.ERR_UNKNOWN_RESTYPE_CLASS_2,
-                className,
-                type.getClass().getName()), e);
+            LOG.error(
+                Messages.get().getBundle().key(
+                    Messages.ERR_UNKNOWN_RESTYPE_CLASS_2,
+                    className,
+                    type.getClass().getName()),
+                e);
         }
         return type;
     }

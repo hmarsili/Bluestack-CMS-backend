@@ -6,14 +6,15 @@ import net.sf.ehcache.Element;
 
 import java.io.InputStream;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.opencms.main.CmsLog;
 
 import com.tfsla.rankViews.model.TfsRankResults;
 import com.tfsla.statistics.model.TfsStatisticsOptions;
 
 public class TfsCacheManager {
 	
-	static Logger LOG = Logger.getLogger(TfsCacheManager.class);
+	static Log LOG = CmsLog.getLog(TfsCacheManager.class);
 
 	private static TfsCacheManager instance = new TfsCacheManager();
 	

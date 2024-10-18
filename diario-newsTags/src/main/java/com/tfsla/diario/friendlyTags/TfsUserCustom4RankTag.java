@@ -2,7 +2,7 @@ package com.tfsla.diario.friendlyTags;
 
 import java.io.IOException;
 
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspException;
 public class TfsUserCustom4RankTag extends A_TfsUsuarioValueTag {
 	
 	private static final long serialVersionUID = 8407442786970137828L;

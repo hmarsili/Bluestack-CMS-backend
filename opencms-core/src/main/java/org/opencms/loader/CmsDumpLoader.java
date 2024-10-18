@@ -31,6 +31,7 @@
 
 package org.opencms.loader;
 
+import org.opencms.configuration.CmsParameterConfiguration;
 import org.opencms.file.CmsFile;
 import org.opencms.file.CmsObject;
 import org.opencms.file.CmsProperty;
@@ -44,18 +45,14 @@ import org.opencms.util.CmsStringUtil;
 import org.opencms.workplace.CmsWorkplaceManager;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.Locale;
-import java.util.Map;
-import java.util.TreeMap;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
-import org.apache.commons.collections.ExtendedProperties;
 
 /**
  * Dump loader for binary or other unprocessed resource types.<p>
@@ -78,14 +75,14 @@ public class CmsDumpLoader implements I_CmsResourceLoader {
     private static long m_clientCacheMaxAge;
 
     /** The resource loader configuration. */
-    private Map m_configuration;
+    private CmsParameterConfiguration m_configuration;
 
     /**
      * The constructor of the class is empty and does nothing.<p>
      */
     public CmsDumpLoader() {
 
-        m_configuration = new TreeMap();
+        m_configuration = new CmsParameterConfiguration();
     }
 
     /**
@@ -105,7 +102,7 @@ public class CmsDumpLoader implements I_CmsResourceLoader {
     }
 
     /**
-     * @see org.opencms.loader.I_CmsResourceLoader#dump(org.opencms.file.CmsObject, org.opencms.file.CmsResource, java.lang.String, java.util.Locale, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     * @see org.opencms.loader.I_CmsResourceLoader#dump(org.opencms.file.CmsObject, org.opencms.file.CmsResource, java.lang.String, java.util.Locale, jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse)
      */
     public byte[] dump(
         CmsObject cms,
@@ -119,7 +116,7 @@ public class CmsDumpLoader implements I_CmsResourceLoader {
     }
 
     /**
-     * @see org.opencms.loader.I_CmsResourceLoader#export(org.opencms.file.CmsObject, org.opencms.file.CmsResource, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     * @see org.opencms.loader.I_CmsResourceLoader#export(org.opencms.file.CmsObject, org.opencms.file.CmsResource, jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse)
      */
     public byte[] export(CmsObject cms, CmsResource resource, HttpServletRequest req, HttpServletResponse res)
     throws IOException, CmsException {
@@ -151,10 +148,10 @@ public class CmsDumpLoader implements I_CmsResourceLoader {
      * 
      * @see org.opencms.configuration.I_CmsConfigurationParameterHandler#getConfiguration()
      */
-    public Map getConfiguration() {
+    public CmsParameterConfiguration getConfiguration() {
 
         // return the configuration in an immutable form
-        return Collections.unmodifiableMap(m_configuration);
+        return m_configuration;
     }
 
     /**
@@ -182,10 +179,7 @@ public class CmsDumpLoader implements I_CmsResourceLoader {
      */
     public void initConfiguration() {
 
-        ExtendedProperties config = new ExtendedProperties();
-        config.putAll(m_configuration);
-
-        String maxAge = config.getString("client.cache.maxage");
+        String maxAge = m_configuration.get("client.cache.maxage");
         if (maxAge == null) {
             m_clientCacheMaxAge = -1;
         } else {
@@ -235,7 +229,7 @@ public class CmsDumpLoader implements I_CmsResourceLoader {
     }
 
     /**
-     * @see org.opencms.loader.I_CmsResourceLoader#load(org.opencms.file.CmsObject, org.opencms.file.CmsResource, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     * @see org.opencms.loader.I_CmsResourceLoader#load(org.opencms.file.CmsObject, org.opencms.file.CmsResource, jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse)
      */
     public void load(CmsObject cms, CmsResource resource, HttpServletRequest req, HttpServletResponse res)
     throws IOException, CmsException {
@@ -285,7 +279,7 @@ public class CmsDumpLoader implements I_CmsResourceLoader {
     }
 
     /**
-     * @see org.opencms.loader.I_CmsResourceLoader#service(org.opencms.file.CmsObject, org.opencms.file.CmsResource, javax.servlet.ServletRequest, javax.servlet.ServletResponse)
+     * @see org.opencms.loader.I_CmsResourceLoader#service(org.opencms.file.CmsObject, org.opencms.file.CmsResource, jakarta.servlet.ServletRequest, jakarta.servlet.ServletResponse)
      */
     public void service(CmsObject cms, CmsResource resource, ServletRequest req, ServletResponse res)
     throws CmsException, IOException {

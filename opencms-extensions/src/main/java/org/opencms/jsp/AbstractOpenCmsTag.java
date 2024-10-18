@@ -2,9 +2,9 @@ package org.opencms.jsp;
 
 import java.util.Locale;
 
-import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.tagext.Tag;
-import javax.servlet.jsp.tagext.TagSupport;
+import jakarta.servlet.jsp.PageContext;
+import jakarta.servlet.jsp.tagext.Tag;
+import jakarta.servlet.jsp.tagext.TagSupport;
 
 import org.apache.commons.logging.Log;
 import org.opencms.file.CmsObject;
@@ -24,9 +24,9 @@ import com.tfsla.tags.AbstractTag;
 /**
  * Es una clase base para extender tags de openCMS
  * Debe estar en este package, porque usa cosas con visibilidad al package
- * que están en el código de OpenCMS
+ * que estï¿½n en el cï¿½digo de OpenCMS
  * 
- * Por limitaciones de OpenCMS, al redefinir los métodos release y endTag, deben llamar al super. 
+ * Por limitaciones de OpenCMS, al redefinir los mï¿½todos release y endTag, deben llamar al super. 
  * 
  * @author lgassman
  */
@@ -60,7 +60,7 @@ public abstract class AbstractOpenCmsTag extends AbstractTag {
 	}
 	
     /**
-     * Devuelve el content o un String vacío ("") si no existe
+     * Devuelve el content o un String vacï¿½o ("") si no existe
      * @return
      */
 	protected String getContent() {
@@ -87,7 +87,7 @@ public abstract class AbstractOpenCmsTag extends AbstractTag {
 	}
 
 	/**
-	 * @see javax.servlet.jsp.tagext.Tag#release()
+	 * @see jakarta.servlet.jsp.tagext.Tag#release()
 	 */
 	public void release() {
 		this.m_element = null;

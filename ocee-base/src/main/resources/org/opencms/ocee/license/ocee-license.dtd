@@ -1,0 +1,19 @@
+<!-- 
+# The root configuration node is called <opencms> for all OpenCms configurations.
+-->
+<!ELEMENT opencms (license)>
+
+<!--
+# The configuration of the OpenCms license management is done here.
+-->
+<!ELEMENT license (name, key)>
+
+<!--
+# The name of the company or person who has adquired the license.
+-->
+<!ELEMENT name (#PCDATA)>
+
+<!--
+# The license key itself.
+-->
+<!ELEMENT key (#PCDATA)>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+# The root configuration node is called <opencms> for all OpenCms configurations.
+-->
+<!ELEMENT opencms (remote-commands)>
+
+<!--
+# A list of remote commands.
+-->
+<!ELEMENT remote-commands (remote-command*)>
+
+<!--
+# the remote-command node.
+-->
+<!ELEMENT remote-command (#PCDATA)>
+
+<!--
+# The name of a remote command
+-->
+<!ATTLIST remote-command name CDATA #REQUIRED>

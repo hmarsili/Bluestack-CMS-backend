@@ -1,6 +1,6 @@
 package com.tfsla.diario.webservices.helpers;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import net.sf.json.JSONObject;
 

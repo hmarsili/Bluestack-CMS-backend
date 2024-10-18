@@ -258,16 +258,6 @@
 
 	<jsp-config>
 	
-		<jsp-property-group>
-    	        	    <url-pattern>*.jsp</url-pattern>
-        	            <page-encoding>UTF-8</page-encoding>
-                </jsp-property-group>
-
-		<taglib>
-		   	<taglib-uri>http://www.tfsla.com/taglib/tfsStatistics</taglib-uri>
-   			<taglib-location>/WEB-INF/tfsStatistics.tld</taglib-location>
-		</taglib>
-
             <taglib>
                   <taglib-uri>http://java.sun.com/jsp/jstl/fmt</taglib-uri>
                   <taglib-location>/WEB-INF/fmt.tld</taglib-location>
@@ -312,6 +302,11 @@
                <taglib-uri>http://jakarta.apache.org/taglibs/string-1.1</taglib-uri>
                <taglib-location>/WEB-INF/taglibs-string.tld</taglib-location>
            </taglib>
+        
+        <jsp-property-group>
+    	        	    <url-pattern>*.jsp</url-pattern>
+        	            <page-encoding>UTF-8</page-encoding>
+                </jsp-property-group>
            
 	</jsp-config>
 

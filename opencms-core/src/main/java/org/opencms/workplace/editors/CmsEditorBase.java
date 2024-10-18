@@ -35,7 +35,7 @@ import org.opencms.db.CmsUserSettings;
 import org.opencms.jsp.CmsJspActionElement;
 import org.opencms.workplace.CmsDialog;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Base class for all editors that turns of time warp deletion inherited from 
@@ -60,7 +60,7 @@ public class CmsEditorBase extends CmsDialog {
     }
 
     /**
-     * @see org.opencms.workplace.CmsWorkplace#initTimeWarp(org.opencms.db.CmsUserSettings, javax.servlet.http.HttpSession)
+     * @see org.opencms.workplace.CmsWorkplace#initTimeWarp(org.opencms.db.CmsUserSettings, jakarta.servlet.http.HttpSession)
      */
     @Override
     protected void initTimeWarp(CmsUserSettings settings, HttpSession session) {

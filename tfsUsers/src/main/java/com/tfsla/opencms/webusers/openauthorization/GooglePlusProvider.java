@@ -1,6 +1,6 @@
 package com.tfsla.opencms.webusers.openauthorization;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 public class GooglePlusProvider extends GoogleProvider implements IOpenProvider {
 	protected final String providerName = "googlePlus";

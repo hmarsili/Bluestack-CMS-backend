@@ -45,10 +45,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.PageContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.PageContext;
 
 /**
  * This bean provides methods to generate customized http status error pages, e.g. to handle 404 (not found) errors.<p>
@@ -64,16 +64,16 @@ import javax.servlet.jsp.PageContext;
 public class CmsJspStatusBean extends CmsJspActionElement {
 
     /** Request attribute key for the error message. */
-    public static final String ERROR_MESSAGE = "javax.servlet.error.message";
+    public static final String ERROR_MESSAGE = "jakarta.servlet.error.message";
 
     /** Request attribute key for the error request URI. */
-    public static final String ERROR_REQUEST_URI = "javax.servlet.error.request_uri";
+    public static final String ERROR_REQUEST_URI = "jakarta.servlet.error.request_uri";
 
     /** Request attribute key for the error servlet name. */
-    public static final String ERROR_SERVLET_NAME = "javax.servlet.error.servlet_name";
+    public static final String ERROR_SERVLET_NAME = "jakarta.servlet.error.servlet_name";
 
     /** Request attribute key for the error status code. */
-    public static final String ERROR_STATUS_CODE = "javax.servlet.error.status_code";
+    public static final String ERROR_STATUS_CODE = "jakarta.servlet.error.status_code";
 
     /** Default name for an unknown error status code. */
     public static final String UNKKNOWN_STATUS_CODE = "unknown";

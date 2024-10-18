@@ -32,6 +32,7 @@
 package org.opencms.loader;
 
 import org.opencms.cache.CmsVfsNameBasedDiskCache;
+import org.opencms.configuration.CmsParameterConfiguration;
 import org.opencms.file.CmsFile;
 import org.opencms.file.CmsObject;
 import org.opencms.file.CmsResource;
@@ -47,8 +48,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 
@@ -259,10 +260,10 @@ public class CmsImageLoader extends CmsDumpLoader implements I_CmsEventListener 
      * @see org.opencms.configuration.I_CmsConfigurationParameterHandler#getConfiguration()
      */
     @Override
-    public Map getConfiguration() {
+    public CmsParameterConfiguration getConfiguration() {
 
-        Map config = super.getConfiguration();
-        TreeMap result = new TreeMap();
+    	CmsParameterConfiguration config = super.getConfiguration();
+    	CmsParameterConfiguration result = new CmsParameterConfiguration();
         if (config != null) {
             result.putAll(config);
         }
@@ -309,7 +310,7 @@ public class CmsImageLoader extends CmsDumpLoader implements I_CmsEventListener 
     }
 
     /**
-     * @see org.opencms.loader.I_CmsResourceLoader#load(org.opencms.file.CmsObject, org.opencms.file.CmsResource, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     * @see org.opencms.loader.I_CmsResourceLoader#load(org.opencms.file.CmsObject, org.opencms.file.CmsResource, jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse)
      */
     @Override
     public void load(CmsObject cms, CmsResource resource, HttpServletRequest req, HttpServletResponse res)

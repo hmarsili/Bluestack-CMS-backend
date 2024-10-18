@@ -165,7 +165,7 @@ public class CmsSessionInfo implements Comparable, Serializable {
      *
      * @return the maximum time, in seconds, this session info is allowed to be inactive
      * 
-     * @see javax.servlet.http.HttpSession#getMaxInactiveInterval()
+     * @see jakarta.servlet.http.HttpSession#getMaxInactiveInterval()
      */
     public int getMaxInactiveInterval() {
 
@@ -197,7 +197,7 @@ public class CmsSessionInfo implements Comparable, Serializable {
      *
      * @return the id of the OpenCms (http) session this session info belongs to
      * 
-     * @see javax.servlet.http.HttpSession#getId()
+     * @see jakarta.servlet.http.HttpSession#getId()
      */
     public CmsUUID getSessionId() {
 

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+# The root configuration node is called <opencms> for all OpenCms configurations.
+-->
+<!ELEMENT opencms (vfsdoctor)>
+
+<!--
+# <vfsdoctor> 
+# The configuration of VFS-Doctor OpenCms OCEE module is done here.
+-->
+<!ELEMENT vfsdoctor (plugin)>
+
+<!--
+# <plugin> 
+# the plugin configuration node.
+-->
+<!ELEMENT plugin (queries)>
+
+<!--
+# <queries> 
+# List of sql query.
+-->
+<!ELEMENT queries (query*)>
+
+<!--
+# <query> 
+# A multi bd provider sql query.
+-->
+<!ELEMENT query (default,spec-queries?)>
+
+<!--
+# The name of a sql-query
+-->
+<!ATTLIST query name CDATA #REQUIRED>
+
+<!--
+# The default (db provider independent) sql query
+-->
+<!ELEMENT default (#PCDATA)>
+
+<!--
+# <spec-queries> 
+# List of db provider specific sql queries.
+-->
+<!ELEMENT spec-queries (spec-query*)>
+
+<!--
+# <spec-query> 
+# A parameterized db provider specific sql query.
+-->
+<!ELEMENT spec-query (#PCDATA)>
+
+<!--
+# The name of a db provider for the specific sql query.
+-->
+<!ATTLIST spec-query dbprovider CDATA #REQUIRED>
+
+
