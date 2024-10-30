@@ -89,9 +89,6 @@ import org.apache.commons.logging.Log;
  */
 public class CmsResourceManager {
 
-    public void prueba(String value) {
-    	System.out.println("CmsResourceManager - Prueba --> " + value);
-    }
     /**
      * Contains the part of the resource manager configuration that can be changed 
      * during runtime by the import / deletion of a module.<p>

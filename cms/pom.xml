@@ -172,7 +172,18 @@
 		  </exclusion>
 	  </exclusions>
     </dependency>
-    
+
+    <dependency>
+      <groupId>blueStack</groupId>
+      <artifactId>diario-newsletter</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+      <exclusions>
+		  <exclusion>
+			  <groupId>poi</groupId>
+			  <artifactId>poi-2.5.1-final</artifactId>
+		  </exclusion>
+	  </exclusions>
+    </dependency>    
        <dependency>
       <groupId>blueStack</groupId>
       <artifactId>ocee-cache</artifactId>

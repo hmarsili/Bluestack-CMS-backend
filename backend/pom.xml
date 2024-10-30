@@ -23,6 +23,7 @@
 	  <module>../diario-webservices</module>
 	  <module>../diario-genericImport</module>
 	  <module>../diario-newsTags</module>
+	  <module>../diario-newsletter</module>
 	  <module>../ocee-cache</module>
 	  <module>../ocee-ldap</module>
 	  <module>../templateManager</module>

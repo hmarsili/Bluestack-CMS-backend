@@ -452,12 +452,6 @@ public class CmsVfsConfiguration extends A_CmsXmlConfiguration {
             "*/" + N_VFS + "/" + N_RESOURCES,
             I_CmsConfigurationParameterHandler.INIT_CONFIGURATION_METHOD);
         digester.addSetNext("*/" + N_VFS + "/" + N_RESOURCES, "setResourceManager");
-
-        
-      //AGREGADO PRUEBA
-    	digester.addCallMethod("*/" + N_VFS + "/" + N_RESOURCES + "/" + N_RESOURCELOADERS + "/" + N_LOADER, "prueba", 1);
-    	digester.addCallParam("*/" + N_VFS + "/" + N_RESOURCES + "/" + N_RESOURCELOADERS + "/" + N_LOADER, 0,  A_CLASS);
-    	// FIN AGREGADO PRUEBA
     	
         // add rules for resource loaders
         digester.addObjectCreate(

@@ -170,9 +170,6 @@ public class CmsConfigurationManager implements I_CmsXmlConfiguration {
         cacheDtdSystemId(configuration);
     }
 
-    public void prueba(String value) {
-    	System.out.println("Prueba --> " + value);
-    }
     /**
      * @see org.opencms.configuration.I_CmsConfigurationParameterHandler#addConfigurationParameter(java.lang.String, java.lang.String)
      */
@@ -187,11 +184,6 @@ public class CmsConfigurationManager implements I_CmsXmlConfiguration {
     public void addXmlDigesterRules(Digester digester) {
 
         // add rule for <configuration> node        
-
-    	//AGREGADO PRUEBA
-    	digester.addCallMethod("*/" + N_CONFIGURATION + "/" + N_CONFIG, "prueba", 1);
-    	digester.addCallParam("*/" + N_CONFIGURATION + "/" + N_CONFIG, 0,  I_CmsXmlConfiguration.A_CLASS);
-    	// FIN AGREGADO PRUEBA
     	
     	digester.addObjectCreate(
             "*/" + N_CONFIGURATION + "/" + N_CONFIG,

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
-                                
+                                    
+    
     
     
     
@@ -7,7 +8,8 @@
     
     
     <wb-module deploy-name="cms">
-                                                                
+                                                                        
+        
         
         
         
@@ -15,7 +17,8 @@
         
         
         <wb-resource deploy-path="/" source-path="/target/m2e-wtp/web-resources"/>
-                                                                
+                                                                        
+        
         
         
         
@@ -23,7 +26,8 @@
         
         
         <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
-                                                                
+                                                                        
+        
         
         
         
@@ -31,7 +35,8 @@
         
         
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
-                                                                
+                                                                        
+        
         
         
         
@@ -75,6 +80,9 @@
         <dependent-module archiveName="diario-webservices-0.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/diario-webservices/diario-webservices">
             <dependency-type>uses</dependency-type>
         </dependent-module>
+        <dependent-module archiveName="diario-newsletter-0.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/diario-newsletter/diario-newsletter">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
         <dependent-module archiveName="ocee-cache-0.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/ocee-cache/ocee-cache">
             <dependency-type>uses</dependency-type>
         </dependent-module>
@@ -114,7 +122,8 @@
         <dependent-module archiveName="ocee-vfsdoctor-0.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/ocee-vfsdoctor/ocee-vfsdoctor">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-                                                                
+                                                                        
+        
         
         
         
@@ -122,10 +131,12 @@
         
         
         <property name="java-output-path" value="/blueStack-cms/target/classes"/>
-                        
+                                
+        
         
         <property name="context-root" value="cms"/>
-                                                            
+                                                                    
+    
     
     
     
@@ -133,7 +144,8 @@
     
     
     </wb-module>
-                            
+                                
+
 
 
 
