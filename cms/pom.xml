@@ -100,6 +100,18 @@
       <artifactId>opencms-modules</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
+
+    <dependency>
+      <groupId>blueStack</groupId>
+      <artifactId>opencms-commons</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>    
+    
+    <dependency>
+      <groupId>blueStack</groupId>
+      <artifactId>opencms-newsletter</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
     
    <dependency>
       <groupId>blueStack</groupId>
@@ -368,8 +380,15 @@
     <groupId>jakarta.servlet.jsp</groupId>
     <artifactId>jakarta.servlet.jsp-api</artifactId>
     <version>3.1.1</version>
-    <scope>provided</scope>
 </dependency>
+
+<!-- https://mvnrepository.com/artifact/jakarta.servlet.jsp.jstl/jakarta.servlet.jsp.jstl-api -->
+<dependency>
+    <groupId>jakarta.servlet.jsp.jstl</groupId>
+    <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
+    <version>3.0.2</version>
+</dependency>
+
 
 
   </dependencies>

@@ -510,8 +510,8 @@ public class CmsConfigurationManager implements I_CmsXmlConfiguration {
 
         
         configuration.addXmlDigesterRules(m_digester);
-        System.out.println(fileUrl);
-        System.out.println("<!--!> loadXmlConfiguration " + configuration.getXmlFileName());
+        //System.out.println(fileUrl);
+        //System.out.println("<!--!> loadXmlConfiguration " + configuration.getXmlFileName());
         // start the parsing process        
         InputSource  inputSource = new InputSource(fileUrl.openStream());
         

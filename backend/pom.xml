@@ -13,6 +13,8 @@
 	  <module>../opencms-core</module>
 	  <module>../opencms-components</module>
 	  <module>../opencms-modules</module>
+	  <module>../opencms-commons</module>
+	  <module>../opencms-newsletter</module>
 	  <module>../opencms-extensions</module>
 	  <module>../searchExtensions</module>
 	  <module>../imageVariants</module>
