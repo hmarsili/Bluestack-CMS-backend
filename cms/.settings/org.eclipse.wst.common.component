@@ -133,6 +133,9 @@
         <dependent-module archiveName="ocee-vfsdoctor-0.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/ocee-vfsdoctor/ocee-vfsdoctor">
             <dependency-type>uses</dependency-type>
         </dependent-module>
+        <dependent-module archiveName="bs-releaseManager-0.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/bs-releaseManager/bs-releaseManager">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
                                                                                 
         
         

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema targetNamespace="http://www.tfsla.com/module"
+    elementFormDefault="qualified"
+    xmlns="http://www.tfsla.com/module"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    
+<xs:simpleType name="levels">
+	<xs:restriction base="xs:string">
+		<xs:enumeration value="general"/>
+		<xs:enumeration value="site"/>
+		<xs:enumeration value="publication"/>
+	</xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="types">
+	<xs:restriction base="xs:string">
+		<xs:enumeration value="decimal"/>
+		<xs:enumeration value="numeric"/>
+		<xs:enumeration value="string"/>
+		<xs:enumeration value="boolean"/>
+		<xs:enumeration value="list"/>
+	</xs:restriction>
+</xs:simpleType>
+
+<xs:element name="description" type="xs:string" />
+<xs:element name="longDescription" type="xs:string" />
+
+<xs:element name="level" type="levels" />
+
+<xs:element name="type" type="types" />
+<xs:element name="defaultValue" type="xs:string" />
+<xs:element name="regEx" type="xs:string" />
+<xs:element name="value" type="xs:string"/>
+<xs:element name="validationMsg" type="xs:string"/>
+<xs:element name="optional" type="xs:boolean"/>
+
+
+<xs:element name="values" >
+	<xs:complexType>
+		<xs:sequence>
+			<xs:element ref="value" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+</xs:element>
+
+<xs:element name="parameter">
+	<xs:complexType>
+		<xs:sequence>
+			<xs:element ref="description" />
+			<xs:element ref="longDescription" />
+			<xs:element ref="defaultValue" />
+			<xs:element ref="type" />
+			<xs:element ref="regEx" />
+			<xs:element ref="optional" />
+			<xs:element ref="validationMsg" />
+			<xs:element ref="values" minOccurs="0" />
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:string" use="required"/>
+	</xs:complexType>
+</xs:element>
+
+<xs:element name="parameters">
+	<xs:complexType>
+		<xs:sequence>
+			<xs:element ref="parameter" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+</xs:element>
+
+<xs:element name="paramGroups">
+	<xs:complexType>
+		<xs:sequence>
+			<xs:element ref="paramGroup" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+</xs:element>
+
+<xs:element name="paramGroup">
+	<xs:complexType>
+		<xs:sequence>
+			<xs:element ref="description" />
+			<xs:element ref="parameter" minOccurs="0" />
+			<xs:element ref="parameters" maxOccurs="unbounded" />
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:string" use="required"/>
+	</xs:complexType>
+</xs:element>
+
+<xs:element name="module">
+	<xs:complexType>
+		<xs:sequence>
+			<xs:element ref="description" />
+			<xs:element ref="optional" />
+			<xs:element ref="level" maxOccurs="3" />
+			<xs:element ref="parameters" minOccurs="0" maxOccurs="unbounded" />
+			<xs:element ref="paramGroups" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:string" use="required"/>
+	</xs:complexType>
+</xs:element>
+
+</xs:schema>
