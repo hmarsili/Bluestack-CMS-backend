@@ -253,7 +253,7 @@ public class ImageFinder {
 		
 		String siteName = OpenCms.getSiteManager().getCurrentSite(cmsObject).getSiteRoot();
 		
-		logger.debug(resource.getRootPath() + "> En sitio: " + siteName + " | proyecto: " + cmsObject.getRequestContext().currentProject().getName() + " | publicacion: " + (currentPublication != null ? currentPublication.getNombre() : "No encontrada"));
+		logger.debug(resource.getRootPath() + " > En sitio: " + siteName + " | proyecto: " + cmsObject.getRequestContext().currentProject().getName() + " | publicacion: " + (currentPublication != null ? currentPublication.getNombre() : "No encontrada"));
 
 		
 		

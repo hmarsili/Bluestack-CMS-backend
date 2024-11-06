@@ -94,6 +94,8 @@ public class TfsImageExportListener  implements I_CmsEventListener {
 						if (site==null)
 							continue;
 						
+						cmsObject.getRequestContext().setSiteRoot(site.getSiteRoot());
+						
 						if (resource.getTypeId()==getNoticiaType()) {
 							CmsLog.getLog(this).info("Verificando la necesidad de exportar imagenes de la noticia " + resource.getRootPath());
 
