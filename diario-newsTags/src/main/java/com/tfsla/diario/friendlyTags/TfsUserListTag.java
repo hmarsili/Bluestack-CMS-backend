@@ -192,8 +192,7 @@ public class TfsUserListTag extends BaseTag implements I_TfsUser,I_TfsCollection
 	
 	@Override
 	public int doStartTag() throws JspException {
-		findUsers("opencms");
-		/*
+		
 		//determinar si el typepedata se trata de datos si se trata de ranking de usuarios
 		if (order==null){
 			findUsers("opencms");
@@ -205,7 +204,7 @@ public class TfsUserListTag extends BaseTag implements I_TfsUser,I_TfsCollection
 				findUsers("opencms");	
 			}
 		}
-		*/
+		
 		return (hasMoreContent() ? EVAL_BODY_INCLUDE : SKIP_BODY );		
 	}
 
@@ -215,6 +214,8 @@ public class TfsUserListTag extends BaseTag implements I_TfsUser,I_TfsCollection
 		Map<String,Object> parameters = createParameterMap();
 	    CmsObject cms = CmsFlexController.getCmsObject(pageContext.getRequest());
 	    saveUser();
+	    if (!typedata.equals("stats")){
+	   
 		//if(typedata=="opencms"){
 			DataUsersCollector collector= new DataUsersCollector();
 			users = collector.collectUsers(parameters, cms, true);
@@ -223,6 +224,7 @@ public class TfsUserListTag extends BaseTag implements I_TfsUser,I_TfsCollection
 		//	RankingUsersCollector collector=new RankingUsersCollector();
 		//	users=collector.collectUsers(parameters, cms);
 		//}
+	    }
 	}
 	
 	protected Map<String,Object> createParameterMap() {

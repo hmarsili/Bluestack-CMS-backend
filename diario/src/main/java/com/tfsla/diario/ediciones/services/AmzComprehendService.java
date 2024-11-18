@@ -207,10 +207,12 @@ public class AmzComprehendService {
         
         DetectEntitiesResponse detectEntitiesResult  = getComprehendClient().detectEntities(detectEntitiesRequest);
 
-        detectEntitiesResult.entities().sort((Entity e1, Entity e2) -> e2.score().compareTo(e1.score()));
+        ArrayList<Entity> entities = new ArrayList<>(detectEntitiesResult.entities());
+        
+        entities.sort((Entity e1, Entity e2) -> e2.score().compareTo(e1.score()));
         //detectEntitiesResult.getEntities().forEach(System.out::println);
 
-        return detectEntitiesResult.entities();
+        return entities;
         
 	}
 
