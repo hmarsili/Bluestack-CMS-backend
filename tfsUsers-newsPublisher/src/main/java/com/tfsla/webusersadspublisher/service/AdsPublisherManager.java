@@ -88,8 +88,9 @@ public class AdsPublisherManager{
 			
 	    	//List items = upload.parseRequest(request);
 	    	
-			while (request.getParameterNames().asIterator().hasNext()) {
-				String atrName = request.getParameterNames().asIterator().next();
+			Iterator<String> atrNames = request.getParameterNames().asIterator();
+			while (atrNames.hasNext()) {
+				String atrName = atrNames.next();
 			
 				if (atrName.indexOf("video") >= 0)
 				{

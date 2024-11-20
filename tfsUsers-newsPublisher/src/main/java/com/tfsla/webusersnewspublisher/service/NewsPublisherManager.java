@@ -1,21 +1,15 @@
 package com.tfsla.webusersnewspublisher.service;
 
 import com.tfsla.utils.CmsResourceUtils;
-import com.tfsla.utils.TfsAdminUserProvider;
 import com.tfsla.webusersnewspublisher.helper.expirenews.ExpireNewsService;
 import com.tfsla.webusersnewspublisher.helper.expirenews.ExpireNewsValidator;
 import com.tfsla.webusersnewspublisher.helper.expirenews.Strings;
 import com.tfsla.webusersnewspublisher.model.News;
 import com.tfsla.webusersposts.service.PostsMailingService;
 
-import org.apache.commons.fileupload.FileItemFactory;
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.logging.Log;
 import org.opencms.configuration.CPMConfig;
 import org.opencms.configuration.CmsMedios;
-import org.opencms.db.CmsDefaultUsers;
 import org.opencms.file.CmsFile;
 import org.opencms.file.CmsObject;
 import org.opencms.file.CmsProject;
@@ -82,9 +76,9 @@ public class NewsPublisherManager{
 		Map<String, Object> map = new HashMap<String, Object>();
 	
 		try {
-			FileItemFactory factory = new DiskFileItemFactory();
-			ServletFileUpload upload = new ServletFileUpload(factory);
-			upload.setHeaderEncoding("UTF-8");
+			//FileItemFactory factory = new DiskFileItemFactory();
+			//ServletFileUpload upload = new ServletFileUpload(factory);
+			//upload.setHeaderEncoding("UTF-8");
 			Collection<Part> items = request.getParts();
 	    	//List items = upload.parseRequest(request);
 	    	
@@ -98,8 +92,9 @@ public class NewsPublisherManager{
 			List<String> categories = new ArrayList<String>();
 			String fileName = "";
 			
-			while (request.getParameterNames().asIterator().hasNext()) {
-				String atrName = request.getParameterNames().asIterator().next();
+			Iterator<String> paramsName = request.getParameterNames().asIterator();
+			while (paramsName.hasNext()) {
+				String atrName = paramsName.next();
 				
 				if (atrName.indexOf("video") >= 0) {
 					if (atrName != null && atrName.indexOf("<script") < 0 && atrName.indexOf("</script>") < 0 && !atrName.equals("")) {
