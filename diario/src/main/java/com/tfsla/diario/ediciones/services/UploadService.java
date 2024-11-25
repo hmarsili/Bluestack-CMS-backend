@@ -64,6 +64,7 @@ import software.amazon.awssdk.services.s3.S3AsyncClient;
 
 import com.tfsla.diario.file.types.TfsResourceTypeVideoVodLink;
 import com.google.gdata.model.Path;
+import com.tfsla.diario.file.types.TfsResourceTypeUploadProcessing;
 import com.tfsla.diario.file.types.TfsResourceTypeVideoLinkProcessing;
 
 public abstract class UploadService {
@@ -100,6 +101,40 @@ public abstract class UploadService {
 	protected String videoType = "";
 	
 
+	protected String processPath(String path, String fileName) {
+		return path + fileName;
+	}
+	
+	public String checkFileName(String path,String fileName){
+		
+		String newFileName = fileName;
+		
+		int count = 0;
+		boolean isExist = true;
+		
+		String linkName = processPath(path, fileName);
+		
+		String tmpName =  fileName;
+		String fileNameWithoutExt = fileName.substring(0, fileName.lastIndexOf("."));
+		String fileNameExt = fileName.substring(fileName.lastIndexOf(".")+1,fileName.length());
+		
+		while (isExist){
+			
+			if(cmsObject.existsResource(linkName)){
+				count++;
+				tmpName = fileNameWithoutExt+"_"+count+"."+fileNameExt;
+				linkName = processPath(path, tmpName);
+			}else{
+				isExist = false;
+			}
+		}
+		
+		newFileName = tmpName;
+		
+		return newFileName;
+	}
+
+	
 	protected int getVFSResourceType(String fileName) throws CmsException {
 		return OpenCms.getResourceManager().getDefaultTypeForName(fileName).getTypeId(); 
 	}
@@ -332,6 +367,7 @@ public abstract class UploadService {
 			String linkName = path + fileName;
 			LOG.debug("creando link a S3 en vfs: " + linkName + " en " + cmsObject.getRequestContext().getSiteRoot() + " (" + cmsObject.getRequestContext().currentProject().getName()  + "|" + cmsObject.getRequestContext().currentUser().getFullName() + " )");
 			int type = getPointerType();
+			
 			if (this.videoType.equals("video-processing")) {
 				type = TfsResourceTypeVideoLinkProcessing.getStaticTypeId();
 			}
@@ -381,7 +417,8 @@ public abstract class UploadService {
 	
 	public preUploadResponse preUploadAmzFile(CmsObject cmsObject, String path, String fileName, Map<String,String> parameters, List properties) throws Exception {
 		fileName = getValidFileName(fileName);
-
+		fileName = checkFileName(fileName,path);
+		
 		LOG.debug("Nombre corregido del archivo a subir al s3 de amazon: " + fileName);
 		String subFolderRFSPath = getRFSSubFolderPath(rfsSubFolderFormat, parameters);
 		LOG.debug("subcarpeta: " + subFolderRFSPath);
@@ -401,13 +438,7 @@ public abstract class UploadService {
 		try {
 			String linkName = path + fileName;
 			LOG.debug("creando link a S3 en vfs: " + linkName + " en " + cmsObject.getRequestContext().getSiteRoot() + " (" + cmsObject.getRequestContext().currentProject().getName()  + "|" + cmsObject.getRequestContext().currentUser().getFullName() + " )");
-			int type = getPointerType();
-			if (this.videoType.equals("video-processing")) {
-				type = TfsResourceTypeVideoLinkProcessing.getStaticTypeId();
-			}
-			if (!this.videoType.equals("video-processing") && !this.videoType.equals("")) {
-				type = TfsResourceTypeVideoVodLink.getStaticTypeId();
-			}
+			int type = TfsResourceTypeUploadProcessing.getStaticTypeId();
 			
 			cmsObject.createResource(linkName, 
 					type,
@@ -446,16 +477,20 @@ public abstract class UploadService {
                     .build();
 
             PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
-                    .signatureDuration(Duration.ofMinutes(10))  // The URL expires in 10 minutes.
+            		 .signatureDuration(Duration.ofMinutes(10))  // The URL expires in 10 minutes.
                     .putObjectRequest(objectRequest)
                     .build();
 
 
             PresignedPutObjectRequest presignedRequest = presigner.presignPutObject(presignRequest);
             String myURL = presignedRequest.url().toString();
+            LOG.info("bucketName: " + bucketName);
+            LOG.info("keyName: " + keyName);
             LOG.info("Presigned URL to upload a file to: " + myURL);
             LOG.info("HTTP method: " + presignedRequest.httpRequest().method());
 
+            LOG.info( presignedRequest.signedHeaders());
+            
             return presignedRequest.url().toExternalForm();
         }
     }

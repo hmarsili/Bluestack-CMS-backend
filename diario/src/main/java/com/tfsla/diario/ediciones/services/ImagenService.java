@@ -496,9 +496,6 @@ public class ImagenService extends UploadService {
 		return super.uploadAmzFile(cmsObject, path, fileName, parameters, fileStream, properties);
 	}
 	
-	protected String processPath(String path, String fileName) {
-		return path + fileName;
-	}
 	
 	protected void deleteResource(String link) throws Exception {
 		//To be implemented in child classes
@@ -585,34 +582,6 @@ public class ImagenService extends UploadService {
 	}
 	
 	
-	public String checkFileName(String path,String fileName){
-		
-		String newFileName = fileName;
-		
-		int count = 0;
-		boolean isExist = true;
-		
-		String linkName = processPath(path, fileName);
-		
-		String tmpName =  fileName;
-		String fileNameWithoutExt = fileName.substring(0, fileName.lastIndexOf("."));
-		String fileNameExt = fileName.substring(fileName.lastIndexOf(".")+1,fileName.length());
-		
-		while (isExist){
-			
-			if(cmsObject.existsResource(linkName)){
-				count++;
-				tmpName = fileNameWithoutExt+"_"+count+"."+fileNameExt;
-				linkName = processPath(path, tmpName);
-			}else{
-				isExist = false;
-			}
-		}
-		
-		newFileName = tmpName;
-		
-		return newFileName;
-	}
 	
 	public void checkOwnerFolder(File dir){
 		
