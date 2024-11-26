@@ -321,7 +321,7 @@ public class VideoCodeLoader extends A_DescriptionLoader implements I_CmsEventLi
 		
 	}
 	
-	private String videoExistInBD(CmsObject cmsObject, String videoCode) {
+	public static String videoExistInBD(CmsObject cmsObject, String videoCode) {
 		String videoBDPath = "";
 		String resourceID = "";
 		

@@ -10,6 +10,7 @@ import javax.servlet.jsp.JspTagException;
 import org.opencms.file.CmsObject;
 import org.opencms.file.CmsResource;
 import org.opencms.flex.CmsFlexController;
+import org.opencms.file.CmsResourceFilter;
 import org.opencms.main.OpenCms;
 
 import com.tfsla.diario.model.TfsListaVideos;
@@ -47,6 +48,7 @@ public class TfsVideosListTag extends BaseTag implements I_TfsCollectionListTag 
 	public static final String param_searchinhistory="searchinhistory";
 	public static final String param_numberOfParamters = "params-count";
 	public static final String param_id = "id";
+	public static final String param_resourcefilter="resourcefilter";
 
 	private String from=null;
 	private String to=null;
@@ -66,6 +68,7 @@ public class TfsVideosListTag extends BaseTag implements I_TfsCollectionListTag 
 	private String publication = null;
 	private String formats=null;
 	private String id=null;
+	private CmsResourceFilter resourcefilter = null;
 	
 	List<CmsResource> videos = null;
 	int index=-1;
@@ -102,6 +105,7 @@ public class TfsVideosListTag extends BaseTag implements I_TfsCollectionListTag 
 		parameters.put(param_type,type);
 		parameters.put(param_classification, classification);
 		parameters.put(param_id, id);
+		parameters.put(param_resourcefilter,resourcefilter);
 
 		int paramsWithValues = 
 			1  + //size
@@ -113,6 +117,7 @@ public class TfsVideosListTag extends BaseTag implements I_TfsCollectionListTag 
 			(advancedfilter!=null ? 1 : 0) +
 			(searchindex!=null ? 1 : 0) +
 			(searchinhistory!=null ? 1 : 0) +
+			(resourcefilter!=null? 1 : 0)+
 			
 			(category!=null ? 1 : 0) +
 			(formats!=null ? 1 : 0) +
@@ -524,6 +529,32 @@ public class TfsVideosListTag extends BaseTag implements I_TfsCollectionListTag 
 
 	public void setPage(int page) {
 			this.page = page;
+	}
+
+	public void setResourcefilter(String resourceFilter) {
+		if (resourceFilter==null || resourceFilter.trim().length()==0)
+			this.resourcefilter = null;
+		else {
+			if (resourceFilter.trim().toUpperCase().equals("ALL"))
+				this.resourcefilter = CmsResourceFilter.ALL;
+			else if (resourceFilter.trim().toUpperCase().equals("ALL_MODIFIED"))
+				this.resourcefilter = CmsResourceFilter.ALL_MODIFIED;
+			else if (resourceFilter.trim().toUpperCase().equals("DEFAULT"))
+				this.resourcefilter = CmsResourceFilter.DEFAULT;
+			else if (resourceFilter.trim().toUpperCase().equals("IGNORE_EXPIRATION"))
+				this.resourcefilter = CmsResourceFilter.IGNORE_EXPIRATION;
+			else if (resourceFilter.trim().toUpperCase().equals("ONLY_VISIBLE"))
+				this.resourcefilter = CmsResourceFilter.ONLY_VISIBLE;
+			else if (resourceFilter.trim().toUpperCase().equals("ONLY_VISIBLE_NO_DELETED"))
+				this.resourcefilter = CmsResourceFilter.ONLY_VISIBLE_NO_DELETED;
+		}
+	}
+	
+	public String getResourcefilter() {
+		if (resourcefilter==null)
+			return null;
+		
+		return resourcefilter.toString();
 	}
 
 }
