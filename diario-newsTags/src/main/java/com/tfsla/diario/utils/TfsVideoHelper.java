@@ -9,6 +9,7 @@ import org.opencms.configuration.CPMConfig;
 import org.opencms.configuration.CmsMedios;
 import org.opencms.file.CmsObject;
 import org.opencms.file.CmsResource;
+import org.opencms.file.CmsResourceFilter;
 import org.opencms.loader.CmsLoaderException;
 import org.opencms.main.CmsException;
 import org.opencms.main.CmsLog;
@@ -61,7 +62,7 @@ public class TfsVideoHelper {
 		CmsResource videoResource = null;
 		
 		try {
-			videoResource = cmsObject.readResource(path);
+			videoResource = cmsObject.readResource(path,CmsResourceFilter.ALL);
 		} catch (CmsException e) {
 			LOG.error ("Error al obtener el video", e);
 			return "";
@@ -186,8 +187,7 @@ public class TfsVideoHelper {
 		CmsResource videoResource = null;
 		
 		try {
-			videoResource = cmsObject.readResource(videoPath);
-		   
+			videoResource = cmsObject.readResource(videoPath,CmsResourceFilter.ALL);
 		} catch (CmsException e) {
 			LOG.error ("Error al obtener el video", e);
 			return "";
