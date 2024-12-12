@@ -54,7 +54,6 @@ import software.amazon.awssdk.transfer.s3.S3TransferManager;
 import software.amazon.awssdk.transfer.s3.model.CompletedUpload;
 import software.amazon.awssdk.transfer.s3.model.Upload;
 import software.amazon.awssdk.transfer.s3.model.UploadRequest;
-import software.amazon.awssdk.transfer.s3.progress.LoggingTransferListener;
 import software.amazon.awssdk.transfer.s3.progress.TransferListener;
 import software.amazon.awssdk.transfer.s3.progress.TransferListener.Context.BytesTransferred;
 import software.amazon.awssdk.transfer.s3.progress.TransferListener.Context.TransferComplete;
@@ -63,7 +62,10 @@ import software.amazon.awssdk.transfer.s3.progress.TransferListener.Context.Tran
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 
 import com.tfsla.diario.file.types.TfsResourceTypeVideoVodLink;
-import com.google.gdata.model.Path;
+
+import net.sf.json.JSONObject;
+
+import com.tfsla.diario.ediciones.model.TipoEdicion;
 import com.tfsla.diario.file.types.TfsResourceTypeUploadProcessing;
 import com.tfsla.diario.file.types.TfsResourceTypeVideoLinkProcessing;
 
@@ -74,6 +76,8 @@ public abstract class UploadService {
 	public static final int UPLOAD_AMZ = 4;
 
 	protected static final Log LOG = CmsLog.getLog(UploadService.class);
+	protected String publication;
+	protected String siteName;
 	protected CmsObject cmsObject = null;
 	protected String amzDirectory = "";
 	protected String amzBucket = "";
@@ -113,7 +117,7 @@ public abstract class UploadService {
 		boolean isExist = true;
 		
 		String linkName = processPath(path, fileName);
-		
+		//System.out.println("fileName: " + fileName +" - lastindex: "+  fileName.lastIndexOf("."));
 		String tmpName =  fileName;
 		String fileNameWithoutExt = fileName.substring(0, fileName.lastIndexOf("."));
 		String fileNameExt = fileName.substring(fileName.lastIndexOf(".")+1,fileName.length());
@@ -387,14 +391,22 @@ public abstract class UploadService {
 			throw e;
 		}
 	}
-	
+		
 	public class preUploadResponse {
 		String presignedUrl;
 		String vfsPath;
+		String site;
+		String user;
+		String publication;
+		String lang;
 		
-		public preUploadResponse(String presignedUrl, String vfsPath) {
+		public preUploadResponse(String presignedUrl, String vfsPath, String site, String user, String publication, String lang) {
 			this.presignedUrl = presignedUrl;
 			this.vfsPath = vfsPath;
+			this.site = site;
+			this.user = user;
+			this.publication = publication;
+			this.lang = lang;
 		}
 		
 		public String getPresignedUrl() {
@@ -413,11 +425,30 @@ public abstract class UploadService {
 			this.vfsPath = vfsPath;
 		}
 
+		public String getSite() {
+			return site;
+		}
+
+		public String getUser() {
+			return user;
+		}
+
+		public String getPublication() {
+			return publication;
+		}
+
+		public String getLang() {
+			return lang;
+		}
+
 	}
 	
 	public preUploadResponse preUploadAmzFile(CmsObject cmsObject, String path, String fileName, Map<String,String> parameters, List properties) throws Exception {
 		fileName = getValidFileName(fileName);
-		fileName = checkFileName(fileName,path);
+		fileName = checkFileName(path,fileName);
+		TipoEdicionService tService = new TipoEdicionService();
+		TipoEdicion tEdicion = tService.obtenerTipoEdicion(Integer.parseInt(publication));
+		String lang = tEdicion.getLanguage();
 		
 		LOG.debug("Nombre corregido del archivo a subir al s3 de amazon: " + fileName);
 		String subFolderRFSPath = getRFSSubFolderPath(rfsSubFolderFormat, parameters);
@@ -449,9 +480,13 @@ public abstract class UploadService {
 			
 			Map<String, String> metadata = new HashMap<String,String>();
 			metadata.put("vfsUrl", linkName);
+			metadata.put("site", cmsObject.getRequestContext().getSiteRoot());
+			metadata.put("user", cmsObject.getRequestContext().currentUser().getName());
+			metadata.put("publication", publication);
+			metadata.put("lang", lang);
 			
 			String presignedUrl = createPresignedUrl(amzBucket.replace("/", ""),fullPath,metadata);
-			return new preUploadResponse(presignedUrl,linkName);
+			return new preUploadResponse(presignedUrl,linkName,cmsObject.getRequestContext().getSiteRoot(),cmsObject.getRequestContext().currentUser().getName(),publication,lang);
 			
 			//return linkName;
 		} catch (CmsException e) {
@@ -477,7 +512,8 @@ public abstract class UploadService {
                     .build();
 
             PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
-            		 .signatureDuration(Duration.ofMinutes(10))  // The URL expires in 10 minutes.
+            		.signatureDuration(Duration.ofDays(1))  // The URL expires in 10 minutes.
+            		 //.signatureDuration(Duration.ofMinutes(10))  // The URL expires in 10 minutes.
                     .putObjectRequest(objectRequest)
                     .build();
 
@@ -725,13 +761,20 @@ public abstract class UploadService {
 	}
 
 	protected String getValidFileName(String fileName) {
+		
+		//System.out.println("getValidFileName:" + fileName);
 		String validFileName = cmsObject.getRequestContext().getFileTranslator().translateResource(fileName);
+		//System.out.println("validFileName:" + validFileName);
 		validFileName = Normalizer.normalize(validFileName, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
+		//System.out.println("Normalizer validFileName:" + validFileName);
 		validFileName = validFileName.replaceAll("\\s","");
+		//System.out.println("unspaced validFileName:" + validFileName);
 		
 		String extFilename = FilenameUtils.getExtension(validFileName);
 		String fileNameWhithoutExt = FilenameUtils.getBaseName(validFileName);
 		
+		//System.out.println("extFilename:" + extFilename);
+		//System.out.println("fileNameWhithoutExt:" + fileNameWhithoutExt);
 		validFileName = fileNameWhithoutExt.replaceAll("\\.", "_")+"."+extFilename;
 		
 		return validFileName;
@@ -744,6 +787,9 @@ public abstract class UploadService {
 	public void loadBaseProperties(String siteName, String publication) {
     	String module = getModuleName();
  		CPMConfig config = CmsMedios.getInstance().getCmsParaMediosConfiguration();
+ 		
+ 		this.siteName = siteName;
+ 		this.publication = publication;
  		
  		vfsPath = config.getParam(siteName, publication, module, "vfsPath","");
  		vfsSubFolderFormat = config.getParam(siteName, publication, module, "vfsSubFolderFormat","");
@@ -993,4 +1039,6 @@ public abstract class UploadService {
 		
 		return false;
 	}
+
+	abstract public JSONObject callbackUpload(JSONObject data);
 }

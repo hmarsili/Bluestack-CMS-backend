@@ -31,6 +31,7 @@ public class TipoEdicionesDAO extends baseDAO {
 					+ "url, "
 					+ "proyecto, "
 					+ "tipoPublicacion, "
+					+ "language, "
 					+ "edicionActiva, "
 					+ "noticiasIndex, "
 					+ "imagenesIndex, "
@@ -102,6 +103,7 @@ public class TipoEdicionesDAO extends baseDAO {
 					+ "url, "
 					+ "proyecto, "
 					+ "tipoPublicacion, "
+					+ "language, "
 					+ "edicionActiva, "
 					+ "noticiasIndex, "
 					+ "imagenesIndex, "
@@ -176,6 +178,7 @@ public class TipoEdicionesDAO extends baseDAO {
 					+ "url, "
 					+ "proyecto, "
 					+ "tipoPublicacion, "
+					+ "language, "
 					+ "edicionActiva, "
 					+ "noticiasIndex, "
 					+ "imagenesIndex, "
@@ -248,6 +251,8 @@ public class TipoEdicionesDAO extends baseDAO {
 			tipoEdicion.setOnline(true);
 		else
 			tipoEdicion.setOnline(false);
+		
+		tipoEdicion.setLanguage(rs.getString("language"));
 			
 		tipoEdicion.setEdicionActiva(rs.getInt("edicionActiva"));
 
@@ -315,6 +320,7 @@ public class TipoEdicionesDAO extends baseDAO {
 					+ "proyecto, "
 					+ "tipoPublicacion, "
 					+ "edicionActiva, "
+					+ "language, "
 					+ "noticiasIndex, "
 					+ "imagenesIndex, "
 					+ "videosIndex, "
@@ -386,6 +392,7 @@ public class TipoEdicionesDAO extends baseDAO {
 					+ "url, "
 					+ "proyecto, "
 					+ "tipoPublicacion, "
+					+ "language, "
 					+ "edicionActiva, "
 					+ "noticiasIndex, "
 					+ "imagenesIndex, "
@@ -456,6 +463,7 @@ public class TipoEdicionesDAO extends baseDAO {
 					+ "url, "
 					+ "proyecto, "
 					+ "tipoPublicacion, "
+					+ "language, "
 					+ "edicionActiva, "
 					+ "noticiasIndex, "
 					+ "imagenesIndex, "
@@ -531,6 +539,7 @@ public class TipoEdicionesDAO extends baseDAO {
 					+ "url, "
 					+ "proyecto, "
 					+ "tipoPublicacion, "
+					+ "language, "
 					+ "edicionActiva, "
 					+ "noticiasIndex, "
 					+ "imagenesIndex, "
@@ -650,6 +659,7 @@ public class TipoEdicionesDAO extends baseDAO {
 					+ "recetaIndexOnline = ?,"
 					+ "recetaIndexOffline = ?,"
 					+ "customDomain=? ,"
+					+ "language=?, "
 					+ "imagePath=?"
 					+ "where id=?");
 
@@ -695,9 +705,11 @@ public class TipoEdicionesDAO extends baseDAO {
 			
 			stmt.setString(30,tipoEdicion.getCustomDomain());
 			
-			stmt.setString(31,tipoEdicion.getImagePath());
+			stmt.setString(31,tipoEdicion.getLanguage());
 			
-			stmt.setInt(32,tipoEdicion.getId());
+			stmt.setString(32,tipoEdicion.getImagePath());
+			
+			stmt.setInt(33,tipoEdicion.getId());
 
 			stmt.executeUpdate();
 
@@ -753,6 +765,7 @@ public class TipoEdicionesDAO extends baseDAO {
 				+ "url, "
 				+ "proyecto, "
 				+ "tipoPublicacion, "
+				+ "language, "
 				+ "noticiasIndex, "
 				+ "imagenesIndex, "
 				+ "videosIndex, "
@@ -775,44 +788,45 @@ public class TipoEdicionesDAO extends baseDAO {
 				+ "recetaIndexOffline ,"
 				+ "customDomain,"
 				+ "imagePath ) "
-				+ "values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+				+ "values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
 		stmt.setString(1,tipoEdicion.getNombre());
 		stmt.setString(2,tipoEdicion.getDescripcion());
 		stmt.setString(3,tipoEdicion.getBaseURL());
 		stmt.setString(4,tipoEdicion.getProyecto());
 		stmt.setString(5,tipoEdicion.getTipoPublicacion());
+		stmt.setString(6,tipoEdicion.getLanguage());
 
-		stmt.setString(6,tipoEdicion.getNoticiasIndex());
-		stmt.setString(7, tipoEdicion.getImagenesIndex());
-		stmt.setString(8, tipoEdicion.getVideosIndex());
-		stmt.setString(9, tipoEdicion.getAudiosIndex());
+		stmt.setString(7,tipoEdicion.getNoticiasIndex());
+		stmt.setString(8, tipoEdicion.getImagenesIndex());
+		stmt.setString(9, tipoEdicion.getVideosIndex());
+		stmt.setString(10, tipoEdicion.getAudiosIndex());
 
-		stmt.setString(10, tipoEdicion.getEncuestasIndex());
-		stmt.setString(11, tipoEdicion.getTwitterFeedIndex());
+		stmt.setString(11, tipoEdicion.getEncuestasIndex());
+		stmt.setString(12, tipoEdicion.getTwitterFeedIndex());
 
-		stmt.setString(12,tipoEdicion.getNoticiasIndexOffline());
-		stmt.setString(13, tipoEdicion.getImagenesIndexOffline());
-		stmt.setString(14, tipoEdicion.getVideosIndexOffline());
-		stmt.setString(15, tipoEdicion.getAudiosIndexOffline());
+		stmt.setString(13,tipoEdicion.getNoticiasIndexOffline());
+		stmt.setString(14, tipoEdicion.getImagenesIndexOffline());
+		stmt.setString(15, tipoEdicion.getVideosIndexOffline());
+		stmt.setString(16, tipoEdicion.getAudiosIndexOffline());
 
-		stmt.setString(16, tipoEdicion.getEncuestasIndexOffline());
-		stmt.setString(17, tipoEdicion.getTwitterFeedIndexOffline());
+		stmt.setString(17, tipoEdicion.getEncuestasIndexOffline());
+		stmt.setString(18, tipoEdicion.getTwitterFeedIndexOffline());
 
-		stmt.setString(18, tipoEdicion.getVideoYoutubeDefaultVFSPath());
-		stmt.setString(19, tipoEdicion.getVideoEmbeddedDefaultVFSPath());
+		stmt.setString(19, tipoEdicion.getVideoYoutubeDefaultVFSPath());
+		stmt.setString(20, tipoEdicion.getVideoEmbeddedDefaultVFSPath());
 
-		stmt.setString(20, tipoEdicion.getEventosIndex());
-		stmt.setString(21, tipoEdicion.getEncuestasIndexOffline());
+		stmt.setString(21, tipoEdicion.getEventosIndex());
+		stmt.setString(22, tipoEdicion.getEncuestasIndexOffline());
 		
-		stmt.setString(22, tipoEdicion.getTriviasIndex());
-		stmt.setString(23, tipoEdicion.getTriviasIndexOffline());
+		stmt.setString(23, tipoEdicion.getTriviasIndex());
+		stmt.setString(24, tipoEdicion.getTriviasIndexOffline());
 
-		stmt.setString(24, tipoEdicion.getRecetaIndexOnline());
-		stmt.setString(25, tipoEdicion.getRecetaIndexOffline());
+		stmt.setString(25, tipoEdicion.getRecetaIndexOnline());
+		stmt.setString(26, tipoEdicion.getRecetaIndexOffline());
 
-		stmt.setString(26, tipoEdicion.getCustomDomain());
-		stmt.setString(27, tipoEdicion.getImagePath());
+		stmt.setString(27, tipoEdicion.getCustomDomain());
+		stmt.setString(28, tipoEdicion.getImagePath());
 		
 		stmt.executeUpdate();
 
@@ -839,6 +853,7 @@ public class TipoEdicionesDAO extends baseDAO {
 					+ "url, "
 					+ "proyecto, "
 					+ "tipoPublicacion, "
+					+ "language, "
 					+ "edicionActiva, "
 					+ "noticiasIndex, "
 					+ "imagenesIndex, "

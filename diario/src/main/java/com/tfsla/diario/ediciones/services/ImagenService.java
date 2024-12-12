@@ -26,8 +26,12 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
 import javax.swing.ImageIcon;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.net.PrintCommandListener;
 import org.apache.commons.net.ftp.FTPClient;
@@ -53,6 +57,7 @@ import org.opencms.security.CmsSecurityException;
 import org.opencms.util.CmsFileUtil;
 
 import com.tfsla.diario.ediciones.model.TipoEdicion;
+import com.tfsla.utils.CmsObjectUtils;
 import com.tfsla.utils.CmsResourceUtils;
 
 public class ImagenService extends UploadService {
@@ -65,8 +70,6 @@ public class ImagenService extends UploadService {
 	private String defaultAspectRatio = "";
 	private String predefinedSizes = "";
 	private String defaultPredefinedSize = "";
-	private String siteName = "";
-	private String publication = "";
 	private int maxUploadWidth = 0;
 	private int maxUploadHeight = 0;
 
@@ -627,6 +630,155 @@ public class ImagenService extends UploadService {
 		}
 		
 		return;
+	}
+
+	@Override
+	public JSONObject callbackUpload(JSONObject data) {
+		
+		JSONObject response = new JSONObject();
+		
+		// TODO Auto-generated method stub
+		String urlImage = data.getString("vfsurl");
+		String site = data.getString("site");
+		String user = data.getString("user");
+		String publication = data.getString("publication");
+		
+		response.put("vfsurl", urlImage);
+		response.put("site",site);
+		response.put("user",user);
+		response.put("publication",publication);
+		
+		CmsObject cmsObjectClone = CmsObjectUtils.getClone(cmsObject);
+		try {
+			cmsObjectClone.loginUser(user);
+			cmsObjectClone.getRequestContext().setSiteRoot(site);
+			cmsObjectClone.getRequestContext().setCurrentProject(cmsObject.readProject("Offline"));
+			
+			cmsObjectClone.lockResource(urlImage);
+			CmsResource res = cmsObjectClone.readResource(urlImage);
+			
+			res.setType(CmsResourceTypeExternalImage.getStaticTypeId());
+			
+			
+			
+			cmsObjectClone.writeResource(res);
+			
+			//Punto focal
+			double x = data.getJSONObject("focalPoint").getDouble("x");
+			double y = data.getJSONObject("focalPoint").getDouble("y");
+			String puntoFocal = "fpx:" + Math.round(x) + ",fpy:" + Math.round(y);
+			cmsObjectClone.writePropertyObject(urlImage, new CmsProperty("image.focalPoint",puntoFocal, null));
+
+			response.put("image.focalPoint",puntoFocal);
+
+			CmsProperty propimg;
+			
+			//description & title
+			if (data.get("description")!=null && data.getString("description").trim().length()>0) {
+				String description = data.getString("description").trim();
+				propimg =  new CmsProperty("Description", null,description);
+				cmsObjectClone.writePropertyObject(urlImage,propimg);
+				
+				propimg =  new CmsProperty("Title", null,description);
+				cmsObjectClone.writePropertyObject(urlImage,propimg);
+			
+				response.put("description",description);
+			}
+			
+			
+			// Author
+			if (data.get("author")!=null && data.getString("author").trim().length()>0) {
+				String author = data.getString("author").trim();
+				propimg =  new CmsProperty("Author", null,author);
+				cmsObjectClone.writePropertyObject(urlImage,propimg);
+				
+				response.put("author",author);
+			}
+			
+			String thumbnail = data.getString("thumbnail");
+			propimg =  new CmsProperty("thumbnail", null,thumbnail);
+			cmsObjectClone.writePropertyObject(urlImage,propimg);
+			
+			response.put("thumbnail",thumbnail);
+			
+			String width = data.getString("width");
+			propimg =  new CmsProperty("image.size.width", null,width);
+			cmsObjectClone.writePropertyObject(urlImage,propimg);
+			
+			String height = data.getString("height");
+			propimg =  new CmsProperty("image.size", null,"w"+width+",h:"+height);
+			cmsObjectClone.writePropertyObject(urlImage,propimg);
+			
+
+			propimg =  new CmsProperty("image.size.total", null,"" + (Integer.parseInt(width)*Integer.parseInt(height)));
+			cmsObjectClone.writePropertyObject(urlImage,propimg);
+			
+			response.put("width",width);
+			response.put("height",height);
+
+			/*
+			Faltaria guardar el tamaño en bytes de la imagen ---> "size": 4254266,
+		    */
+			
+			if (data.getJSONArray("moderation").size()>0) {
+				JSONArray moderationJs = data.getJSONArray("moderation");
+				String moderation = moderationJs.getString(0);
+				for (int j=1; j<moderationJs.size();j++) {
+					moderation += "," +  moderationJs.getString(j);
+				}
+				propimg =  new CmsProperty("UnsafeLabels", null,moderation);
+				cmsObjectClone.writePropertyObject(urlImage,propimg);
+				
+				
+				response.put("UnsafeLabels",moderation);
+			}
+			
+			String tags = "";
+			
+			if (data.get("metadataKeywords")!=null) {
+				String metaKeyword = data.getString("metadataKeywords");
+				metaKeyword = StringUtils.join(metaKeyword.split("\\|"), ", ");
+				metaKeyword = StringUtils.join(metaKeyword.split(";"), ", ");
+				
+				if (metaKeyword.length()>0)
+					tags += metaKeyword;
+			}
+			
+			if (data.getJSONArray("tags").size()>0) {
+				JSONArray tagsJs = data.getJSONArray("tags");
+				String tagsReck = tagsJs.getString(0);
+				for (int j=1; j<tagsJs.size();j++) {
+					tagsReck += "," +  tagsJs.getString(j);
+				}
+				
+				tags += (tags.length()>0 ? ",": "") + tagsReck;
+			}
+			
+			
+			if (data.getJSONArray("celebrities").size()>0) {
+				JSONArray celebritiesJs = data.getJSONArray("celebrities");
+				String celebrities = celebritiesJs.getString(0);
+				for (int j=1; j<celebritiesJs.size();j++) {
+					celebrities += "," +  celebritiesJs.getString(j);
+				}
+				
+				tags += (tags.length()>0 ? ",": "") + celebrities;
+				
+			}
+			
+			if (tags.length()>0) {
+				propimg =  new CmsProperty("Keywords", null,tags);
+				cmsObjectClone.writePropertyObject(urlImage,propimg);
+				
+				response.put("Keywords",tags);
+			}
+			
+			cmsObjectClone.unlockResource(urlImage);
+		} catch (CmsException e) {
+			LOG.error("Error al recibir callback de alta de imagen",e);
+		}
+		
+		return response;
 	}
 	
 	

@@ -30,6 +30,8 @@ import com.tfsla.diario.videoConverter.VideoInfo;
 import com.tfsla.diario.videoConverter.VideoSize;
 import com.tfsla.utils.CmsResourceUtils;
 
+import net.sf.json.JSONObject;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -459,6 +461,12 @@ public class AudiosService extends UploadService {
 			LOG.error("Error al intentar subir el archivo a " + ftpServer,e);
 			throw e;
 		}
+	}
+
+	@Override
+	public JSONObject callbackUpload(JSONObject data) {
+		// TODO Falta implementar
+		throw new RuntimeException("Metodo no implementado!");
 	}
 	
 }

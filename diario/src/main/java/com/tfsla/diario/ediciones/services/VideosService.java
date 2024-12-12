@@ -1704,4 +1704,10 @@ public Object getYoutubeAPIData(String youtubeId){
 	        
     }
 
+	@Override
+	public JSONObject callbackUpload(JSONObject data) {
+		// TODO Falta implementar
+		throw new RuntimeException("Metodo no implementado!");
+	}
+
 }

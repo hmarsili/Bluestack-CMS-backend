@@ -11,6 +11,7 @@ public class TipoEdicion {
 	int edicionActiva;
 	boolean online;
 	String imagePath;
+	String language;
 	
 	//TODO:Agregar en el service la creacion - si no existen - de las carpetas
 	//TODO: Agregar en news-tags que use los indices correspondientes.
@@ -359,5 +360,13 @@ public String getRecetaIndexOnline() {
 
 	public void setTriviasIndex(String triviasIndex) {
 		this.triviasIndex = triviasIndex;
+	}
+
+	public String getLanguage() {
+		return language;
+	}
+
+	public void setLanguage(String language) {
+		this.language = language;
 	}
 }

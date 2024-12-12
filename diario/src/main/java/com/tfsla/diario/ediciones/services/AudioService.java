@@ -10,6 +10,8 @@ import org.opencms.main.OpenCms;
 
 import com.tfsla.diario.ediciones.model.TipoEdicion;
 
+import net.sf.json.JSONObject;
+
 public class AudioService extends UploadService {
 
 	int folderType = -1;
@@ -67,5 +69,12 @@ public class AudioService extends UploadService {
 	@Override
 	protected String getModuleName() {
 		return "audioUpload";
+	}
+
+	@Override
+	public JSONObject callbackUpload(JSONObject data) {
+		// TODO Falta implementar
+		throw new RuntimeException("Metodo no implementado!");
+		
 	}
 }

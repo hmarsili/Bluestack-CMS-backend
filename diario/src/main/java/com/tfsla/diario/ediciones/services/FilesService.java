@@ -12,6 +12,8 @@ import org.opencms.main.OpenCms;
 
 import com.tfsla.diario.ediciones.model.TipoEdicion;
 
+import net.sf.json.JSONObject;
+
 public class FilesService extends UploadService {
 
 	private static final Log LOG = CmsLog.getLog(FilesService.class);
@@ -75,5 +77,11 @@ public class FilesService extends UploadService {
 	@Override
 	protected String getModuleName() {
 		return "fileUpload";
+	}
+
+	@Override
+	public JSONObject callbackUpload(JSONObject data) {
+		// TODO Falta implementar
+		throw new RuntimeException("Metodo no implementado!");
 	}
 }

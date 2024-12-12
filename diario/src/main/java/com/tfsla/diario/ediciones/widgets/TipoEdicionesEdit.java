@@ -266,6 +266,8 @@ public class TipoEdicionesEdit extends CmsWidgetDialog {
 		addWidget(newInput("customDomain","Dominio personalizado"));
 		
 		addWidget(newInput("imagePath","Imagen personalizado"));
+		
+		addWidget(newInput("language","Idioma de la publicacion"));
 
 	}
 
