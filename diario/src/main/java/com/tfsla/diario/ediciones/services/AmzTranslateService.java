@@ -1,10 +1,13 @@
 package com.tfsla.diario.ediciones.services;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
@@ -97,8 +100,7 @@ public class AmzTranslateService {
 		this.cmsObject = cmsObject;
 	}
 	
-	public String rewriteNews(String newsPath, String prompt) {
-		
+	public String rewriteNews(String newsPath, TipoEdicion pubDestino, String prompt) throws Exception {
 		TipoEdicionBaseService tService = new TipoEdicionBaseService();
 		TipoEdicion tEdicion = null;
 		try {
@@ -106,8 +108,15 @@ public class AmzTranslateService {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			LOG.error("Error al intentar obtener la publicacion de la noticia " + newsPath,e);
-			return null;
+			throw new Exception("Error al intentar obtener la publicacion de la noticia " + newsPath,e); 
+			
 		}
+		
+		if (!tEdicion.getLanguage().equals(pubDestino.getLanguage())) {
+			LOG.error("No se puede reescribir una noticia en un idioma diferente: " + newsPath);
+			throw new Exception("No se puede reescribir una noticia en un idioma diferente: " + newsPath); 
+		}
+		
 		
 		CmsFile file;
 		I_CmsXmlDocument fileContent;
@@ -116,7 +125,8 @@ public class AmzTranslateService {
 			fileContent = CmsXmlContentFactory.unmarshal(this.cmsObject, file);
 		} catch (CmsException e) {
 			LOG.error("Error al obtener la noticia " + newsPath,e);
-			return null;
+			throw new Exception("Error al obtener la noticia " + newsPath,e); 
+			
 		}
 		
 		JSONObject content = new JSONObject();
@@ -124,7 +134,7 @@ public class AmzTranslateService {
 			extractFieldsToTranslateFromNews(newsPath, content, fileContent);
 		} catch (CmsXmlException e) {
 			LOG.error("Error al obtener el contenido de la noticia " + newsPath,e);
-			return null;
+			throw new Exception("Error al obtener el contenido de la noticia " + newsPath,e); 
 		}
     	
     	//LOG.error("imprimiendo contenido extraido de la noticia");
@@ -206,7 +216,7 @@ public class AmzTranslateService {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			LOG.error("Error al intentar la reescritura de la noticia " + newsPath,e);
-			return null;
+			throw new Exception("Error al intentar la reescritura de la noticia " + newsPath,e); 
 		}
     	
     	//JSONObject jsonResponse = translateContent(newsPath, pubDestino, tEdicion, content);
@@ -217,30 +227,31 @@ public class AmzTranslateService {
 		attrName = "title";
 		replaceAttributes(content, path, attrName);
     	
-    	LOG.error(content);
+    	LOG.debug(content);
 		
 		String newsType;
 		try {
 			newsType = this.cmsObject.readPropertyObject(file, "newsType", true).getValue();
 		} catch (CmsException e) {
 			LOG.error("Error al obtener el tipo de noticia de " + newsPath,e);
-			return null;
+			throw new Exception("Error al obtener el tipo de noticia de " + newsPath,e);
 		}
 		
 		if (newsType==null) {
 			LOG.error("Error al obtener el tipo de noticia de " + newsPath);
-			return null;
+			throw new Exception("Error al obtener el tipo de noticia de " + newsPath);
 		}
 		
 		
-		String fileNameDest = fillDestNews(file, fileContent, content, tEdicion, newsType);
+		String fileNameDest = fillDestNews(file, fileContent, content, pubDestino, newsType);
 		
 		
 		return fileNameDest;
 
 	}
 	
-	public String rewriteAndTranslateNews(String newsPath, TipoEdicion pubDestino, String prompt) {
+	public String rewriteNews(String newsPath, String prompt) throws Exception {
+		
 		TipoEdicionBaseService tService = new TipoEdicionBaseService();
 		TipoEdicion tEdicion = null;
 		try {
@@ -248,19 +259,49 @@ public class AmzTranslateService {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			LOG.error("Error al intentar obtener la publicacion de la noticia " + newsPath,e);
-			return null;
+			throw new Exception("Error al intentar obtener la publicacion de la noticia " + newsPath, e);
+			
+		}
+		
+		return rewriteNews(newsPath, tEdicion, prompt);
+
+	}
+	
+	public String rewriteAndTranslateNews(String newsPath, TipoEdicion pubDestino, String prompt) throws Exception {
+		TipoEdicionBaseService tService = new TipoEdicionBaseService();
+		TipoEdicion tEdicion = null;
+		try {
+			tEdicion = tService.obtenerTipoEdicion(cmsObject, newsPath);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			LOG.error("Error al intentar obtener la publicacion de la noticia " + newsPath,e);
+			throw new Exception("Error al intentar obtener la publicacion de la noticia " + newsPath,e);
 		}
 		
 		if (tEdicion.getLanguage().equals(pubDestino.getLanguage())) {
 			LOG.error("No se puede traducir una noticia en su mismo idioma: " + newsPath);
-			return null;
+			throw new Exception("No se puede traducir una noticia en su mismo idioma: " + newsPath);
 		}
 		
-		if (tEdicion.getLanguage().equals(pubDestino.getLanguage())) {
+		return rewriteAndTranslateNews(newsPath, pubDestino, pubDestino.getLanguage(), prompt);
+    	
+	}
+	
+	public String rewriteAndTranslateNews(String newsPath, TipoEdicion pubDestino, String lang, String prompt) throws Exception {
+		TipoEdicionBaseService tService = new TipoEdicionBaseService();
+		TipoEdicion tEdicion = null;
+		try {
+			tEdicion = tService.obtenerTipoEdicion(cmsObject, newsPath);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			LOG.error("Error al intentar obtener la publicacion de la noticia " + newsPath,e);
+			throw new Exception("Error al intentar obtener la publicacion de la noticia " + newsPath,e);
+		}
+		
+		if (tEdicion.getLanguage().equals(lang)) {
 			LOG.error("No se puede traducir una noticia en su mismo idioma: " + newsPath);
-			return null;
+			throw new Exception("No se puede traducir una noticia en su mismo idioma: " + newsPath);
 		}
-		
 		
 		CmsFile file;
 		I_CmsXmlDocument fileContent;
@@ -269,7 +310,7 @@ public class AmzTranslateService {
 			fileContent = CmsXmlContentFactory.unmarshal(this.cmsObject, file);
 		} catch (CmsException e) {
 			LOG.error("Error al obtener la noticia " + newsPath,e);
-			return null;
+			throw new Exception("Error al obtener la noticia " + newsPath,e);
 		}
 		
 		JSONObject content = new JSONObject();
@@ -277,7 +318,7 @@ public class AmzTranslateService {
 			extractFieldsToTranslateFromNews(newsPath, content, fileContent);
 		} catch (CmsXmlException e) {
 			LOG.error("Error al obtener el contenido de la noticia " + newsPath,e);
-			return null;
+			throw new Exception("Error al obtener el contenido de la noticia " + newsPath,e);
 		}
     	
     	String context = getRewriteContext();
@@ -341,10 +382,10 @@ public class AmzTranslateService {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			LOG.error("Error al intentar la reescritura de la noticia " + newsPath,e);
-			return null;
+			throw new Exception("Error al intentar la reescritura de la noticia " + newsPath,e);
 		}
     	
-    	JSONObject jsonResponse = translateContent(newsPath, pubDestino, tEdicion, content);
+    	JSONObject jsonResponse = translateContent(newsPath, lang, tEdicion, content);
 		
 		String path="cuerpo";
 		String attrName = "alt";
@@ -352,19 +393,19 @@ public class AmzTranslateService {
 		attrName = "title";
 		replaceAttributes(jsonResponse, path, attrName);
     	
-    	LOG.error(jsonResponse);
+    	//LOG.error(jsonResponse);
 		
 		String newsType;
 		try {
 			newsType = this.cmsObject.readPropertyObject(file, "newsType", true).getValue();
 		} catch (CmsException e) {
 			LOG.error("Error al obtener el tipo de noticia de " + newsPath,e);
-			return null;
+			throw new Exception("Error al obtener el tipo de noticia de " + newsPath,e);
 		}
 		
 		if (newsType==null) {
 			LOG.error("Error al obtener el tipo de noticia de " + newsPath);
-			return null;
+			throw new Exception("Error al obtener el tipo de noticia de " + newsPath);
 		}
 		
 		
@@ -375,7 +416,8 @@ public class AmzTranslateService {
     	
 	}
 	
-	public String translateNews(String newsPath, TipoEdicion pubDestino) {
+	
+	public String translateNews(String newsPath, TipoEdicion pubDestino, String lang) throws Exception {
 		
 		TipoEdicionBaseService tService = new TipoEdicionBaseService();
 		TipoEdicion tEdicion = null;
@@ -384,14 +426,8 @@ public class AmzTranslateService {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			LOG.error("Error al intentar obtener la publicacion de la noticia " + newsPath,e);
-			return null;
+			throw new Exception("Error al intentar obtener la publicacion de la noticia " + newsPath,e);
 		}
-		
-		if (tEdicion.getLanguage().equals(pubDestino.getLanguage())) {
-			LOG.error("No se puede traducir una noticia en su mismo idioma: " + newsPath);
-			return null;
-		}
-		
 		
 		CmsFile file;
 		I_CmsXmlDocument fileContent;
@@ -400,7 +436,7 @@ public class AmzTranslateService {
 			fileContent = CmsXmlContentFactory.unmarshal(this.cmsObject, file);
 		} catch (CmsException e) {
 			LOG.error("Error al obtener la noticia " + newsPath,e);
-			return null;
+			throw new Exception("Error al obtener la noticia " + newsPath,e);
 		}
 		
 		JSONObject content = new JSONObject();
@@ -408,10 +444,10 @@ public class AmzTranslateService {
 			extractFieldsToTranslateFromNews(newsPath, content, fileContent);
 		} catch (CmsXmlException e) {
 			LOG.error("Error al obtener el contenido de la noticia " + newsPath,e);
-			return null;
+			throw new Exception("Error al obtener el contenido de la noticia " + newsPath,e);
 		}
     	
-		JSONObject jsonResponse = translateContent(newsPath, pubDestino, tEdicion, content);
+		JSONObject jsonResponse = translateContent(newsPath, lang, tEdicion, content);
 		
 		String path="cuerpo";
 		String attrName = "alt";
@@ -419,19 +455,19 @@ public class AmzTranslateService {
 		attrName = "title";
 		replaceAttributes(jsonResponse, path, attrName);
 		
-		LOG.error(jsonResponse);
+		//LOG.error(jsonResponse);
 		
 		String newsType;
 		try {
 			newsType = this.cmsObject.readPropertyObject(file, "newsType", true).getValue();
 		} catch (CmsException e) {
 			LOG.error("Error al obtener el tipo de noticia de " + newsPath,e);
-			return null;
+			throw new Exception("Error al obtener el tipo de noticia de " + newsPath,e);
 		}
 		
 		if (newsType==null) {
 			LOG.error("Error al obtener el tipo de noticia de " + newsPath);
-			return null;
+			throw new Exception("Error al obtener el tipo de noticia de " + newsPath);
 		}
 		
 		
@@ -441,7 +477,27 @@ public class AmzTranslateService {
 		return fileNameDest;
 	}
 
-	private String fillDestNews(CmsFile file, I_CmsXmlDocument fileContent, JSONObject jsonResponse,TipoEdicion pubDestino, String newsType) {
+	public String translateNews(String newsPath, TipoEdicion pubDestino) throws Exception {
+		
+		TipoEdicionBaseService tService = new TipoEdicionBaseService();
+		TipoEdicion tEdicion = null;
+		try {
+			tEdicion = tService.obtenerTipoEdicion(cmsObject, newsPath);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			LOG.error("Error al intentar obtener la publicacion de la noticia " + newsPath,e);
+			throw new Exception("Error al intentar obtener la publicacion de la noticia " + newsPath,e);
+		}
+		
+		if (tEdicion.getLanguage().equals(pubDestino.getLanguage())) {
+			LOG.error("No se puede traducir una noticia en su mismo idioma: " + newsPath);
+			throw new Exception("No se puede traducir una noticia en su mismo idioma: " + newsPath);
+		}
+		
+		return translateNews(newsPath, pubDestino, pubDestino.getLanguage());
+	}
+
+	private String fillDestNews(CmsFile file, I_CmsXmlDocument fileContent, JSONObject jsonResponse,TipoEdicion pubDestino, String newsType) throws Exception {
 		
 		String fileNameDest = createDestNews(pubDestino, newsType);
 		if (fileNameDest==null)
@@ -692,22 +748,22 @@ public class AmzTranslateService {
 			decodedContent = decodedContent.replaceAll("(?!\\n)[\\p{C}]", "");
 			        
 			fileDest.setContents(decodedContent.getBytes("UTF-8"));
-			LOG.error(decodedContent);
+			//LOG.error(decodedContent);
 			cmsObject.writeFile(fileDest);
 			cmsObject.unlockResource(fileNameDest);
 		}
 		catch (CmsException e) {
 			LOG.error("Error al completar el contenido de la nueva noticia " + fileNameDest ,e );
-			return null;
+			throw new Exception("Error al completar el contenido de la nueva noticia " + fileNameDest ,e );
 		} catch (UnsupportedEncodingException e) {
 			LOG.error("Error al completar el contenido de la nueva noticia " + fileNameDest ,e );
-			return null;
+			throw new Exception("Error al completar el contenido de la nueva noticia " + fileNameDest ,e );
 		}
 		
 		return fileNameDest;
 	}
 
-	private String createDestNews(TipoEdicion pubDestino, String newsType) {
+	private String createDestNews(TipoEdicion pubDestino, String newsType) throws Exception {
 		String fileNameDest;
 		
 		NoticiasService nService = new NoticiasService();
@@ -721,18 +777,18 @@ public class AmzTranslateService {
 			cmsObject.writePropertyObject(fileNameDest, prop);
 			
 		} catch (Exception e) {
-			LOG.error("Error al crear la noticia en la publicacion " + pubDestino.getDescripcion() ,new Exception("Stack trace") );
-			return null;
+			LOG.error("Error al crear la noticia en la publicacion " + pubDestino.getDescripcion() ,e );
+			throw new Exception("Error al crear la noticia en la publicacion " + pubDestino.getDescripcion() ,e );
 		}
 		return fileNameDest;
 	}
 
-	private JSONObject translateContent(String newsPath, TipoEdicion pubDestino, TipoEdicion tEdicion,
-			JSONObject content) {
+	private JSONObject translateContent(String newsPath, String lang, TipoEdicion tEdicion,
+			JSONObject content) throws Exception {
 		JSONObject jsonbody = new JSONObject();
 		JSONObject config = new JSONObject();
 		config.put("origLang",tEdicion.getLanguage());
-		config.put("destLang",pubDestino.getLanguage());
+		config.put("destLang",lang);
 		
 		jsonbody.put("process", config);
 		
@@ -743,10 +799,10 @@ public class AmzTranslateService {
 		String response=null;
 		try {
 			response = callAwsTranslate(jsonbody);
-			LOG.error(response);
+			LOG.debug(response);
 		} catch (Exception e) {
 			LOG.error("Error al intentar traducir la noticia " + newsPath,e);
-			e.printStackTrace();
+			throw new Exception("Error al intentar traducir la noticia " + newsPath,e);
 		}
 		
 		
@@ -810,8 +866,8 @@ public class AmzTranslateService {
 
 	private void replaceAttributes(JSONObject jsonResponse, String path, String attrName) {
 		int idx=1;
-		LOG.error("reemplazando ->" + path + "_" + attrName + "[" + idx + "]");
-		LOG.error("existe? ->" + jsonResponse.has(path + "_" + attrName + "[" + idx + "]"));
+		//LOG.error("reemplazando ->" + path + "_" + attrName + "[" + idx + "]");
+		//LOG.error("existe? ->" + jsonResponse.has(path + "_" + attrName + "[" + idx + "]"));
 		int startPos = 0;
 		while (jsonResponse.has(path + "_" + attrName + "[" + idx + "]")) {
 			String value = jsonResponse.getString(path);
@@ -823,7 +879,7 @@ public class AmzTranslateService {
 				value = value.substring(0, startPos) + jsonResponse.getString(path + "_" + attrName + "[" + idx + "]") + value.substring(endPos);
 			}
 			
-			LOG.error("value ->" + value);
+			//LOG.error("value ->" + value);
 			jsonResponse.put(path, value);
 			idx++;
 		}
@@ -1141,8 +1197,6 @@ public class AmzTranslateService {
 		}
 	}
 
-	
-	
     protected int getElementCountWithValue(CmsObject cms, String key, String controlKey, I_CmsXmlDocument content)
 	{
 		Locale locale = cms.getRequestContext().getLocale();
@@ -1167,7 +1221,6 @@ public class AmzTranslateService {
 		return total - blank;
 	}
 
-	
 	protected String getElementValue(CmsObject cms, String elementName, I_CmsXmlDocument content, Locale locale) {    
 		try {
 	    	String value = content.getStringValue(cms, elementName, locale);
@@ -1183,7 +1236,6 @@ public class AmzTranslateService {
 	
 		return "";
 	}
-	
 		
 	protected String callAwsTranslate(JSONObject jsonbody) throws Exception
 	{
@@ -1192,24 +1244,39 @@ public class AmzTranslateService {
 		// LOG.debug("informamos a AWS " + sBody + " endpoint "+ endpoint);
 		StringRequestEntity requestEntity = new StringRequestEntity(
 				sBody,
-				"application/json",
-				"UTF-8");
+				"application/json; charset=utf-8",
+				"utf-8");
 
 		PostMethod postMethod = new PostMethod(getTranslateEndpoint());
 		postMethod.setRequestEntity(requestEntity);
-
+		postMethod.addRequestHeader(new Header("Accept", "application/json"));
+		postMethod.addRequestHeader(new Header("Accept-Charset", "utf-8"));
+		
 		HttpClient httpClient = new HttpClient();
 		int statusCode = httpClient.executeMethod(postMethod);
 		LOG.debug("volvemos da AWS " + statusCode);
 		if (statusCode == HttpStatus.SC_OK) {
 			LOG.debug(postMethod.getResponseBodyAsString());
-			return postMethod.getResponseBodyAsString();
+			
+			ByteBuffer buffer = StandardCharsets.ISO_8859_1.encode(postMethod.getResponseBodyAsString()); 
+
+			String utf8EncodedString = StandardCharsets.UTF_8.decode(buffer).toString();
+			LOG.debug("utf8:");
+			LOG.debug(utf8EncodedString);
+			
+			return utf8EncodedString;
+			//buffer = StandardCharsets.UTF_8.encode(postMethod.getResponseBodyAsString());
+			//LOG.debug("ISO_8859_1:");
+			//LOG.debug( StandardCharsets.ISO_8859_1.decode(buffer).toString());
+			
+			//return postMethod.getResponseBodyAsString();
 		}
 		else {
 			LOG.error("Error al intentar traducir. Error code" + statusCode);
 			LOG.error("Error response: " + postMethod.getResponseBodyAsString());
+			throw new Exception("Error al intentar traducir. Error code" + statusCode);
 		}
-		return null;
+		
 	}
 	
 	private CmsFile getCmsFile(String resourceName) throws CmsException {
@@ -1225,10 +1292,9 @@ public class AmzTranslateService {
     	
     }
 
-	
 	public void extractContent(JSONObject ContentExtracted, I_CmsXmlDocument fileContent, String path) throws CmsXmlException {
 
-		LOG.error("Extrayendo contenido del campo " + path);
+		//LOG.debug("Extrayendo contenido del campo " + path);
 
 		//I_CmsXmlDocument fileContent = CmsXmlContentFactory.unmarshal(this.cmsObject, file);
 		Locale locale = this.cmsObject.getRequestContext().getLocale();

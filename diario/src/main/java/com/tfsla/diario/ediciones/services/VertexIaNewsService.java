@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
 import org.opencms.configuration.CmsMedios;
 import org.opencms.file.CmsObject;
+import org.opencms.main.CmsLog;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.ServiceAccountCredentialsUtils;
@@ -47,6 +49,7 @@ public class VertexIaNewsService {
 	protected String basePrompt = null;
 	
 
+	private static final Log LOG = CmsLog.getLog(VertexIaNewsService.class);
 	public VertexIaNewsService(String site, String publication) {
 		this.siteName = site;
 		this.publication = publication;
@@ -109,6 +112,11 @@ public class VertexIaNewsService {
 			  responseText += ResponseHandler.getText(responsePart).replaceAll("```json", "").replaceAll("```", "");
 			}
 		
+		  LOG.error("respuesta de VertexIaNewsService: ");
+		  LOG.error(responseText);
+		  
+		  LOG.error("--------------------------------------------------------");
+		  
 		  String[] parte = responseText.split("\\n");
 		  
 		  JsonObject jsonObject = new JsonObject();
@@ -116,7 +124,7 @@ public class VertexIaNewsService {
 		  int campo = 0;
 		  String cuerpo="";
 		  for (String p : parte) {
-			  p = p.replaceFirst("[tT]itulo:\\s", "").replaceFirst("[Bb]ajada:\\s", "").replaceFirst("[Cc]uerpo:", "");
+			  p = p.replaceFirst("\\**[tT][ií]tulo:\\**\\s", "").replaceFirst("\\**[Bb]ajada:\\**\\s", "").replaceFirst("\\**[Cc]uerpo:\\**[\\s\\n]", "");
 			  
 			  if (campo<2 && p.replaceAll("\\n", "").trim().length()==0)
 				  continue;
