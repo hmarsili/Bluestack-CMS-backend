@@ -242,8 +242,7 @@ public class AmzTranslateService {
 			throw new Exception("Error al obtener el tipo de noticia de " + newsPath);
 		}
 		
-		
-		String fileNameDest = fillDestNews(file, fileContent, content, pubDestino, newsType);
+		String fileNameDest = fillDestNews(file, fileContent, content, pubDestino, newsType, "rewrite");
 		
 		
 		return fileNameDest;
@@ -409,7 +408,7 @@ public class AmzTranslateService {
 		}
 		
 		
-		String fileNameDest = fillDestNews(file, fileContent, jsonResponse, pubDestino, newsType);
+		String fileNameDest = fillDestNews(file, fileContent, jsonResponse, pubDestino, newsType, "rewrite&translate");
 		
 		
 		return fileNameDest;
@@ -471,7 +470,7 @@ public class AmzTranslateService {
 		}
 		
 		
-		String fileNameDest = fillDestNews(file, fileContent, jsonResponse, pubDestino, newsType);
+		String fileNameDest = fillDestNews(file, fileContent, jsonResponse, pubDestino, newsType, "translate");
 		
 		
 		return fileNameDest;
@@ -497,9 +496,9 @@ public class AmzTranslateService {
 		return translateNews(newsPath, pubDestino, pubDestino.getLanguage());
 	}
 
-	private String fillDestNews(CmsFile file, I_CmsXmlDocument fileContent, JSONObject jsonResponse,TipoEdicion pubDestino, String newsType) throws Exception {
+	private String fillDestNews(CmsFile file, I_CmsXmlDocument fileContent, JSONObject jsonResponse,TipoEdicion pubDestino, String newsType, String proccesCreation) throws Exception {
 		
-		String fileNameDest = createDestNews(pubDestino, newsType);
+		String fileNameDest = createDestNews(pubDestino, newsType, proccesCreation, cmsObject.getSitePath(file));
 		if (fileNameDest==null)
 			return null;
 		
@@ -763,7 +762,7 @@ public class AmzTranslateService {
 		return fileNameDest;
 	}
 
-	private String createDestNews(TipoEdicion pubDestino, String newsType) throws Exception {
+	private String createDestNews(TipoEdicion pubDestino, String newsType, String processCreation, String originalNewsPath) throws Exception {
 		String fileNameDest;
 		
 		NoticiasService nService = new NoticiasService();
@@ -773,7 +772,10 @@ public class AmzTranslateService {
 			CmsProperty prop = new CmsProperty("adminVersion", null, "v8", true);
 			cmsObject.writePropertyObject(fileNameDest, prop);
 
-			prop = new CmsProperty("newsProcessCreation", null, "Translate", true);
+			prop = new CmsProperty("newsProcessCreation", null, processCreation, true);
+			cmsObject.writePropertyObject(fileNameDest, prop);
+			
+			prop = new CmsProperty("originalNewsPath", null, originalNewsPath, true);
 			cmsObject.writePropertyObject(fileNameDest, prop);
 			
 		} catch (Exception e) {
@@ -890,9 +892,11 @@ public class AmzTranslateService {
 		
 		newContent.getValue("noticiaListaIntegrada", Locale.ENGLISH).setStringValue(cms, content.getValue("noticiaListaIntegrada", Locale.ENGLISH).getStringValue(cms));
 		
-		int noticiaListaCount = getElementCountWithValue(cms, "noticiaLista",
-				 "titulo",
-					 content);
+		int noticiaListaCount = content.getIndexCount("noticiaLista", Locale.ENGLISH);
+		
+		//int noticiaListaCount = getElementCountWithValue(cms, "noticiaLista",
+		//		 "titulo",
+		//			 content);
 
 		for (int j=1;j<=noticiaListaCount;j++)
 		{
@@ -1307,7 +1311,8 @@ public class AmzTranslateService {
 				
 				pathNum = path.replaceFirst("\\[x\\]", "[" + i + "]");
 				
-				lastPos = (pathNum.indexOf("/")>-1 ? pathNum.indexOf("/") : pathNum.length()-1);
+				int lenIdx = ("" + i).length(); 
+				lastPos = (path.indexOf("x\\]/")>-1 ? path.indexOf("x\\]/")+lenIdx+1 : pathNum.length()-1);
 				
 				extractContent(ContentExtracted, fileContent, pathNum);
 				i++;
