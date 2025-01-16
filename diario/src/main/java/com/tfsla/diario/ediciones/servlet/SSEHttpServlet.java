@@ -47,6 +47,7 @@ public class SSEHttpServlet extends HttpServlet{
 			
 			service.subscribe(userName);
 			
+			welcomeMsg(res);
 			sendEvents(res, service);
 		}
 		catch (CmsException e) {
@@ -56,6 +57,20 @@ public class SSEHttpServlet extends HttpServlet{
 		
 	}
 
+	private void welcomeMsg(HttpServletResponse res) {
+		PrintWriter print = null;
+		try {
+			print = res.getWriter();
+			print.print("event: init\n");
+			print.print("data: " + userName + " welcome to sse service\n");
+			print.print("\n");
+			res.flushBuffer();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	private void sendEvents(HttpServletResponse res, SSEService service) {
 		PrintWriter print = null;
 		List<ServerEvent> events = null;
@@ -73,6 +88,7 @@ public class SSEHttpServlet extends HttpServlet{
 					it.remove();
 				}
 				
+				res.flushBuffer();
 				Random randGen = new Random();
 				Thread.sleep(500 + randGen.nextInt(0, 300));
 			
@@ -108,7 +124,7 @@ public class SSEHttpServlet extends HttpServlet{
 		Cookie[] cookies = req.getCookies();
 		for (int j=0; j<cookies.length; j++) {
 			Cookie cookie = cookies[j];
-			
+			//System.out.println(cookie.getName());
 			if (cookie.getName().equals("browserId"))
 				return cookie.getValue();	
 		}
