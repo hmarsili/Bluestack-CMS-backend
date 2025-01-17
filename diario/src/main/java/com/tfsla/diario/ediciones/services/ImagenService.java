@@ -774,8 +774,23 @@ public class ImagenService extends UploadService {
 			}
 			
 			cmsObjectClone.unlockResource(urlImage);
+			
+			
+			String msg = "{ url: " + urlImage + ", " +
+				", status: ok" +
+				", site: " + site +
+				", publication: " + publication + " }";
+			
+			SSEService.getInstance().addEvent("imageUpload", msg, user);
 		} catch (CmsException e) {
 			LOG.error("Error al recibir callback de alta de imagen",e);
+			
+			String msg = "{ url: " + urlImage + ", " +
+					", status: error" +
+					", site: " + site +
+					", publication: " + publication + " }";
+				
+			SSEService.getInstance().addEvent("imageUpload", msg, user);
 		}
 		
 		return response;
