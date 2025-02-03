@@ -443,6 +443,8 @@ public abstract class UploadService {
 
 	}
 	
+	protected abstract void addPreloadParameters(Map<String, String> metadata);
+	
 	public preUploadResponse preUploadAmzFile(CmsObject cmsObject, String path, String fileName, Map<String,String> parameters, List properties) throws Exception {
 		fileName = getValidFileName(fileName);
 		fileName = checkFileName(path,fileName);
@@ -451,7 +453,7 @@ public abstract class UploadService {
 		String lang = tEdicion.getLanguage();
 		
 		LOG.debug("Nombre corregido del archivo a subir al s3 de amazon: " + fileName);
-		String subFolderRFSPath = getRFSSubFolderPath(rfsSubFolderFormat, parameters);
+		String subFolderRFSPath = getRFSSubFolderPath(vfsSubFolderFormat, parameters);
 		LOG.debug("subcarpeta: " + subFolderRFSPath);
 
 		String dir = amzDirectory + "/" + subFolderRFSPath;
@@ -484,6 +486,8 @@ public abstract class UploadService {
 			metadata.put("user", cmsObject.getRequestContext().currentUser().getName());
 			metadata.put("publication", publication);
 			metadata.put("lang", lang);
+			addPreloadParameters(metadata);
+			
 			
 			String presignedUrl = createPresignedUrl(amzBucket.replace("/", ""),fullPath,metadata);
 			return new preUploadResponse(presignedUrl,linkName,cmsObject.getRequestContext().getSiteRoot(),cmsObject.getRequestContext().currentUser().getName(),publication,lang);

@@ -59,7 +59,7 @@ public class VideoCodeLoader extends A_DescriptionLoader implements I_CmsEventLi
 		int noticiaType = getNoticiaType();
 		
 		if (event.getType()==I_CmsEventListener.EVENT_BEFORE_RESOURCE_DELETED) {
-			
+
 			CmsObject cmsObject;
 			VideoEmbeddedService videoEmbeddedService = new VideoEmbeddedService();
 			try {

@@ -795,6 +795,12 @@ public class ImagenService extends UploadService {
 		
 		return response;
 	}
+
+	@Override
+	protected void addPreloadParameters(Map<String, String> metadata) {
+		// Sin agregados...
+		
+	}
 	
 	
 }

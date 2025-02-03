@@ -1709,5 +1709,10 @@ public Object getYoutubeAPIData(String youtubeId){
 		// TODO Falta implementar
 		throw new RuntimeException("Metodo no implementado!");
 	}
+	
+	@Override
+	protected void addPreloadParameters(Map<String, String> metadata) {
+		
+	}
 
 }

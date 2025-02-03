@@ -469,4 +469,10 @@ public class AudiosService extends UploadService {
 		throw new RuntimeException("Metodo no implementado!");
 	}
 	
+	@Override
+	protected void addPreloadParameters(Map<String, String> metadata) {
+		// Sin agregados...
+		
+	}
+	
 }

@@ -84,4 +84,10 @@ public class FilesService extends UploadService {
 		// TODO Falta implementar
 		throw new RuntimeException("Metodo no implementado!");
 	}
+
+	@Override
+	protected void addPreloadParameters(Map<String, String> metadata) {
+		// TODO Auto-generated method stub
+		
+	}
 }
