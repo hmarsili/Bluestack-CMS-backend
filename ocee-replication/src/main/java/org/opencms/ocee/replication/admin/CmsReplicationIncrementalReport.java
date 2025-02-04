@@ -1,0 +1,84 @@
+package org.opencms.ocee.replication.admin;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.PageContext;
+import org.opencms.jsp.CmsJspActionElement;
+import org.opencms.ocee.base.CmsOceeManager;
+import org.opencms.ocee.replication.CmsReplicationIncrementalThread;
+import org.opencms.ocee.replication.CmsReplicationManager;
+import org.opencms.report.I_CmsReportThread;
+import org.opencms.util.CmsStringUtil;
+import org.opencms.util.CmsUUID;
+import org.opencms.workplace.CmsWorkplaceSettings;
+import org.opencms.workplace.list.A_CmsListReport;
+
+public class CmsReplicationIncrementalReport extends A_CmsListReport {
+   public static final String PARAM_RESOURCEIDS = "resourceids";
+   public static final String PARAM_SERVERID = "serverid";
+   private String o000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000super;
+   private String Ò000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000new;
+   private String Ó000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000Object;
+
+   public CmsReplicationIncrementalReport(CmsJspActionElement jsp) {
+      super(jsp);
+   }
+
+   public CmsReplicationIncrementalReport(PageContext context, HttpServletRequest req, HttpServletResponse res) {
+      this(new CmsJspActionElement(context, req, res));
+   }
+
+   public String getParamResourceids() {
+      return this.o000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000super;
+   }
+
+   public String getParamServerid() {
+      return this.Ò000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000new;
+   }
+
+   public String getParamServerTitle() {
+      return this.Ó000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000Object;
+   }
+
+   public I_CmsReportThread initializeThread() {
+      return new CmsReplicationIncrementalThread(this.getCms(), this.getParamResourceids(), this.getParamServerid());
+   }
+
+   public void setParamResourceids(String paramResourceids) {
+      this.o000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000super = paramResourceids;
+   }
+
+   public void setParamServerid(String paramServerId) {
+      this.Ò000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000new = paramServerId;
+   }
+
+   public void setParamServerTitle(String paramServerTitle) {
+      this.Ó000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000Object = paramServerTitle;
+   }
+
+   protected void initWorkplaceRequestValues(CmsWorkplaceSettings settings, HttpServletRequest request) {
+      super.initWorkplaceRequestValues(settings, request);
+      if (!CmsOceeManager.getInstance().checkCoreVersion("7.0.5") && ("initial".equals(this.getParamAction()) || this.getParamAction() == null)) {
+         try {
+            this.validateParameters();
+         } catch (Exception var6) {
+            this.setAction(4);
+
+            try {
+               this.actionCloseDialog();
+            } catch (JspException var5) {
+            }
+
+            return;
+         }
+      }
+
+   }
+
+   protected void validateParameters() throws Exception {
+      if (CmsStringUtil.isEmptyOrWhitespaceOnly(this.getParamServerid()) || CmsReplicationManager.getInstance().getConfiguration().getReplicationServer(new CmsUUID(this.getParamServerid())) == null) {
+         throw new Exception();
+      }
+   }
+}

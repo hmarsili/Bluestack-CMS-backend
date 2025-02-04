@@ -1,0 +1,85 @@
+package org.opencms.ocee.replication.admin;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.PageContext;
+import org.opencms.jsp.CmsJspActionElement;
+import org.opencms.ocee.base.CmsOceeManager;
+import org.opencms.ocee.replication.CmsReplicationManager;
+import org.opencms.ocee.replication.CmsReplicationThread;
+import org.opencms.report.I_CmsReportThread;
+import org.opencms.util.CmsStringUtil;
+import org.opencms.util.CmsUUID;
+import org.opencms.workplace.CmsWorkplaceSettings;
+import org.opencms.workplace.list.A_CmsListReport;
+
+public class CmsReplicationReport extends A_CmsListReport {
+   public static final String PARAM_HANDLERS = "handlers";
+   public static final String PARAM_RESOURCES = "resources";
+   public static final String PARAM_SERVERS = "servers";
+   private String o000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000super;
+   private String Ó000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000Object;
+   private String Ò000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000new;
+
+   public CmsReplicationReport(CmsJspActionElement jsp) {
+      super(jsp);
+   }
+
+   public CmsReplicationReport(PageContext context, HttpServletRequest req, HttpServletResponse res) {
+      this(new CmsJspActionElement(context, req, res));
+   }
+
+   public String getParamHandlers() {
+      return this.o000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000super;
+   }
+
+   public String getParamResources() {
+      return this.Ó000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000Object;
+   }
+
+   public String getParamServers() {
+      return this.Ò000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000new;
+   }
+
+   public I_CmsReportThread initializeThread() {
+      return new CmsReplicationThread(this.getCms(), this.getParamHandlers(), this.getParamServers(), this.getParamResources());
+   }
+
+   public void setParamHandlers(String paramModes) {
+      this.o000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000super = paramModes;
+   }
+
+   public void setParamResources(String paramResources) {
+      this.Ó000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000Object = paramResources;
+   }
+
+   public void setParamServers(String paramServers) {
+      this.Ò000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000new = paramServers;
+   }
+
+   protected void initWorkplaceRequestValues(CmsWorkplaceSettings settings, HttpServletRequest request) {
+      super.initWorkplaceRequestValues(settings, request);
+      if (!CmsOceeManager.getInstance().checkCoreVersion("7.0.5") && ("initial".equals(this.getParamAction()) || this.getParamAction() == null)) {
+         try {
+            this.validateParameters();
+         } catch (Exception var6) {
+            this.setAction(4);
+
+            try {
+               this.actionCloseDialog();
+            } catch (JspException var5) {
+            }
+
+            return;
+         }
+      }
+
+   }
+
+   protected void validateParameters() throws Exception {
+      if (CmsStringUtil.isEmptyOrWhitespaceOnly(this.getParamServers()) || CmsReplicationManager.getInstance().getConfiguration().getReplicationServer(new CmsUUID(this.getParamServers())) == null) {
+         throw new Exception();
+      }
+   }
+}

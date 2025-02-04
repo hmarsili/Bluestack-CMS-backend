@@ -1,0 +1,279 @@
+<!-- 
+# The root configuration node is called <opencms> for all OpenCms configurations.
+-->
+<!ELEMENT opencms (replication)>
+
+<!--
+# <replication> configuration:
+# The configuration of the OpenCms replication is done here.
+-->
+<!ELEMENT replication (managersgroup?,publishhistoryid?,handlers,servers,replicationsources,exportfolder?,replicationorder?,userreplications?)>
+
+<!--
+# The replication managers group.
+-->
+<!ELEMENT managersgroup (#PCDATA)>
+
+<!--
+# The publish history id to use for replication. only used in manual mode.
+-->
+<!ELEMENT publishhistoryid (#PCDATA)>
+
+<!--
+# The replication configuration contains a handler node for each handler.
+-->
+<!ELEMENT handlers (handler+)>
+
+<!--
+# The handler configuration.
+-->
+<!ELEMENT handler (class, stats?)>
+
+<!--
+# The handler class name.
+-->
+<!ELEMENT class (#PCDATA)>
+
+<!--
+# The statistical information.
+-->
+<!ELEMENT stats (date, duration, username, details?)>
+
+<!--
+# The date/time of replication.
+-->
+<!ELEMENT date (#PCDATA)>
+
+<!--
+# The duration of replication.
+-->
+<!ELEMENT duration (#PCDATA)>
+
+<!--
+# The username of replication.
+-->
+<!ELEMENT username (#PCDATA)>
+
+<!--
+# The list of statistical detail information.
+-->
+<!ELEMENT details (detail*)>
+
+<!--
+# The statistical detail information.
+-->
+<!ELEMENT detail (#PCDATA)>
+<!ATTLIST detail key CDATA #REQUIRED>
+
+<!--
+# The replication configuration contains a server node for each server.
+-->
+<!ELEMENT servers (server+)>
+
+<!--
+# The replication configuration contains a replicationsource for each
+# list of VFS resources to be replicated.
+-->
+<!ELEMENT replicationsources (replicationsource+)>
+
+<!--
+# The server configuration.
+-->
+<!ELEMENT server (name,description?,serverid?,poolurl?,origin?,destination?,vfsreplicationnotification?,drivers?,sources)>
+
+<!--
+# The replication mode for each server.
+-->
+<!ATTLIST server mode (auto|manual) "auto">
+
+<!--
+# Element for a logical name.
+-->
+<!ELEMENT name (#PCDATA)>
+
+<!--
+# Element for a description.
+-->
+<!ELEMENT description (#PCDATA)>
+
+<!--
+# The server id to use for replication. Only used in manual mode.
+-->
+<!ELEMENT serverid (#PCDATA)>
+
+<!--
+# The pool URL (excluding DBCP's pool URL prefix) to get JDBC connections
+# from the JDBC driver manager to write replication data to a remote database.
+-->
+<!ELEMENT poolurl (#PCDATA)>
+
+<!--
+# The server which is the origin for the replication.
+-->
+<!ELEMENT origin (server-name,poolurl)>
+
+<!--
+# The server which is the destination for the replication.
+-->
+<!ELEMENT destination (server-name,poolurl)>
+
+<!--
+# The name of the server.
+-->
+<!ELEMENT server-name (#PCDATA)>
+
+<!--
+# Each server contains a list of (VFS) sources accessed by a logical name.
+-->
+<!ELEMENT sources (source+)>
+
+<!--
+# A source is the logical name of a replication source, which is a list
+# of VFS resources.
+-->
+<!ELEMENT source (#PCDATA)>
+
+<!--
+# Optional interface will be called when a vfs replication is finished 
+# before the PUBLISH_PROJECT event propagation and after it.
+-->
+<!ELEMENT vfsreplicationnotification (class)>
+<!--
+# This element contains the driver configurations for the server. 
+-->
+<!ELEMENT drivers (history, project, user, vfs) >
+
+<!--
+# The VFS driver configuration for the server. 
+-->
+<!ELEMENT vfs EMPTY>
+
+<!--
+# The VFS driver class name .
+-->
+<!ATTLIST vfs class CDATA #REQUIRED>
+
+<!--
+# The class name of the SQL manager for the VFS driver. 
+-->
+<!ATTLIST vfs sqlmanager CDATA #REQUIRED>
+
+
+<!--
+# The user driver configuration for the server. 
+-->
+<!ELEMENT user EMPTY>
+
+<!--
+# The user driver class name. 
+-->
+<!ATTLIST user class CDATA #REQUIRED>
+
+<!--
+# The class name of the SQL manager for the user driver. 
+-->
+<!ATTLIST user sqlmanager CDATA #REQUIRED>
+ 
+ <!-- 
+ # The project driver configuration for the server.
+ -->
+<!ELEMENT project EMPTY>
+
+<!--
+# The project driver class name.
+-->
+<!ATTLIST project class CDATA #REQUIRED>
+
+<!-- 
+# The class name of the SQL manager for the project driver. 
+-->
+<!ATTLIST project sqlmanager CDATA #REQUIRED>
+
+<!--
+# The history driver configuration for the server. 
+-->
+<!ELEMENT history EMPTY>
+
+<!--
+# The history driver class name. 
+-->
+<!ATTLIST history class CDATA #REQUIRED>
+
+<!--
+# The class name of the SQL manager for the history driver. 
+-->
+<!ATTLIST history sqlmanager CDATA #REQUIRED>
+ 
+
+
+
+<!--
+# The replication source configuration.
+-->
+<!ELEMENT replicationsource (name,resources)>
+
+<!--
+# The resources are a list of VFS resources.
+-->
+<!ELEMENT resources (resource+)>
+
+<!--
+# A VFS resource to be replicated, preferably a folder.
+-->
+<!ELEMENT resource (#PCDATA)>
+
+<!--
+# The replication export folder.
+-->
+<!ELEMENT exportfolder (#PCDATA)>
+
+<!--
+# The replication order list of VFS resources.
+-->
+<!ELEMENT replicationorder (resource+)>
+
+<!--
+# A list of user replications to move information back to the workplace server.
+-->
+<!ELEMENT userreplications (synchronization,userreplication+)>
+
+<!--
+# The replication export folder.
+-->
+<!ELEMENT synchronization (#PCDATA)>
+
+<!--
+# The synchronization class used.
+-->
+<!ATTLIST synchronization class CDATA #REQUIRED>
+
+<!--
+# The user replication configuration.
+-->
+<!ELEMENT userreplication (server-name,poolurl,orgunits*,groups*)>
+
+<!--
+# If this configuration should be used to replicate user backwards, 
+# ie. from the replicated server to the workplace server.
+-->
+<!ATTLIST userreplication name CDATA #IMPLIED>
+
+<!--
+# The list of organizational units used for the user replication.
+-->
+<!ELEMENT orgunits (orgunit+)>
+
+<!--
+# The organizational unit for the user replication.
+-->
+<!ELEMENT orgunit (#PCDATA)>
+
+<!--
+# The list of groups used for the user replication.
+-->
+<!ELEMENT groups (group+)>
+
+<!--
+# The group for the user replication.
+-->
+<!ELEMENT group (#PCDATA)>

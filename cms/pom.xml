@@ -12,6 +12,7 @@
   <name>CMS BlueStack Webapp</name>
   <!-- FIXME change it to the project's website -->
   <url>http://www.example.com</url>
+<!--
 	<repositories>
 	  
 		<repository>
@@ -26,7 +27,7 @@
 		  </repository>	
 
 	</repositories>
-
+-->
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>17</maven.compiler.source>
@@ -343,14 +344,14 @@
     </dependency>
 -->
     <dependency>
-      <groupId>Alkacon</groupId>
-      <artifactId>org.opencms.ocee.replication</artifactId>
+      <groupId>blueStack</groupId>
+      <artifactId>ocee-replication</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
     
     <dependency>
-      <groupId>Alkacon</groupId>
-      <artifactId>org.opencms.ocee.transaction</artifactId>
+      <groupId>blueStack</groupId>
+      <artifactId>ocee-transaction</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
    

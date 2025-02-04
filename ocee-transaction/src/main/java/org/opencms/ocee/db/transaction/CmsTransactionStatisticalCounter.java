@@ -1,0 +1,24 @@
+package org.opencms.ocee.db.transaction;
+
+import org.opencms.ocee.base.CmsStatisticalCounter;
+import org.opencms.workplace.CmsDialog;
+
+public class CmsTransactionStatisticalCounter extends CmsStatisticalCounter {
+   private CmsTransactionInstanceType o000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000super;
+
+   public CmsTransactionStatisticalCounter(String name, String group, float position, CmsTransactionInstanceType type) {
+      super(name, group, position);
+      this.o000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000super = type;
+   }
+
+   public String toString(CmsDialog wp) {
+      CmsTransactionManager manager = CmsTransactionManager.getInstance();
+      if (manager == null) {
+         return "";
+      } else {
+         CmsTransactionStatistics stats = CmsTransactionManager.getInstance().getStatistics(this.o000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000super);
+         long total = stats.getCommits() + stats.getRollbacks();
+         return CmsStatisticalCounter.percentageOutput(this.getValue(), total).key(wp.getLocale());
+      }
+   }
+}
