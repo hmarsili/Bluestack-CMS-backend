@@ -322,7 +322,7 @@ public class AmzTranslateService {
     	
     	String context = getRewriteContext();
     	String newsTitle = content.getString("titulo");
-		String newsSubTitleFixed = content.getString("volanta");
+		String newsSubTitleFixed = content.getString("copete");
 		String cuerpo = content.getString("cuerpo");
 	
 		String newsContentFixed = "";
@@ -351,7 +351,7 @@ public class AmzTranslateService {
     		
     		
     		content.put("titulo",responseGenerated.get("titulo").getAsString());
-    		content.put("volanta",responseGenerated.get("bajada").getAsString());
+    		content.put("copete",responseGenerated.get("bajada").getAsString());
     		
     		
     		String newsContentFixedRewrited = "";
@@ -906,16 +906,19 @@ public class AmzTranslateService {
 			if(value==null)
 				newContent.addValue(cms, "noticiaLista", Locale.ENGLISH,j-1);
 			
-			newContent.getValue("noticiaLista" + "[" + j + "]/titulo", Locale.ENGLISH).setStringValue(cms, jsonResponse.getString("noticiaLista[" + j +  "]/titulo"));
+			if (jsonResponse.has("noticiaLista[" + j +  "]/titulo"))
+				newContent.getValue("noticiaLista" + "[" + j + "]/titulo", Locale.ENGLISH).setStringValue(cms, jsonResponse.getString("noticiaLista[" + j +  "]/titulo"));
 			
 			String path="noticiaLista"+"[" + j + "]/cuerpo";
-			String attrName = "alt";
-			replaceAttributes(jsonResponse, path, attrName);
-			attrName = "title";
-			replaceAttributes(jsonResponse, path, attrName);
 			
-			newContent.getValue("noticiaLista"+"[" + j + "]/cuerpo", Locale.ENGLISH).setStringValue(cms, jsonResponse.getString("noticiaLista[" + j +  "]/cuerpo"));
-		
+			if (jsonResponse.has(path)) {
+				String attrName = "alt";
+				replaceAttributes(jsonResponse, path, attrName);
+				attrName = "title";
+				replaceAttributes(jsonResponse, path, attrName);
+				
+				newContent.getValue("noticiaLista"+"[" + j + "]/cuerpo", Locale.ENGLISH).setStringValue(cms, jsonResponse.getString("noticiaLista[" + j +  "]/cuerpo"));
+			}
 			// Categories
 			int categoriesCount = getElementCountWithValue(cms,"noticiaLista"+"[" + j + "]/"+"Categorias","",content);	
 
@@ -950,9 +953,13 @@ public class AmzTranslateService {
 					newContent.getValue("noticiaLista"+"[" + j + "]/imagenlista/fotografo", Locale.ENGLISH).setStringValue(cms, content.getValue("noticiaLista"+"[" + j + "]/imagenlista/fotografo", Locale.ENGLISH).getStringValue(cms));
 					
 				}
-				newContent.getValue("noticiaLista"+"[" + j + "]/imagenlista/descripcion", Locale.ENGLISH).setStringValue(cms, jsonResponse.getString("noticiaLista[" + j + "]/imagenlista/descripcion"));
-				newContent.getValue("noticiaLista"+"[" + j + "]/imagenlista/fuente", Locale.ENGLISH).setStringValue(cms, jsonResponse.getString("noticiaLista[" + j + "]/imagenlista/fuente"));
-				newContent.getValue("noticiaLista"+"[" + j + "]/imagenlista/keywords", Locale.ENGLISH).setStringValue(cms, jsonResponse.getString("noticiaLista[" + j + "]/imagenlista/keywords"));
+				
+				if (jsonResponse.has("noticiaLista[" + j + "]/imagenlista/descripcion"))
+					newContent.getValue("noticiaLista"+"[" + j + "]/imagenlista/descripcion", Locale.ENGLISH).setStringValue(cms, jsonResponse.getString("noticiaLista[" + j + "]/imagenlista/descripcion"));
+				if (jsonResponse.has("noticiaLista[" + j + "]/imagenlista/fuente"))
+					newContent.getValue("noticiaLista"+"[" + j + "]/imagenlista/fuente", Locale.ENGLISH).setStringValue(cms, jsonResponse.getString("noticiaLista[" + j + "]/imagenlista/fuente"));
+				if (jsonResponse.has("noticiaLista[" + j + "]/imagenlista/keywords"))
+					newContent.getValue("noticiaLista"+"[" + j + "]/imagenlista/keywords", Locale.ENGLISH).setStringValue(cms, jsonResponse.getString("noticiaLista[" + j + "]/imagenlista/keywords"));
 				
 			}
 			
@@ -1007,7 +1014,8 @@ public class AmzTranslateService {
 					newContent.getValue(tagNameMostrarEnHome,Locale.ENGLISH).setStringValue(cms,getElementValue(cms, tagNameMostrarEnHome, content, Locale.ENGLISH));
 					
 			        String tagNameKeywords = "noticiaLista"+"[" + j + "]/"+"videoYouTube"+"["+y+"]/keywords";
-					newContent.getValue(tagNameKeywords,Locale.ENGLISH).setStringValue(cms,jsonResponse.getString("noticiaLista[" + j + "]/videoYouTube["+y+"]/keywords"));
+			        if (jsonResponse.has(tagNameKeywords))
+			        	newContent.getValue(tagNameKeywords,Locale.ENGLISH).setStringValue(cms,jsonResponse.getString("noticiaLista[" + j + "]/videoYouTube["+y+"]/keywords"));
 					
 					// Categories
 					int categoriesCountYt = getElementCountWithValue(cms, "noticiaLista"+"[" + j + "]/"+"videoYouTube",
@@ -1069,12 +1077,14 @@ public class AmzTranslateService {
 					}	
 					
 					//Embedded Source
-					String videoEmbeddedSource = jsonResponse.getString("noticiaLista[" + j + "]/videoEmbedded["+e+"]/fuente");
 					
-					if(!videoEmbeddedSource.isEmpty()){
-						newContent.getValue("noticiaLista"+"[" + j + "]/"+"videoEmbedded"+"["+e+"]/"+"fuente",Locale.ENGLISH).setStringValue(cms, videoEmbeddedSource);
+					if (jsonResponse.has("noticiaLista[" + j + "]/videoEmbedded["+e+"]/fuente")) {
+						String videoEmbeddedSource = jsonResponse.getString("noticiaLista[" + j + "]/videoEmbedded["+e+"]/fuente");
+						
+						if(!videoEmbeddedSource.isEmpty()){
+							newContent.getValue("noticiaLista"+"[" + j + "]/"+"videoEmbedded"+"["+e+"]/"+"fuente",Locale.ENGLISH).setStringValue(cms, videoEmbeddedSource);
+						}
 					}
-					
 					String tagNameAutor = "noticiaLista"+"[" + j + "]/"+"videoEmbedded"+"["+e+"]/autor";
 					newContent.getValue(tagNameAutor,Locale.ENGLISH).setStringValue(cms,getElementValue(cms,tagNameAutor, content, Locale.ENGLISH));
 					
@@ -1082,7 +1092,8 @@ public class AmzTranslateService {
 					newContent.getValue(tagNameCalificacion,Locale.ENGLISH).setStringValue(cms,getElementValue(cms,tagNameCalificacion, content, Locale.ENGLISH));
 					
 			        String tagNameKeywords = "noticiaLista"+"[" + j + "]/"+"videoEmbedded"+"["+e+"]/"+"keywords";
-					newContent.getValue(tagNameKeywords,Locale.ENGLISH).setStringValue(cms,jsonResponse.getString("noticiaLista[" + j + "]/videoEmbedded["+e+"]/keywords"));
+			        if (jsonResponse.has(tagNameKeywords))
+			        		newContent.getValue(tagNameKeywords,Locale.ENGLISH).setStringValue(cms,jsonResponse.getString("noticiaLista[" + j + "]/videoEmbedded["+e+"]/keywords"));
 					
 					// Categories
 					int categoriesCountE = getElementCountWithValue(cms,"noticiaLista"+"[" + j + "]/"+"videoEmbedded","categoria",content);	
@@ -1121,25 +1132,31 @@ public class AmzTranslateService {
 						newContent.getValue("noticiaLista"+"[" + j + "]/"+"videoFlash"+"["+f+"]/"+"imagen",Locale.ENGLISH).setStringValue(cms, videoFlashImage);
 					}	
 					
-					//Flash Title
-					String videoFlaseTitle = jsonResponse.getString("noticiaLista[" + j + "]/videoFlash["+f+"]/titulo");
-					if(!videoFlaseTitle.isEmpty()){
-						newContent.getValue("noticiaLista"+"[" + j + "]/"+"videoFlash"+"["+f+"]/"+"titulo",Locale.ENGLISH).setStringValue(cms, videoFlaseTitle);
-					}	
+					 if (jsonResponse.has("noticiaLista[" + j + "]/videoFlash["+f+"]/titulo")) {
+						//Flash Title
+						String videoFlaseTitle = jsonResponse.getString("noticiaLista[" + j + "]/videoFlash["+f+"]/titulo");
+						if(!videoFlaseTitle.isEmpty()){
+							newContent.getValue("noticiaLista"+"[" + j + "]/"+"videoFlash"+"["+f+"]/"+"titulo",Locale.ENGLISH).setStringValue(cms, videoFlaseTitle);
+						}	
+					 }
 					
 					//Flash Description
-					String videoFlashDescription = jsonResponse.getString("noticiaLista[" + j + "]/videoFlash["+f+"]/description");
-					
-					if(!videoFlashDescription.isEmpty()){
-						newContent.getValue("noticiaLista"+"[" + j + "]/"+"videoFlash"+"["+f+"]/"+"description",Locale.ENGLISH).setStringValue(cms, videoFlashDescription);
-					}	
+					 if (jsonResponse.has("noticiaLista[" + j + "]/videoFlash["+f+"]/description")) {
+						String videoFlashDescription = jsonResponse.getString("noticiaLista[" + j + "]/videoFlash["+f+"]/description");
+						
+						if(!videoFlashDescription.isEmpty()){
+							newContent.getValue("noticiaLista"+"[" + j + "]/"+"videoFlash"+"["+f+"]/"+"description",Locale.ENGLISH).setStringValue(cms, videoFlashDescription);
+						}	
+					 }
 					
 					//flash Source
-					String videoFlashSource = jsonResponse.getString("noticiaLista[" + j + "]/videoFlash["+f+"]/fuente");
-					
-					if(!videoFlashSource.isEmpty()){
-						newContent.getValue("noticiaLista"+"[" + j + "]/"+"videoFlash"+"["+f+"]/"+"fuente",Locale.ENGLISH).setStringValue(cms, videoFlashSource);
-					}
+					 if (jsonResponse.has("noticiaLista[" + j + "]/videoFlash["+f+"]/fuente")) {
+						String videoFlashSource = jsonResponse.getString("noticiaLista[" + j + "]/videoFlash["+f+"]/fuente");
+						
+						if(!videoFlashSource.isEmpty()){
+							newContent.getValue("noticiaLista"+"[" + j + "]/"+"videoFlash"+"["+f+"]/"+"fuente",Locale.ENGLISH).setStringValue(cms, videoFlashSource);
+						}
+					 }
 					
 					String tagNameAutor = "noticiaLista"+"[" + j + "]/"+"videoFlash"+"["+f+"]/autor";
 					newContent.getValue(tagNameAutor,Locale.ENGLISH).setStringValue(cms,getElementValue(cms, tagNameAutor, content, Locale.ENGLISH));
@@ -1154,7 +1171,8 @@ public class AmzTranslateService {
 					newContent.getValue(tagNameMostrarEnHome,Locale.ENGLISH).setStringValue(cms,getElementValue(cms, tagNameMostrarEnHome, content, Locale.ENGLISH));
 					
 			        String tagNameKeywords = "noticiaLista"+"[" + j + "]/"+"videoFlash"+"["+f+"]/keywords";
-					newContent.getValue(tagNameKeywords,Locale.ENGLISH).setStringValue(cms,jsonResponse.getString("noticiaLista[" + j + "]/videoFlash["+f+"]/keywords"));
+			        if (jsonResponse.has(tagNameKeywords))
+			        	newContent.getValue(tagNameKeywords,Locale.ENGLISH).setStringValue(cms,jsonResponse.getString("noticiaLista[" + j + "]/videoFlash["+f+"]/keywords"));
 					
 					// Categories
 					int categoriesCountF = getElementCountWithValue(cms,"noticiaLista"+"[" + j + "]/"+"videoFlash",
