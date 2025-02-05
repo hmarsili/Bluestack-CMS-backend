@@ -1330,7 +1330,7 @@ public class AmzTranslateService {
 				pathNum = path.replaceFirst("\\[x\\]", "[" + i + "]");
 				
 				int lenIdx = ("" + i).length(); 
-				lastPos = (path.indexOf("x\\]/")>-1 ? path.indexOf("x\\]/")+lenIdx+1 : pathNum.length()-1);
+				lastPos = (path.indexOf("x]/")>-1 ? path.indexOf("x]/")+lenIdx+1 : pathNum.length());
 				
 				extractContent(ContentExtracted, fileContent, pathNum);
 				i++;

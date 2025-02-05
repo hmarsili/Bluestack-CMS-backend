@@ -22,6 +22,7 @@ import net.sf.json.JSONObject;
 
 
 import org.apache.commons.logging.Log;
+import org.opencms.configuration.CmsMedios;
 import org.opencms.file.CmsFile;
 import org.opencms.file.CmsObject;
 import org.opencms.file.CmsProperty;
@@ -90,6 +91,10 @@ public class TranscriptService extends UploadService {
 	
 	public TranscriptService(CmsObject cmsObject, String siteName, String publication) {
 		this.loadProperties(siteName,publication);
+	}
+	
+	public boolean isAmzTranslateEnabled() {
+		return CmsMedios.getInstance().getCmsParaMediosConfiguration().getBooleanParam(siteName, publication, getModuleName(), "AmzTranscribeEnabled", false);
 	}
 
 	public void loadProperties(String siteName, String publication) {
