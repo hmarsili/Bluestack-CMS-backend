@@ -51,6 +51,13 @@ public abstract class FilesAddWebService extends OfflineProjectService {
 	@SuppressWarnings("rawtypes")
 	@Override
 	protected JSON doExecute() throws Throwable {
+		
+		Object publish = this.getPostRequestParam("publish");
+		if(publish != null && publish.toString().trim().equals("false"))
+			this.publish = false;
+		else
+			this.publish = true;
+		
 		JSONArray jsonResponse = new JSONArray();
 		Hashtable<String, Object> params = new Hashtable<String, Object>();
 		try {
@@ -86,7 +93,7 @@ public abstract class FilesAddWebService extends OfflineProjectService {
 						
 						saveProperties(properties,fileNameVFS, SessionManager.getAdminCmsObject(site));
 						
-						if(fileNameVFS!= null && !fileNameVFS.equals(""))
+						if(fileNameVFS!= null && !fileNameVFS.equals("") && this.publish)
 							OpenCms.getPublishManager().publishResource(SessionManager.getAdminCmsObject(site), fileNameVFS);
 						
 					} else {
@@ -99,7 +106,7 @@ public abstract class FilesAddWebService extends OfflineProjectService {
 							
 							saveProperties(properties,fileNameVFS, cmsClone);
 							
-							if(fileNameVFS!= null && !fileNameVFS.equals(""))
+							if(fileNameVFS!= null && !fileNameVFS.equals("") && this.publish)
 								OpenCms.getPublishManager().publishResource(cmsClone, fileNameVFS);
 					}
 					
@@ -293,5 +300,7 @@ public abstract class FilesAddWebService extends OfflineProjectService {
 	protected String section;
 	protected String sitename;
 	protected String publication;
+	
+	protected boolean publish;
 	
 }
