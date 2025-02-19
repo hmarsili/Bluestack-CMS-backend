@@ -182,6 +182,62 @@ public class VertexIaNewsService {
     }  
      
 	}
+	
+	public JsonObject assistance(String assistanceType, String option, String content) throws IOException {
+        GoogleCredentials credentials = null;
+		
+	    try {
+			credentials = getCredentials();
+		} catch (Exception e1) {
+			e1.printStackTrace();
+			return null;
+		}
+		
+	    try (VertexAI vertexAi = new VertexAI(getProject(), getLocation(),null,credentials); ){
+	    	
+	      GenerationConfig generationConfig = GenerationConfig.newBuilder()
+	              .setMaxOutputTokens(Integer.parseInt(getMaxOutputTokens()))
+	              .setTemperature(Float.parseFloat(getTemperature()))
+	              .setTopP(Float.parseFloat(getTopP()))
+	              .build();
+	      GenerativeModel model = new GenerativeModel(getModel(), generationConfig, vertexAi);
+	      
+	      List<SafetySetting> safetySettings = setSafetySettings();
+	 
+	      String prompt =  getPromptByType(assistanceType);
+	      String fullPrompt = "";
+	    		  
+	      if(option != null)
+	    	  fullPrompt = String.format(prompt, content, option);
+	      else 
+	    	  fullPrompt =  prompt.replaceAll("%1",content);
+	      
+	      fullPrompt += "\nLa respuesta debe indicarse como responseAI";
+	     
+	      List<Content> contents = new ArrayList<>();
+	      contents.add(Content.newBuilder().setRole("user").addParts(Part.newBuilder().setText(fullPrompt)).build());
+	
+	      ResponseStream<GenerateContentResponse> responseStream = model.generateContentStream(contents, safetySettings);
+	      
+	      JsonObject jsonObject = extracteResponse(responseStream);
+	
+	      
+	      return jsonObject;
+	    }  
+	}
+	
+	private JsonObject extracteResponse(ResponseStream<GenerateContentResponse> responseStream) {
+		String responseText = "";
+		  for (GenerateContentResponse responsePart: responseStream) {
+			  responseText += ResponseHandler.getText(responsePart).replaceAll("```json", "").replaceAll("```", "");
+			}
+		
+		  JsonObject jsonObject = new JsonObject();
+		  
+		  jsonObject.addProperty("responseAI",  responseText.replaceAll("responseAI:", "").trim());
+		  
+		return jsonObject;
+	}
 
 	private List<SafetySetting> setSafetySettings() {
 		List<SafetySetting> safetySettings = Arrays.asList(
@@ -301,6 +357,10 @@ public class VertexIaNewsService {
 			CmsMedios.getInstance().getCmsParaMediosConfiguration().getParam(siteName, publication, getModuleName(), "basePrompt", ""));
 	}
 	
+	protected String getPromptByType(String group) {
+		return (prompt = 
+			CmsMedios.getInstance().getCmsParaMediosConfiguration().getItemGroupParam(siteName, publication, getModuleName(), group, "prompt"));
+	}
 	
 	protected String getModel() {
 		return (modelName = 
