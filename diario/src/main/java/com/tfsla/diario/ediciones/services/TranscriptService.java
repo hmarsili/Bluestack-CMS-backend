@@ -30,6 +30,7 @@ import org.opencms.file.CmsResource;
 import org.opencms.file.CmsResourceFilter;
 import org.opencms.file.types.CmsResourceTypeExternalImage;
 import org.opencms.file.types.CmsResourceTypeFolder;
+import org.opencms.file.types.CmsResourceTypeUnknownFile;
 import org.opencms.loader.CmsLoaderException;
 import org.opencms.main.CmsException;
 import org.opencms.main.CmsLog;
@@ -39,6 +40,7 @@ import org.opencms.util.CmsFileUtil;
 
 import com.tfsla.diario.ediciones.model.TipoEdicion;
 import com.tfsla.diario.file.types.TfsResourceTypeTranscription;
+import com.tfsla.diario.file.types.TfsResourceTypeUploadProcessing;
 import com.tfsla.utils.CmsObjectUtils;
 
 public class TranscriptService extends UploadService {
@@ -235,7 +237,7 @@ public class TranscriptService extends UploadService {
 
 	@Override
 	protected int getPointerType() throws CmsLoaderException {
-		return CmsResourceTypeExternalImage.getStaticTypeId();
+		return TfsResourceTypeUploadProcessing.getStaticTypeId();
 	}
 
 public void checkOwnerFolder(File dir){
@@ -294,6 +296,7 @@ public void checkOwnerFolder(File dir){
 		String site = data.getString("site");
 		String user = data.getString("user");
 		String publication = data.getString("publication");
+		String status = data.getString("status");
 		
 		response.put("vfsurl", urlImage);
 		response.put("site",site);
@@ -310,58 +313,85 @@ public void checkOwnerFolder(File dir){
 			CmsFile newFile = cmsObjectClone.readFile(urlImage, CmsResourceFilter.IGNORE_EXPIRATION);
 			//CmsResource res = cmsObjectClone.readResource(urlImage);
 			
-			newFile.setType(TfsResourceTypeTranscription.getStaticTypeId());
 			
+			if (status.equals("completed")) {
+				
 			
-			/*
-			{
-				  site: '/sites/generic1',
-				  publication: '1',
-				  user: 'vpod',
-				  transcriptFile: 'transcript/audios/2025/01/22/TrailerHistoriayReview_Loom.mp3.json',
-				  language_codes: 'es-US',
-				  transcriptText: ''
+				newFile.setType(TfsResourceTypeTranscription.getStaticTypeId());
+				
+				
+				/*
+				{
+					  site: '/sites/generic1',
+					  publication: '1',
+					  user: 'vpod',
+					  transcriptFile: 'transcript/audios/2025/01/22/TrailerHistoriayReview_Loom.mp3.json',
+					  language_codes: 'es-US',
+					  transcriptText: ''
+					}
+				*/
+				
+				newFile.setContents(data.getString("transcriptText").getBytes());
+				cmsObjectClone.writeFile(newFile);
+				
+				CmsProperty propimg;
+				
+				//language_codes
+				if (data.get("language_codes")!=null && data.getString("language_codes").trim().length()>0) {
+					String language_codes = data.getString("language_codes").trim();
+					propimg =  new CmsProperty("languageCodes", null,language_codes);
+					cmsObjectClone.writePropertyObject(urlImage,propimg);
+					
+					response.put("languageCodes",language_codes);
 				}
-			*/
-			
-			newFile.setContents(data.getString("transcriptText").getBytes());
-			cmsObjectClone.writeFile(newFile);
-			
-			CmsProperty propimg;
-			
-			//language_codes
-			if (data.get("language_codes")!=null && data.getString("language_codes").trim().length()>0) {
-				String language_codes = data.getString("language_codes").trim();
-				propimg =  new CmsProperty("languageCodes", null,language_codes);
+				
+				String transcriptFile = data.getString("transcriptFile");
+				propimg =  new CmsProperty("transcriptFile", null,transcriptFile);
 				cmsObjectClone.writePropertyObject(urlImage,propimg);
 				
-				response.put("languageCodes",language_codes);
+				String mediaFile = data.getString("mediaFile");
+				propimg =  new CmsProperty("mediaFile", null,mediaFile);
+				cmsObjectClone.writePropertyObject(urlImage,propimg);
+				
+				//Punto focal
+				//double x = data.getJSONObject("focalPoint").getDouble("x");
+	
+				cmsObjectClone.unlockResource(urlImage);
+				
+				String msg = "{ url: " + urlImage + ", " +
+					", status: ok" +
+					", site: " + site +
+					", publication: " + publication + " }";
+				
+				SSEService.getInstance().addEvent("transcriptUpload", msg, user);
+			}
+			else if (status.equals("failed")) {
+				//Fallo la traduccion y guardamos el motivo...
+				newFile.setType(CmsResourceTypeUnknownFile.getStaticTypeId());
+				cmsObjectClone.writeFile(newFile);
+				
+				CmsProperty propimg;
+				String errorDescription = data.getString("errorDescription");
+				propimg =  new CmsProperty("errorDescription", null,errorDescription);
+				cmsObjectClone.writePropertyObject(urlImage,propimg);
+				
+				cmsObjectClone.unlockResource(urlImage);
+				
+				String msg = "{ url: " + urlImage + ", " +
+						", status: error" +
+						", errorCode: " + errorDescription +
+						", site: " + site +
+						", publication: " + publication + " }";
+					
+					SSEService.getInstance().addEvent("transcriptUpload", msg, user);
 			}
 			
-			String transcriptFile = data.getString("transcriptFile");
-			propimg =  new CmsProperty("transcriptFile", null,transcriptFile);
-			cmsObjectClone.writePropertyObject(urlImage,propimg);
-			
-			String mediaFile = data.getString("mediaFile");
-			propimg =  new CmsProperty("mediaFile", null,mediaFile);
-			cmsObjectClone.writePropertyObject(urlImage,propimg);
-			
-			//Punto focal
-			//double x = data.getJSONObject("focalPoint").getDouble("x");
-
-			cmsObjectClone.unlockResource(urlImage);
-			
-			String msg = "{ url: " + urlImage + ", " +
-				", status: ok" +
-				", site: " + site +
-				", publication: " + publication + " }";
-			
-			SSEService.getInstance().addEvent("transcriptUpload", msg, user);
 		} catch (CmsException e) {
 			LOG.error("Error al recibir callback de alta de transcripcion",e);
 			
 			String msg = "{ url: " + urlImage + ", " +
 					", status: error" +
+					", errorCode: " + e.getMessage() +
 					", site: " + site +
 					", publication: " + publication + " }";
 				
