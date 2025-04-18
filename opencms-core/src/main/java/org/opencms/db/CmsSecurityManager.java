@@ -3039,6 +3039,21 @@ public final class CmsSecurityManager {
     	    }
     
     
+    public CmsUser validateEncodedLogin(CmsRequestContext context, String data, String remoteAddress) 
+    	throws CmsException {
+        CmsDbContext dbc = m_dbContextFactory.getDbContext(context);
+        CmsUser result = null;
+        try {
+            result = m_driverManager.validateEncodedLogin(
+                dbc,
+                data,
+                remoteAddress);
+        } finally {
+            dbc.clear();
+        }
+        return result;
+    }
+    
     public CmsUser loginUserEncrypted(CmsRequestContext context, String data, String remoteAddress)
     throws CmsException {
 

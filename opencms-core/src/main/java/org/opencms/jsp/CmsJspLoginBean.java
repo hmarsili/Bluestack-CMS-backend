@@ -71,6 +71,7 @@ public class CmsJspLoginBean extends CmsJspActionElement {
     /** The log object for this class. */
     private static final Log LOG = CmsLog.getLog(CmsJspLoginBean.class);
 
+    private static final Log LOG_LOGIN = CmsLog.getLog("accessLog");
     /** Flag to indicate if a login was successful. */
     private CmsException m_loginException;
 
@@ -158,6 +159,16 @@ public class CmsJspLoginBean extends CmsJspActionElement {
         return (m_loginException == null);
     }
 
+    
+    public CmsUser validateEncodedLogin(String data) {
+	    try {
+	    	return getCmsObject().validateEncodedLogin(data, this.getRequestContext().getRemoteAddress());
+	    } catch (CmsException e) {
+	        // the login has failed
+	        m_loginException = e;
+	    }
+	    return null;
+    }
     
     /**
      * Logs a system user in to OpenCms.<p>
@@ -788,6 +799,14 @@ public class CmsJspLoginBean extends CmsJspActionElement {
                 getRequestContext().addSiteRoot(getRequestContext().getUri()),
                 getRequestContext().getRemoteAddress()));
         }
+        
+        if (LOG_LOGIN.isInfoEnabled()) {
+        	LOG_LOGIN.info(Messages.get().getBundle().key(
+                    Messages.LOG_LOGOUT_SUCCESFUL_3,
+                    getRequestContext().currentUser().getName(),
+                    getRequestContext().addSiteRoot(getRequestContext().getUri()),
+                    getRequestContext().getRemoteAddress()));
+            }
         getResponse().sendRedirect(getFormLink());
     }
 }

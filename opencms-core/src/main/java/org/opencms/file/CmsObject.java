@@ -2239,6 +2239,11 @@ public class CmsObject {
         lockResource(resourcename, CmsLockType.TEMPORARY);
     }
 
+    public CmsUser validateEncodedLogin(String data, String remoteAddress) throws CmsException {
+    	CmsUser user = m_securityManager.validateEncodedLogin(m_context, data, remoteAddress);
+    	return user;
+    }
+    
     public String loginUserEncrypted(String data)  throws CmsException {
     	 // login the user
         CmsUser newUser = m_securityManager.loginUserEncrypted(m_context, data, m_context.getRemoteAddress());

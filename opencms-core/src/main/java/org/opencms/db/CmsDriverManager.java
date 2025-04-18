@@ -313,6 +313,9 @@ public final class CmsDriverManager implements I_CmsEventListener {
 
     /** The log object for this class. */
     private static final Log LOG = CmsLog.getLog(CmsDriverManager.class);
+    
+    /** The log object for this class. */
+    private static final Log LOG_LOGIN = CmsLog.getLog("accessLog");
 
     /** Constant mode parameter to read all files and folders in the {@link #readChangedResourcesInsideProject(CmsDbContext, CmsUUID, CmsReadChangedProjectResourceMode)}} method. */
     private static final CmsReadChangedProjectResourceMode RCPRM_FILES_AND_FOLDERS_MODE = new CmsReadChangedProjectResourceMode();
@@ -5332,10 +5335,20 @@ public final class CmsDriverManager implements I_CmsEventListener {
     public CmsUser loginUserByToken(CmsDbContext dbc, String token, String browserId, String remoteAddress) 
     throws CmsAuthentificationException, CmsDataAccessException {
     	if (CmsStringUtil.isEmptyOrWhitespaceOnly(token)) {
+    		
+    		if (LOG_LOGIN.isInfoEnabled())
+				LOG_LOGIN.info("Failed de login by token. Token is empty " + " from IP " + remoteAddress + " using uri " + dbc.getRequestContext().addSiteRoot(dbc.getRequestContext().getUri()) + ".");
+			
+    		
             throw new CmsDbEntryNotFoundException(Messages.get().container(Messages.ERR_UNKNOWN_TOKEN_1, token));
         }
     	if (CmsStringUtil.isEmptyOrWhitespaceOnly(browserId)) {
-            throw new CmsDbEntryNotFoundException(Messages.get().container(Messages.ERR_UNKNOWN_TOKEN_1, token));
+            
+    		if (LOG_LOGIN.isInfoEnabled())
+				LOG_LOGIN.info("Failed de login by token. browserId is empty " + " from IP " + remoteAddress + " using uri " + dbc.getRequestContext().addSiteRoot(dbc.getRequestContext().getUri()) + ".");
+			
+    		
+    		throw new CmsDbEntryNotFoundException(Messages.get().container(Messages.ERR_UNKNOWN_TOKEN_1, token));
         }
     	
 		I_CmsTokenEncryptationHandler encHandler = OpenCms.getTokenEncryptationHandler();
@@ -5348,6 +5361,10 @@ public final class CmsDriverManager implements I_CmsEventListener {
 			
 		}
 		catch (Exception e) {
+			
+			if (LOG_LOGIN.isInfoEnabled())
+				LOG_LOGIN.info("Token format unrecognized" + " from IP " + remoteAddress + " using uri " + dbc.getRequestContext().addSiteRoot(dbc.getRequestContext().getUri()) + "." ,e);
+			
 			//No coincide el formato del token.
         	throw new CmsAuthentificationException(org.opencms.security.Messages.get().container(
                     org.opencms.security.Messages.ERR_LOGIN_FAILED_TOKEN_INVALIDAD_1,
@@ -5359,8 +5376,69 @@ public final class CmsDriverManager implements I_CmsEventListener {
 		String browserIdStored = jsonObj.optString("b", "");
 		String userId = jsonObj.optString("u", "");
 		
-		if (!browserIdStored.equals(browserId)) {
+		
+		//Me fijo si el usuario esta cacheado...
+		CmsUser user = lastTokens.get(token + browserId);
+    	if (user==null) {
+    		
+    		//Sino lo obtengo en base al id dentro del token.
+    		CmsUUID userUUID = new CmsUUID(userId);
+    		user = getUserDriver(dbc).readUser(dbc, userUUID);
+    	}
+    	
+    	//Si no encontre el usuario
+    	if (user==null) {
+    		
+    		if (LOG_LOGIN.isInfoEnabled())
+    			LOG_LOGIN.info("Error trying to validate user. UserId " + userId + " not found"  + " from IP " + remoteAddress + " using uri " + dbc.getRequestContext().addSiteRoot(dbc.getRequestContext().getUri()) + ".");
+			
+    		throw new CmsAuthentificationException(org.opencms.security.Messages.get().container(
+    				org.opencms.security.Messages.ERR_LOGIN_FAILED_NO_USER_2,
+    				userId,
+    				remoteAddress));
+			
+    	}
+    	
+    	// Verificacion que el usuario este habilitado
+        if (!user.isEnabled()) {
+            // user is disabled, throw a securiy exception
+        	
+			if (LOG_LOGIN.isInfoEnabled())
+				LOG_LOGIN.info("User " + user.getName() + " is disabled " + " from IP " + remoteAddress + " using uri " + dbc.getRequestContext().addSiteRoot(dbc.getRequestContext().getUri()) + ".");
+
+        	
+            throw new CmsAuthentificationException(org.opencms.security.Messages.get().container(
+                org.opencms.security.Messages.ERR_LOGIN_FAILED_DISABLED_2,
+                user.getName(),
+                remoteAddress));
+        }
+        
+        // Verificacion que el usuario este bloqueado
+        if (!m_securityManager.hasRole(
+                dbc,
+                user,
+                CmsRole.ADMINISTRATOR.forOrgUnit(dbc.getRequestContext().getOuFqn()))) {
+                // new user is not Administrator, check if login is currently allowed
+        	
+        		try {
+                OpenCms.getLoginManager().checkLoginAllowed();
+        		}
+        		catch (CmsAuthentificationException ex)
+        		{
+        			
+        			if (LOG_LOGIN.isInfoEnabled())
+        				LOG_LOGIN.info("User " + user.getName() + " is not allowed to login " + "from IP " + remoteAddress + " using uri " + dbc.getRequestContext().addSiteRoot(dbc.getRequestContext().getUri()) + ".");
+        			
+        			throw ex;
+        		}
+         }
+        
+        if (!browserIdStored.equals(browserId)) {
 			// no coincide el browser id guarado con el enviado.
+			
+			if (LOG_LOGIN.isInfoEnabled())
+    			LOG_LOGIN.info("Error trying to login with token from user " + user.getName() + ". BrowserId not matching"  + " from IP " + remoteAddress + " using uri " + dbc.getRequestContext().addSiteRoot(dbc.getRequestContext().getUri()) + ".");
+			
 			throw new CmsAuthentificationException(org.opencms.security.Messages.get().container(
                     org.opencms.security.Messages.ERR_LOGIN_FAILED_TOKEN_INVALIDAD_1,
                     remoteAddress,
@@ -5376,6 +5454,9 @@ public final class CmsDriverManager implements I_CmsEventListener {
 			CmsUUID userUUID = new CmsUUID(userId);
 			OpenCms.getSessionManager().invalidateUserSessions(userUUID);
 
+			if (LOG_LOGIN.isInfoEnabled()) {
+				LOG_LOGIN.info("Token expired for user " + user.getName() + ". Token expired on " + new Date(expiration) + " from IP " + remoteAddress + " using uri " + dbc.getRequestContext().addSiteRoot(dbc.getRequestContext().getUri()) + ".");
+			}
 			throw new CmsAuthentificationException(org.opencms.security.Messages.get().container(
                     org.opencms.security.Messages.ERR_LOGIN_FAILED_TOKEN_EXPIRED_1,
                     remoteAddress,
@@ -5384,43 +5465,6 @@ public final class CmsDriverManager implements I_CmsEventListener {
 			//+ " - exp:" + expiration + " [ now:" + now + "-ext=" + (now - expiration) + "]"
 		}
 		
-		
-		//Me fijo si el usuario esta cacheado...
-		CmsUser user = lastTokens.get(token + browserId);
-    	if (user==null) {
-    		
-    		//Sino lo obtengo en base al id dentro del token.
-    		CmsUUID userUUID = new CmsUUID(userId);
-    		user = getUserDriver(dbc).readUser(dbc, userUUID);
-    	}
-    	
-    	//Si no encontre el usuario
-    	if (user==null)
-    		throw new CmsAuthentificationException(org.opencms.security.Messages.get().container(
-    				org.opencms.security.Messages.ERR_LOGIN_FAILED_NO_USER_2,
-    				userId,
-    				remoteAddress));
-			
-		
-    	// Verificacion que el usuario este habilitado
-        if (!user.isEnabled()) {
-            // user is disabled, throw a securiy exception
-            throw new CmsAuthentificationException(org.opencms.security.Messages.get().container(
-                org.opencms.security.Messages.ERR_LOGIN_FAILED_DISABLED_2,
-                user.getName(),
-                remoteAddress));
-        }
-        
-        // Verificacion que el usuario este bloqueado
-        if (!m_securityManager.hasRole(
-                dbc,
-                user,
-                CmsRole.ADMINISTRATOR.forOrgUnit(dbc.getRequestContext().getOuFqn()))) {
-                // new user is not Administrator, check if login is currently allowed
-                OpenCms.getLoginManager().checkLoginAllowed();
-         }
-
-    	
 		 //Si llego a este punto, el login es valid.
 		lastTokens.put(token + browserId,user);
         // update cache
@@ -5565,8 +5609,7 @@ public final class CmsDriverManager implements I_CmsEventListener {
             return newUser;
     }   
 
-    public CmsUser loginUserEncrypted(CmsDbContext dbc, String data, String remoteAddress) throws CmsAuthentificationException, CmsDataAccessException, CmsPasswordEncryptionException {
-    	
+    public CmsUser validateEncodedLogin(CmsDbContext dbc, String data, String remoteAddress) throws CmsAuthentificationException, CmsDbEntryNotFoundException {
     	if (CmsStringUtil.isEmptyOrWhitespaceOnly(data)) {
     		throw new CmsAuthentificationException(Messages.get().container(
     				Messages.ERR_INVALID_LOGIN_DATA_1, data, remoteAddress));
@@ -5581,6 +5624,10 @@ public final class CmsDriverManager implements I_CmsEventListener {
 			
 		}
 		catch (Exception e) {
+			
+			if (LOG_LOGIN.isInfoEnabled())
+				LOG_LOGIN.info("data format unrecognized" + " from IP " + remoteAddress + " using uri " + dbc.getRequestContext().addSiteRoot(dbc.getRequestContext().getUri()) + ".",e);
+			
 			//No coincide el formato del token.
         	throw new CmsAuthentificationException(org.opencms.security.Messages.get().container(
                     Messages.ERR_INVALID_LOGIN_DATA_1,
@@ -5593,17 +5640,140 @@ public final class CmsDriverManager implements I_CmsEventListener {
 		long minutes =  (new Date().getTime() - timestamp) / (1000 * 60);
 		
 		if (minutes > (24*60)) {
+			
+			if (LOG_LOGIN.isInfoEnabled())
+				LOG_LOGIN.info("login data is old. " + minutes + " minutes" + " from IP " + remoteAddress + " using uri " + dbc.getRequestContext().addSiteRoot(dbc.getRequestContext().getUri()) + ".");
+			
+    		throw new CmsAuthentificationException(Messages.get().container(
+    				Messages.ERR_OLD_LOGIN_DATA_1, data, minutes , remoteAddress));
+    	}
+		
+		//String browserIdStored = jsonObj.optString("b", "");
+		String userName = jsonObj.optString("u", "");
+		//String password = jsonObj.optString("p", "");
+		
+		CmsUser user = null;
+		boolean userExists = true;
+		
+        try {
+        	user = readUser(dbc, userName);
+        } catch (CmsDataAccessException e2) {
+            // apparently this user does not exist in the database
+            userExists = false;
+        }
+        
+        if (!userExists) {
+        	String userOu = CmsOrganizationalUnit.getParentFqn(userName);
+        	if (userOu != null) {
+        		String parentOu = CmsOrganizationalUnit.getParentFqn(userOu);
+        		if (parentOu != null) {
+	                // try a higher level ou
+	                String uName = CmsOrganizationalUnit.getSimpleName(userName);
+	                
+	                try {
+	                	user = readUser(dbc, parentOu + userName);
+	                } catch (CmsDataAccessException e2) {
+	                	
+	                	if (LOG_LOGIN.isInfoEnabled())
+	                		LOG_LOGIN.info("Error in login. User " + userName + " unknown" + " from IP " + remoteAddress + " using uri " + dbc.getRequestContext().addSiteRoot(dbc.getRequestContext().getUri()) + ".");
+	                	
+	                	throw new CmsDbEntryNotFoundException(Messages.get().container(Messages.ERR_UNKNOWN_USER_1, userName));
+	                }
+	                
+        		}
+        	}
+        }
+        
+        /*
+        if (!browserIdStored.equals(browserId)) {
+			// no coincide el browser id guarado con el enviado.
+        	
+        	if (LOG_LOGIN.isInfoEnabled())
+        		LOG_LOGIN.info("Error in login. with user " + userName + ". Inconsistent browserId");
+        	
+        	throw new CmsAuthentificationException(org.opencms.security.Messages.get().container(
+                    Messages.ERR_INVALID_LOGIN_DATA_1,
+                    data,
+                    remoteAddress));
+		}
+		*/
+        
+        
+        if (!user.isEnabled()) {
+        	
+        	
+        	if (LOG_LOGIN.isInfoEnabled())
+        		LOG_LOGIN.info("Error in login. with user " + userName + ". User is disabled" + " from IP " + remoteAddress + " using uri " + dbc.getRequestContext().addSiteRoot(dbc.getRequestContext().getUri()) + ".");
+        	
+            // user is disabled, throw a securiy exception
+            throw new CmsAuthentificationException(org.opencms.security.Messages.get().container(
+                org.opencms.security.Messages.ERR_LOGIN_FAILED_DISABLED_2,
+                userName,
+                remoteAddress));
+        }
+        
+        return user;
+        
+    }
+    
+    public CmsUser loginUserEncrypted(CmsDbContext dbc, String data, String remoteAddress) throws CmsAuthentificationException, CmsDataAccessException, CmsPasswordEncryptionException {
+    	
+    	if (CmsStringUtil.isEmptyOrWhitespaceOnly(data)) {
+    		
+    		if (LOG_LOGIN.isInfoEnabled())
+    			LOG_LOGIN.info("data is empty or white space only" + ": Request from IP " + remoteAddress + " using uri " + dbc.getRequestContext().addSiteRoot(dbc.getRequestContext().getUri()) + ".");
+    		
+    		throw new CmsAuthentificationException(Messages.get().container(
+    				Messages.ERR_INVALID_LOGIN_DATA_1, data, remoteAddress));
+    	}
+    	
+    	I_CmsTokenEncryptationHandler encHandler = OpenCms.getTokenEncryptationHandler();
+    	
+    	JSONObject jsonObj = null;
+		try {
+			String strData = encHandler.decryptEncodedLogin(data);
+			jsonObj = new JSONObject(strData);
+			
+		}
+		catch (Exception e) {
+			
+			if (LOG_LOGIN.isInfoEnabled())
+    			LOG_LOGIN.info("login data is invalid" + ": Request from IP " + remoteAddress + " using uri " + dbc.getRequestContext().addSiteRoot(dbc.getRequestContext().getUri()) + ".");
+    		
+			
+			//No coincide el formato del token.
+        	throw new CmsAuthentificationException(org.opencms.security.Messages.get().container(
+                    Messages.ERR_INVALID_LOGIN_DATA_1,
+                    data,
+                    remoteAddress));
+		}
+		
+		long timestamp = jsonObj.optLong("e",0);
+		
+		long minutes =  (new Date().getTime() - timestamp) / (1000 * 60);
+    
+		//String browserId = jsonObj.optString("b", "");
+		String userName = jsonObj.optString("u", "");
+		String password = jsonObj.optString("p", "");
+		
+		if (minutes > (24*60)) {
+			
+			if (LOG_LOGIN.isInfoEnabled())
+    			LOG_LOGIN.info("login data is old from user" + userName + ": Request from IP " + remoteAddress + " using uri " + dbc.getRequestContext().addSiteRoot(dbc.getRequestContext().getUri()) + ".");
+    		
+			
     		throw new CmsAuthentificationException(Messages.get().container(
     				Messages.ERR_OLD_LOGIN_DATA_1, data, minutes , remoteAddress));
     	}
 			
-		String browserId = jsonObj.optString("b", "");
-		String userName = jsonObj.optString("u", "");
-		String password = jsonObj.optString("p", "");
 		
 		//{'u:'prueba','p':'passprueba','b':'2a673398190210a7a4abe7c0d737c12a','t':1646682117149}
     	
-    	return loginUser(dbc, userName, password, remoteAddress);
+		CmsUser user = loginUser(dbc, userName, password, remoteAddress);
+		
+		if (LOG_LOGIN.isInfoEnabled())
+			LOG_LOGIN.info("Successful login of user " + userName + ": Request from IP " + remoteAddress + " using uri " + dbc.getRequestContext().addSiteRoot(dbc.getRequestContext().getUri()) + ".");
+    	return user;
     	
     }
     

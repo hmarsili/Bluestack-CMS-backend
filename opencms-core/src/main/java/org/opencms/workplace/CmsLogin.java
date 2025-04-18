@@ -115,6 +115,7 @@ public class CmsLogin extends CmsJspLoginBean {
     /** The log object for this class. */
     private static final Log LOG = CmsLog.getLog(CmsLogin.class);
 
+    private static final Log LOG_LOGIN = CmsLog.getLog("accessLog");
     /** The action to perform. */
     private int m_action;
 
@@ -295,6 +296,12 @@ public class CmsLogin extends CmsJspLoginBean {
                 if (getLoginException() == null) {
                     // the login was successful
                     m_action = ACTION_LOGIN;
+                    
+                    LOG_LOGIN.info(org.opencms.jsp.Messages.get().getBundle().key(
+                    		org.opencms.jsp.Messages.LOG_LOGIN_SUCCESSFUL_3,
+                    		m_username,
+                            getRequestContext().addSiteRoot(getRequestContext().getUri()),
+                            getRequestContext().getRemoteAddress()));
 
                     // set the default project of the user
                     CmsUserSettings settings = new CmsUserSettings(cms);
