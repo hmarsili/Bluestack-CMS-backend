@@ -250,8 +250,15 @@ public class CmsIndexingThreadManager {
                 }
                 else {
 
-					writer.updateDocument(pathTerm, doc);
-					
+                	try {
+                		writer.updateDocument(pathTerm, doc);
+                	}
+                    catch (RuntimeException e) {
+                    	LOG.error("failed during updating the index " + index.getName() + " with resource " + res.getRootPath(),e);
+                    	//e.printStackTrace();
+                    	throw e;
+                    }
+                	
 					report.println(
 		                    org.opencms.report.Messages.get().container(org.opencms.report.Messages.RPT_OK_0),
 		                    I_CmsReport.FORMAT_OK);
