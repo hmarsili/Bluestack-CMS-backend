@@ -1642,6 +1642,22 @@ public class TfsVideosAdmin implements EncoderProgressListener {
 	    	    CmsResource sourceFormatVFS = cmsObj.readResource(sourceVFSPath); 
 				com.tfsla.utils.CmsResourceUtils.forceLockResource(cmsObj,sourceVFSPath);
 				publishList.add(sourceFormatVFS);
+				
+				//Verificamos si las carpetas padres estan publicadas y si no las agregamos a la lista de publicación
+				List parentFolders = new ArrayList();
+				for (Iterator<CmsResource> iterator = publishList.iterator(); iterator.hasNext();) {
+					CmsResource resource = iterator.next();
+					CmsResource parentFolder = cmsObj.readResource(CmsResource.getParentFolder(cmsObj.getSitePath(resource)));
+					CmsLock lockRes = cmsObj.getLock(parentFolder);
+					while (!lockRes.getSystemLock().isPublish() && !parentFolder.getState().isUnchanged() && lockRes.isLockableBy(cmsObj.getRequestContext().currentUser())) {
+						parentFolders.add(parentFolder);
+						
+						parentFolder = cmsObj.readResource(CmsResource.getParentFolder(cmsObj.getSitePath(parentFolder)));
+						lockRes = cmsObj.getLock(parentFolder);
+					} 
+				}
+				
+				publishList.addAll(parentFolders);
 	    	  
 			    OpenCms.getPublishManager().publishProject(cmsObj, new CmsLogReport(Locale.getDefault(), this.getClass()), OpenCms.getPublishManager().getPublishList(cmsObj,publishList, false));
 			    LOG.log("Se publicó el video original y sus formatos");
