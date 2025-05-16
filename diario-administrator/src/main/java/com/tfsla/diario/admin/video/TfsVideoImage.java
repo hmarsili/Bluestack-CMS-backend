@@ -407,7 +407,7 @@ public String uploadFFmpegImage(String imgPath, String type) throws Exception{
 			if(titleVideoProp!=null) {
 				titleVideo = titleVideoProp.getValue();
 				
-				if(titleVideo.equals(""))
+				if(titleVideo==null || (titleVideo !=null && titleVideo.equals("")))
 					titleVideo = videoPath.substring(videoPath.lastIndexOf('/') + 1);  
 			}
 			
