@@ -14,6 +14,7 @@ import org.opencms.file.CmsFile;
 import org.opencms.file.CmsObject;
 import org.opencms.file.CmsProperty;
 import org.opencms.file.CmsResource;
+import org.opencms.file.CmsResourceFilter;
 import org.opencms.file.CmsUser;
 import org.opencms.main.CmsException;
 import org.opencms.main.CmsLog;
@@ -26,7 +27,6 @@ import org.opencms.xml.types.I_CmsXmlContentValue;
 
 import com.tfsla.diario.ediciones.model.TipoEdicion;
 import com.tfsla.diario.ediciones.services.TipoEdicionService;
-import com.tfsla.diario.ediciones.services.VideoEmbeddedService;
 import com.tfsla.diario.file.types.TfsResourceTypeVideoEmbedded;
 import com.tfsla.diario.file.types.TfsResourceTypeVideoYoutubeLink;
 import com.tfsla.diario.friendlyTags.I_TfsNoticia;
@@ -61,6 +61,8 @@ public class TfsVideo {
 	private boolean mostrarEnHome;
 	private boolean autoplay;
 	private boolean mute;
+	
+	protected transient CmsFile videoResource;
 	
 	private Date lastmodifieddate;
 	private Date creationdate;
@@ -210,6 +212,7 @@ public class TfsVideo {
 			}
 			
 			CmsFile file = m_cms.readFile(res);
+			videoResource = file;
 			data = new String(file.getContents());
 			
 			typeid = res.getTypeId();
@@ -269,12 +272,10 @@ public class TfsVideo {
 		this.cms = m_cms;
 			try {
 				if(videoPath == ""){
-					resource = m_cms.readResource(res.getXmlDocument().getFile().getStructureId());
+					resource = m_cms.readResource(res.getXmlDocument().getFile().getStructureId(),CmsResourceFilter.ALL);
 				}
-					resource = m_cms.readResource(videoPath);
+				    resource = m_cms.readResource(videoPath,CmsResourceFilter.ALL);
 				
-			
-			I_CmsXmlDocument xmlContent = res.getXmlDocument();
 			TimeZone  zone = TimeZone.getDefault();
 			GregorianCalendar cal = new GregorianCalendar(zone, m_cms.getRequestContext().getLocale());
 
@@ -387,6 +388,14 @@ public class TfsVideo {
 			
 			data = res.getXmlDocument().getStringValue(m_cms,  videoTag + "" + codeVideo, res.getXmlDocumentLocale());
 			
+			if(videoPath==null || (videoPath!=null && videoPath.equals("")))
+				videoPath = VideoCodeLoader.videoExistInBD(m_cms,data);
+			 
+			if(videoPath!=null && !videoPath.equals("")) {
+				 CmsResource vidResource = cms.readResource(videoPath,CmsResourceFilter.ALL);  
+				 videoResource = cms.readFile(vidResource);  
+			}
+			
 			LOG.debug("TfsVideo >> " + videoTag + "" + codeVideo + " >> " + data);
 			typeid = resource.getTypeId();
 			video = "";
@@ -418,8 +427,12 @@ public class TfsVideo {
 				video = data;
 				vfspath = videoVFS;
 				
+				if(videoVFS==null || (videoVFS!=null && videoVFS.equals("")))
+					 videoVFS = VideoCodeLoader.videoExistInBD(m_cms,data);
+				
 				if(videoVFS!=null && !videoVFS.equals("")){
-				       CmsResource resourceVideoVFS = m_cms.readResource(videoVFS);
+					   CmsResource resourceVideoVFS = m_cms.readResource(videoVFS,CmsResourceFilter.ALL);
+				       videoResource = cms.readFile(resourceVideoVFS);
 				       
 				       prop = m_cms.readPropertyObject(resourceVideoVFS, "video-duration", false);
 						if (prop!=null)
@@ -466,9 +479,8 @@ public class TfsVideo {
 		String      videoVFS = null;
 		this.cms = m_cms;
 			try {
-				resource = m_cms.readResource(res.getXmlDocument().getFile().getStructureId());
+				resource = m_cms.readResource(res.getXmlDocument().getFile().getStructureId(),CmsResourceFilter.ALL);
 			
-			    I_CmsXmlDocument xmlContent = res.getXmlDocument();
 			    TimeZone  zone = TimeZone.getDefault();
 			    GregorianCalendar cal = new GregorianCalendar(zone, m_cms.getRequestContext().getLocale());
 
@@ -545,6 +557,14 @@ public class TfsVideo {
 					type = TfsResourceTypeVideoEmbedded.getStaticTypeName();
 				 }
 				
+				 if(videoVFS==null || (videoVFS!=null && videoVFS.equals("")))
+					 videoVFS = VideoCodeLoader.videoExistInBD(m_cms,data);
+				 
+				 if(videoVFS!=null && !videoVFS.equals("")) {
+					 CmsResource vidResource = cms.readResource(videoVFS,CmsResourceFilter.ALL);  
+					 videoResource = cms.readFile(vidResource);  
+				 }
+				 
 				 video = data;
 				 
 				 subCategories = new HashMap<String, Boolean>();
@@ -590,12 +610,10 @@ public class TfsVideo {
 		this.cms = m_cms;
 			try {
 				if(videoPath == ""){
-					resource = m_cms.readResource(res.getXmlDocument().getFile().getStructureId());
+					resource = m_cms.readResource(res.getXmlDocument().getFile().getStructureId(),CmsResourceFilter.ALL);
 				}
-					resource = m_cms.readResource(videoPath);
+					resource = m_cms.readResource(videoPath,CmsResourceFilter.ALL);
 				
-			
-			I_CmsXmlDocument xmlContent = res.getXmlDocument();
 			TimeZone  zone = TimeZone.getDefault();
 			GregorianCalendar cal = new GregorianCalendar(zone, m_cms.getRequestContext().getLocale());
 
@@ -708,6 +726,14 @@ public class TfsVideo {
 			
 			data = res.getXmlDocument().getStringValue(m_cms,  videoTag + "["+index+"]/" + codeVideo, res.getXmlDocumentLocale());
 			
+			if(videoPath==null || (videoPath!=null && videoPath.equals("")))
+				videoPath = VideoCodeLoader.videoExistInBD(m_cms,data);
+			 
+			if(videoPath!=null && !videoPath.equals("")) {
+				 CmsResource vidResource = cms.readResource(videoPath,CmsResourceFilter.ALL);  
+				 videoResource = cms.readFile(vidResource);  
+			}
+			
 			LOG.debug("TfsVideo >> " + videoTag + "["+index+"]/" + codeVideo + " >> " + data);
 			typeid = resource.getTypeId();
 			video = "";
@@ -739,8 +765,12 @@ public class TfsVideo {
 				video = data;
 				vfspath = videoVFS;
 				
+				if(videoVFS==null || (videoVFS!=null && videoVFS.equals("")))
+					videoVFS = VideoCodeLoader.videoExistInBD(m_cms,data);
+				
 				if(videoVFS!=null && !videoVFS.equals("")){
-				       CmsResource resourceVideoVFS = m_cms.readResource(videoVFS);
+				       CmsResource resourceVideoVFS = m_cms.readResource(videoVFS,CmsResourceFilter.ALL);
+				       cms.readFile(resourceVideoVFS);
 				       
 				       prop = m_cms.readPropertyObject(resourceVideoVFS, "video-duration", false);
 						if (prop!=null)
@@ -786,9 +816,8 @@ public class TfsVideo {
 		String      videoVFS = null;
 		this.cms = m_cms;
 			try {
-				resource = m_cms.readResource(res.getXmlDocument().getFile().getStructureId());
+				resource = m_cms.readResource(res.getXmlDocument().getFile().getStructureId(),CmsResourceFilter.ALL);
 			
-			    I_CmsXmlDocument xmlContent = res.getXmlDocument();
 			    TimeZone  zone = TimeZone.getDefault();
 			    GregorianCalendar cal = new GregorianCalendar(zone, m_cms.getRequestContext().getLocale());
 
@@ -865,6 +894,14 @@ public class TfsVideo {
 					type = TfsResourceTypeVideoEmbedded.getStaticTypeName();
 				 }
 				
+				 if(videoVFS==null || (videoVFS!=null && videoVFS.equals("")))
+						videoVFS = VideoCodeLoader.videoExistInBD(m_cms,data);
+				 
+				 if(!videoVFS.equals("")) {
+					 CmsResource vidResource = cms.readResource(videoVFS,CmsResourceFilter.ALL);  
+					 videoResource = cms.readFile(vidResource);  
+				 }
+				 
 				 video = data;
 				 
 				 subCategories = new HashMap<String, Boolean>();
@@ -1173,5 +1210,52 @@ public class TfsVideo {
 		}		
 		
 		return author;
+	}
+	
+	public long getLongDateExpired() {
+		return videoResource.getDateExpired();
+	}
+	
+	public boolean isDateExpiredSet() {
+		if(videoResource==null)
+			return false;
+		else
+			return videoResource.getDateExpired() != CmsResource.DATE_EXPIRED_DEFAULT;
+	}
+	
+	public boolean getIsExpired() {
+		Date date = new Date();
+		if(isDateExpiredSet()) {
+			if(getLongDateExpired() < date.getTime()) return true;
+		}
+		if(isDateReleasedSet()) {
+			if(getLongDateReleased() > date.getTime()) return true;
+		}
+		return false;
+	}
+	
+	public boolean isDateReleasedSet() {
+		if(videoResource==null)
+			return false;
+		else
+			return videoResource.getDateReleased() != CmsResource.DATE_RELEASED_DEFAULT;
+	}
+	
+	public long getLongDateReleased() {
+		return videoResource.getDateReleased();
+	}
+	
+	public Date getDateExpired() {
+		TimeZone zone = TimeZone.getDefault();
+        GregorianCalendar cal = new GregorianCalendar(zone, cms.getRequestContext().getLocale());
+        cal.setTimeInMillis(videoResource.getDateExpired());
+        return cal.getTime();
+	}
+	
+	public Date getDateReleased() {
+		TimeZone zone = TimeZone.getDefault();
+        GregorianCalendar cal = new GregorianCalendar(zone, cms.getRequestContext().getLocale());
+        cal.setTimeInMillis(videoResource.getDateReleased());
+        return cal.getTime();
 	}
 }

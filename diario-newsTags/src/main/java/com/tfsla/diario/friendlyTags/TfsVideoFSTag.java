@@ -5,6 +5,7 @@ import jakarta.servlet.jsp.JspException;
 import jakarta.servlet.jsp.JspTagException;
 
 import org.opencms.file.CmsResource;
+import org.opencms.file.CmsResourceFilter;
 import org.opencms.main.CmsException;
 import org.opencms.main.OpenCms;
 
@@ -83,7 +84,7 @@ public class TfsVideoFSTag extends BaseTag  implements I_TfsCollectionListTag {
 
 		saveVideo();
 		
-		resVideo = m_cms.readResource(path);
+		resVideo = m_cms.readResource(path,CmsResourceFilter.ALL);
 		exposeVideo();
 	}
 	

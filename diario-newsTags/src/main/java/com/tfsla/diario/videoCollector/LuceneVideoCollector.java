@@ -14,8 +14,14 @@ import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.SortedNumericSelector;
 import org.apache.lucene.search.SortedNumericSortField;
 import org.apache.lucene.search.SortedSetSortField;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.MatchAllDocsQuery;
+import org.apache.lucene.search.TermRangeQuery;
 import org.opencms.file.CmsObject;
 import org.opencms.file.CmsResource;
+import org.opencms.file.CmsResourceFilter;
 import org.opencms.loader.CmsLoaderException;
 import org.opencms.main.CmsException;
 import org.opencms.main.CmsLog;
@@ -114,6 +120,18 @@ public class LuceneVideoCollector extends A_Collector {
 		
 		TfsAdvancedSearch adSearch = new TfsAdvancedSearch();
 		
+		CmsResourceFilter resourceFilter = (CmsResourceFilter) parameters.get(TfsVideosListTag.param_resourcefilter);	
+		if (resourceFilter == null)
+			resourceFilter = CmsResourceFilter.DEFAULT;
+		
+		Query expirationQuery = null;
+		if (resourceFilter.equals(CmsResourceFilter.DEFAULT) 
+				|| resourceFilter.equals(CmsResourceFilter.DEFAULT_FILES)
+				|| resourceFilter.equals(CmsResourceFilter.DEFAULT_FOLDERS)) {
+			
+			expirationQuery = getVisibilityQuery();
+		}
+		
 		if(uid!=null && !uid.equals(""))
 			adSearch.setLanguageAnalyzer(new WhitespaceAnalyzer());
 		
@@ -194,6 +212,10 @@ public class LuceneVideoCollector extends A_Collector {
 		adSearch.init(cms,fieldConf);
 		adSearch.setMatchesPerPage(size);
 		adSearch.setQuery(query);
+		
+		if (expirationQuery!=null)
+			adSearch.setExtraQuery(expirationQuery);
+		
 		adSearch.setMaxResults(size*page+1);	
 		adSearch.setPage(page);
 		adSearch.setIndex(serarchIndexName);
@@ -204,6 +226,8 @@ public class LuceneVideoCollector extends A_Collector {
 						adSearch.setSecundaryIndex(secIdxName);
 			}
 		}
+		
+		adSearch.setResFilter(resourceFilter);
 		
 		String order = (String)parameters.get(TfsVideosListTag.param_order);
 		
@@ -216,7 +240,7 @@ public class LuceneVideoCollector extends A_Collector {
 			{
 	 			String path = cms.getRequestContext().removeSiteRoot(resultado.getPath());
 	 			try {
-	 				imagenes.add(cms.readResource(path));
+	 				imagenes.add(cms.readResource(path,CmsResourceFilter.ALL));
 				
 	 			} catch (CmsException e) {
 					// TODO Auto-generated catch block
@@ -402,4 +426,70 @@ public class LuceneVideoCollector extends A_Collector {
 		return tEdicion;
 	}
 
+	private Query legacyVideoWithNoVisibilityFields() {
+		// Condicion: Aquellos video que no tienen los campos de expiracion y disponibilidad
+		Query matchAll = new MatchAllDocsQuery();
+		
+		String from	=	DateTools.dateToString(
+                new Date(0),
+                DateTools.Resolution.SECOND);
+		
+		String to	=	DateTools.dateToString(
+                new Date(Long.MAX_VALUE),
+                DateTools.Resolution.SECOND);
+		
+		TermRangeQuery AllwithExpiredValue = TermRangeQuery.newStringRange(CmsSearchField.FIELD_DATE_EXPIRES_LOOKUP,from,to,true,true);
+		TermRangeQuery AllwithReleasedValue = TermRangeQuery.newStringRange(CmsSearchField.FIELD_DATE_RELEASED_LOOKUP,from,to,true,true);
+		
+		
+		BooleanQuery.Builder allWithNoVisibilityRange = new BooleanQuery.Builder();
+		allWithNoVisibilityRange.add(matchAll,BooleanClause.Occur.MUST);
+		allWithNoVisibilityRange.add(AllwithExpiredValue,BooleanClause.Occur.MUST_NOT);
+		allWithNoVisibilityRange.add(AllwithReleasedValue,BooleanClause.Occur.MUST_NOT);
+		
+		return allWithNoVisibilityRange.build();
+		
+	}
+	
+	private Query eventInVisibilityWindow() {
+		
+		String expiresFrom	=	DateTools.dateToString(
+                new Date(),
+                DateTools.Resolution.SECOND);
+		
+		String expiresTo	=	DateTools.dateToString(
+                new Date(Long.MAX_VALUE),
+                DateTools.Resolution.SECOND);
+		
+		TermRangeQuery expiredLookupRange = TermRangeQuery.newStringRange(CmsSearchField.FIELD_DATE_EXPIRES_LOOKUP,expiresFrom,expiresTo,true,true);
+		//query += getRangeQueryClause(expiresFrom, expiresTo, CmsSearchField.FIELD_DATE_EXPIRES_LOOKUP);
+		
+		String releasedFrom	=	DateTools.dateToString(
+                new Date(0),
+                DateTools.Resolution.SECOND);
+		
+		String releasedTo	=	DateTools.dateToString(
+                new Date(),
+                DateTools.Resolution.SECOND);
+		
+		TermRangeQuery releasedLookupRange = TermRangeQuery.newStringRange(CmsSearchField.FIELD_DATE_RELEASED_LOOKUP,releasedFrom,releasedTo,true,true);
+		
+		//query += getRangeQueryClause(releasedFrom, releasedTo, CmsSearchField.FIELD_DATE_RELEASED_LOOKUP);
+		BooleanQuery.Builder inRange = new BooleanQuery.Builder();
+		inRange.add(releasedLookupRange,BooleanClause.Occur.MUST);
+		inRange.add(expiredLookupRange,BooleanClause.Occur.MUST);
+		
+		return inRange.build();
+		
+	}
+	
+	private Query getVisibilityQuery() {
+		
+		BooleanQuery.Builder inRangeOrNoRestreined = new BooleanQuery.Builder();
+		inRangeOrNoRestreined.add(legacyVideoWithNoVisibilityFields(),BooleanClause.Occur.SHOULD);
+		inRangeOrNoRestreined.add(eventInVisibilityWindow(),BooleanClause.Occur.SHOULD);
+		
+		return inRangeOrNoRestreined.build();
+	}
+	
 }
