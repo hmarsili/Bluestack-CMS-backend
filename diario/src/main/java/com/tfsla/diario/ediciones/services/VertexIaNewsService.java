@@ -192,7 +192,7 @@ public class VertexIaNewsService {
      
 	}
 	
-	public JsonObject assistance(String assistanceType, String option, String content) throws IOException {
+	public JsonObject assistance(String customPrompt, String assistanceType, String option, String content) throws IOException {
         GoogleCredentials credentials = null;
 		
 	    try {
@@ -213,14 +213,22 @@ public class VertexIaNewsService {
 	      
 	      List<SafetySetting> safetySettings = setSafetySettings();
 	 
-	      String prompt =  getPromptByType(assistanceType);
 	      String fullPrompt = "";
-	    		  
-	      if(option != null)
-	    	  fullPrompt = String.format(prompt, content, option);
-	      else 
-	    	  fullPrompt =  prompt.replaceAll("%1",content);
 	      
+	      if(customPrompt!=null) {
+	    	  
+	    	  fullPrompt = customPrompt;
+	    	  fullPrompt += "\n"+content;
+	    	  
+	      }else{
+		      String prompt =  getPromptByType(assistanceType);
+		    		
+		      fullPrompt =  prompt.replaceAll("%1",content);
+		      
+		      if(option != null)
+		    	  fullPrompt =  fullPrompt.replaceAll("%2",option);
+		  }
+		      
 	      fullPrompt += "\nLa respuesta debe indicarse como responseAI";
 	     
 	      List<Content> contents = new ArrayList<>();
@@ -240,10 +248,10 @@ public class VertexIaNewsService {
 		  for (GenerateContentResponse responsePart: responseStream) {
 			  responseText += ResponseHandler.getText(responsePart).replaceAll("```json", "").replaceAll("```", "");
 			}
-		
+		  
 		  JsonObject jsonObject = new JsonObject();
 		  
-		  jsonObject.addProperty("responseAI",  responseText.replaceAll("responseAI:", "").trim());
+		  jsonObject.addProperty("responseAI",  responseText.replaceAll("responseAI:", "").replaceAll("\\*\\*", "").trim());
 		  
 		return jsonObject;
 	}
