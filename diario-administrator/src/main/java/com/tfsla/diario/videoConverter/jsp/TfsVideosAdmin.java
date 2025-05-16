@@ -1938,4 +1938,41 @@ private void deleteFile(CmsResource resource,CmsObject cms) throws CmsException 
 		
 		return existFormatInQueue;
 	}
+	
+	public String getConversionStatus(String sourceVFSPath) {
+		
+		String status = null;
+		int statusInQueue = -1;
+		
+		TfsEnconderQueue queue = new TfsEnconderQueue(getCmsObject(),m_context, request, response);
+		statusInQueue = queue.getQueueStatusByPath(sourceVFSPath);
+			
+		if(statusInQueue==1)
+			status = "OnProcess";
+		else if(statusInQueue==0)
+			status = "OnQueue";
+		else{
+			try {
+				
+				CmsResource resource = getCmsObject().readResource(sourceVFSPath);
+				CmsProperty prop = getCmsObject().readPropertyObject(resource, "video-formats", false);
+				String videoFormats = null;
+				
+				if (prop!=null)
+				videoFormats = prop.getValue();
+				
+				if(videoFormats!= null && !videoFormats.equals(""))
+				status = "Converted";
+		
+			} catch (CmsException e) {
+				CmsLog.getLog(this).equals("Error al verificar formatos cargados del video: "+e.getMessage());
+			}
+		}
+		
+		if(status==null)
+			status = "NoFormats";
+		
+		return status;
+		
+	}
 }
