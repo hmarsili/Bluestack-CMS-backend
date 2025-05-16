@@ -540,6 +540,9 @@ public abstract class UploadService {
 	
 	public static void setUploadStatus(String path,String status) {
 		
+		if (path.startsWith("/"))
+            path = path.substring(1); 
+		
 		String oldStatus = uploadStatus.get(path);
 		String[] parts = oldStatus.split("\\|");
 		

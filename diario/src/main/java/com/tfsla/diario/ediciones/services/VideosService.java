@@ -498,6 +498,7 @@ public class VideosService extends UploadService {
             try {
             	createSpecificProperties(fullPath);
             } catch (CmsException e) {
+            	com.tfsla.diario.ediciones.services.UploadService.setUploadStatus(amzPath,"fail");
     			LOG.error("Error al intentar obtener la info del video: " + fullPath,e);
     		}
          			
@@ -594,6 +595,11 @@ public class VideosService extends UploadService {
 		
 		try {
 			infoVideo = infoExtractor.getInfo(url);
+			
+			if (infoVideo.getVideo() == null) {
+				LOG.error("No se pudo obtener la metadata del video " + vfsResource);
+				return;
+			}
 		} catch (Exception ex){
 			LOG.error("Error al buscar informacion adicional de " + vfsResource, ex);
 			throw ex;
