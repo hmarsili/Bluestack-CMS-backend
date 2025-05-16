@@ -87,7 +87,7 @@ public class VertexIaNewsService {
       //String prompt = "Escribe un noticia en español latinoamericano según el contenido de la siguiente noticia: https://www.tv7israelnews.com/us-israel-tiff-over-judicial-reform/. La noticia debe tener el formato {\"titulo\":\"\", \"bajada\":\"\" y \"cuerpo\":\"\"} en formato json válido con solo esos campos";
      String fullPrompt = prompt + " \n" + getBasePrompt();
       
-     System.out.print(fullPrompt);
+     //System.out.print(fullPrompt);
      
       List<Content> contents = new ArrayList<>();
       contents.add(Content.newBuilder().setRole("user").addParts(Part.newBuilder().setText(fullPrompt)).build());
@@ -99,7 +99,7 @@ public class VertexIaNewsService {
 
       //System.out.print(responseText);
       //JsonObject jsonObject = JsonParser.parseString(responseText).getAsJsonObject();
-      System.out.print(jsonObject);
+     //System.out.print(jsonObject);
       
       return jsonObject;
     }  
@@ -124,15 +124,16 @@ public class VertexIaNewsService {
 		  int campo = 0;
 		  String cuerpo="";
 		  for (String p : parte) {
-			  p = p.replaceFirst("\\**[tT][ií]tulo:\\**\\s", "").replaceFirst("\\**[Bb]ajada:\\**\\s", "").replaceFirst("\\**[Cc]uerpo:\\**[\\s\\n]", "");
+			  //p = p.replaceFirst("\\**[tT][ií]tulo:\\**\\s", "").replaceFirst("\\**[Bb]ajada:\\**\\s", "").replaceFirst("\\**[Cc]uerpo:\\**[\\s\\n]", "");
+			  p = p.replaceFirst("[tT][ií]tulo:\\s*", "").replaceFirst("[Bb]ajada:\\s*", "").replaceFirst("[Cc]uerpo:\\s*", "");
 			  
 			  if (campo<2 && p.replaceAll("\\n", "").trim().length()==0)
 				  continue;
 			  
 			  if (campo==0)
-				  jsonObject.addProperty("titulo",  p.replaceAll("\\*\\*", ""));
+				  jsonObject.addProperty("titulo",  p.replaceAll("\\*\\*", "").trim());
 			  else if (campo==1)
-				  jsonObject.addProperty("bajada",  p.replaceAll("\\*\\*", ""));
+			      jsonObject.addProperty("bajada",  p.replaceAll("\\*\\*", "").trim());
 			  else {
 				  p = p.replaceAll("<br>", "").replaceAll("</br>", "").replaceAll("<br/>", "");
 				  if (p.trim().length()>0)
@@ -141,7 +142,7 @@ public class VertexIaNewsService {
 			  campo++;
 		  }
 		  
-		  jsonObject.addProperty("cuerpo",  cuerpo.replaceAll("\\*\\*", ""));
+		  jsonObject.addProperty("cuerpo",  cuerpo.replaceAll("\\*\\*", "").replaceFirst("<p></p>\\n", "").trim());
 		return jsonObject;
 	}
 	
@@ -172,7 +173,7 @@ public class VertexIaNewsService {
       //String prompt = "Escribe un noticia en español latinoamericano según el contenido de la siguiente noticia: https://www.tv7israelnews.com/us-israel-tiff-over-judicial-reform/. La noticia debe tener el formato {\"titulo\":\"\", \"bajada\":\"\" y \"cuerpo\":\"\"} en formato json válido con solo esos campos";
      String fullPrompt = getPrompt().replaceAll("\\$URL\\$",url) + " \n" + aditionalPrompt;
       
-     System.out.print(fullPrompt);
+     //System.out.print(fullPrompt);
      
       List<Content> contents = new ArrayList<>();
       contents.add(Content.newBuilder().setRole("user").addParts(Part.newBuilder().setText(fullPrompt)).build());
@@ -184,7 +185,7 @@ public class VertexIaNewsService {
 
       //System.out.print(responseText);
       //JsonObject jsonObject = JsonParser.parseString(responseText).getAsJsonObject();
-      System.out.print(jsonObject);
+    //  System.out.print(jsonObject);
       
       return jsonObject;
     }  
