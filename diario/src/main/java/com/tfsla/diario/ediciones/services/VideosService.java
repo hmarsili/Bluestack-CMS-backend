@@ -466,6 +466,8 @@ public class VideosService extends UploadService {
 	@Override 
 	public String uploadAmzFileTM(String fullPath, Map<String,String> parameters, InputStream content) throws Exception {
 	
+		com.tfsla.diario.ediciones.services.UploadService.uploadCancel(false);
+		
 		String amzUrlUploaded = null;
 		String uploadStatus = null;
 		
