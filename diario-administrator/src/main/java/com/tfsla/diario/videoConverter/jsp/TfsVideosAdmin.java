@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;  
+import java.util.regex.Pattern;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -54,11 +56,13 @@ import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.SocketException;
 import java.net.URL;
+import java.net.URI;
 
 import com.tfsla.diario.auditActions.data.TfsAuditActionDAO;
 import com.tfsla.diario.auditActions.model.TfsAuditAction;
 import com.tfsla.diario.ediciones.model.TipoEdicion;
 import com.tfsla.diario.ediciones.services.TipoEdicionService;
+import com.tfsla.diario.file.types.TfsResourceTypeVideoLink;
 import com.tfsla.diario.file.types.TfsResourceTypeVideoVodLink;
 import com.tfsla.diario.videoConverter.ConverterLogger;
 import com.tfsla.diario.videoConverter.Encoder;
@@ -90,6 +94,7 @@ import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest.Builder;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;  
 import software.amazon.awssdk.services.sqs.SqsClient;
 
 import org.opencms.report.CmsLogReport;
@@ -1265,7 +1270,7 @@ public class TfsVideosAdmin implements EncoderProgressListener {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void deleteVideo(String sourceVFSPath, CmsObject cms) {
+public void deleteVideo(String sourceVFSPath, CmsObject cms) {
 		
 		try {	
 			if (!cms.getLock(sourceVFSPath).isUnlocked()) {
@@ -1276,51 +1281,72 @@ public class TfsVideosAdmin implements EncoderProgressListener {
 			     cms.lockResource(sourceVFSPath);
 			}
 			
-			CmsRelationFilter filter = CmsRelationFilter.ALL.filterType(CmsRelationType.valueOf("videoFormats"));
-			List<CmsRelation> relations = cms.getRelationsForResource(sourceVFSPath, filter);
+			boolean fileDeleted = true;
 			
-			for (CmsRelation rel : relations) {
-				
-				String relation = "";
-		      	
-		      	String rel1 = cms.getRequestContext().removeSiteRoot(rel.getTargetPath());
-   				String rel2 = cms.getRequestContext().removeSiteRoot(rel.getSourcePath());
-
-   				if (rel1.equals(sourceVFSPath))
-   					relation = rel2;
-   				else
-   					relation = rel1;
-   				
-   				if (!cms.getLock(relation).isUnlocked()){
-				     if(!cms.getLock(relation).isOwnedBy(cms.getRequestContext().currentUser())){
-					      cms.changeLock(relation);
-				    }
-				}else{
-				     cms.lockResource(relation);
-				}
-   				
-   				CmsResource    relResource = cms.readResource(relation);
-				CmsResourceState estadoRel = relResource.getState();
-		    	String        estadoRelStr = estadoRel.toString();
-		    	
-				cms.deleteResource(relation, CmsResource.DELETE_PRESERVE_SIBLINGS);
-				
-		    	if( !estadoRelStr.equals("2") )
-				    OpenCms.getPublishManager().publishResource(cms,relation);
-			 }
-			
+			// borro el archivo fisico
 			CmsResource  resource = cms.readResource(sourceVFSPath);
-			CmsResourceState  estado = resource.getState();
-	    	String         estadoStr = estado.toString();
-	    	
-			cms.deleteResource(sourceVFSPath, CmsResource.DELETE_PRESERVE_SIBLINGS);
 			
-	    	if( !estadoStr.equals("2") )
-			     OpenCms.getPublishManager().publishResource(cms,sourceVFSPath);
+			if (resource.getTypeId() == TfsResourceTypeVideoLink.getStaticTypeId()) {
+				try {
+					deleteFile(resource,cms);
+				} catch (Exception e) {
+					fileDeleted = false;
+					CmsLog.getLog(this).error("Error al borrar el archivo del video : "+sourceVFSPath+". Error: "+e.getMessage());
+				}
+			}
 			
-			TfsEnconderQueue queue;
-							 queue = new TfsEnconderQueue(cms,m_context, request, response);
-							 queue.deleteFromQueueByPath(sourceVFSPath);
+			if(fileDeleted) {
+				CmsRelationFilter filter = CmsRelationFilter.ALL.filterType(CmsRelationType.valueOf("videoFormats"));
+				List<CmsRelation> relations = cms.getRelationsForResource(sourceVFSPath, filter);
+				
+				for (CmsRelation rel : relations) {
+					
+					String relation = "";
+			      	
+			      	String rel1 = cms.getRequestContext().removeSiteRoot(rel.getTargetPath());
+	   				String rel2 = cms.getRequestContext().removeSiteRoot(rel.getSourcePath());
+	
+	   				if (rel1.equals(sourceVFSPath))
+	   					relation = rel2;
+	   				else
+	   					relation = rel1;
+	   				
+	   				if (!cms.getLock(relation).isUnlocked()){
+					     if(!cms.getLock(relation).isOwnedBy(cms.getRequestContext().currentUser())){
+						      cms.changeLock(relation);
+					    }
+					}else{
+					     cms.lockResource(relation);
+					}
+	   				
+	   				CmsResource    relResource = cms.readResource(relation);
+					CmsResourceState estadoRel = relResource.getState();
+			    	String        estadoRelStr = estadoRel.toString();
+			    	
+			    	try {
+						deleteFile(relResource,cms);
+					} catch (Exception e) {
+						CmsLog.getLog(this).error("Error al borrar el archivo del video : "+relation+". Error: "+e.getMessage());
+					}
+			    	
+					cms.deleteResource(relation, CmsResource.DELETE_PRESERVE_SIBLINGS);
+					
+			    	if( !estadoRelStr.equals("2") )
+					    OpenCms.getPublishManager().publishResource(cms,relation);
+				 }
+				
+				CmsResourceState  estado = resource.getState();
+		    	String         estadoStr = estado.toString();
+		    	
+				cms.deleteResource(sourceVFSPath, CmsResource.DELETE_PRESERVE_SIBLINGS);
+				
+		    	if( !estadoStr.equals("2") )
+				     OpenCms.getPublishManager().publishResource(cms,sourceVFSPath);
+				
+				TfsEnconderQueue queue;
+								 queue = new TfsEnconderQueue(cms,m_context, request, response);
+								 queue.deleteFromQueueByPath(sourceVFSPath);
+			}
 			
 		} catch (CmsException e1) {
 			CmsLog.getLog(this).error("Error al borrar videos: "+e1.getMessage());
@@ -1328,6 +1354,68 @@ public class TfsVideosAdmin implements EncoderProgressListener {
 			CmsLog.getLog(this).error("Error al borrar videos: "+e.getMessage());
 		}
 		
+	}
+	
+private void deleteFile(CmsResource resource,CmsObject cms) throws CmsException {
+		
+		CmsFile file = cms.readFile(resource);
+		String videoUrl = new String(file.getContents());
+		
+		String S3_URL_REGEX = "^https?://[a-z0-9.-]+\\.s3\\..*\\..*\\.amazonaws\\.com/[A-Za-z0-9._-]+[/[^/]+]*$"; 
+		
+		Pattern pattern = Pattern.compile(S3_URL_REGEX);  
+        Matcher matcher = pattern.matcher(videoUrl);  
+        
+        if(matcher.matches())
+        {
+			String amzBucket = config.getParam(siteName, publication, moduleVideoConfig, "amzBucket","");
+			String amzAccessID  = config.getParam(siteName, publication, moduleVideoConfig, "amzAccessID","");
+			String amzAccessKey = config.getParam(siteName, publication, moduleVideoConfig, "amzAccessKey","");
+			String amzRegion = config.getParam(siteName, publication, moduleVideoConfig, "amzRegion","");
+			
+			AwsBasicCredentials awsCreds = AwsBasicCredentials.create(amzAccessID, amzAccessKey);
+			S3Client s3 = null;
+			
+			if(amzRegion != null && !amzRegion.equals("")) {
+				
+				s3 = S3Client.builder()
+					.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+					.region(Region.of(amzRegion))
+					.build();
+			}else {
+				
+				s3 = S3Client.builder()
+						.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+						.build();
+			}
+			 
+	        try {  
+	            String key = URI.create(videoUrl).getPath().substring(1);  
+	            
+	            DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()  
+		                .bucket(amzBucket)  
+		                .key(key)  
+		                .build();  
+
+	            s3.deleteObject(deleteRequest);  
+	        } catch (Exception e) {  
+	            CmsLog.getLog(this).error("Error al eliminar el archivo: " + e.getMessage());
+	        }  
+	        
+        }else {
+        	
+        	String  rfsDirectory = config.getParam(siteName, publication, moduleVideoConfig, "rfsDirectory","");
+			String rfsVirtualUrl = config.getParam(siteName, publication, moduleVideoConfig, "rfsVirtualUrl","");
+			
+			String rfsPath = videoUrl.replace(rfsVirtualUrl, rfsDirectory+"/" );
+        	
+        	File videoFile = new File("/"+rfsPath);
+        	
+        	if(videoFile.exists()) 
+        		videoFile.delete();
+        }
+        
+
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
