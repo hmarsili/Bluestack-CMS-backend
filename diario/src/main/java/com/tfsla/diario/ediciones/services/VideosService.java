@@ -12,6 +12,7 @@ import org.opencms.configuration.CPMConfig;
 import org.opencms.configuration.CmsMedios;
 import org.opencms.configuration.CmsSchedulerConfiguration;
 import org.opencms.db.CmsDbSqlException;
+import org.opencms.db.CmsPublishList;
 import org.opencms.db.CmsResourceState;
 import org.opencms.file.CmsFile;
 import org.opencms.file.CmsObject;
@@ -36,6 +37,7 @@ import org.opencms.relations.CmsRelationType;
 import org.opencms.scheduler.CmsScheduledJobInfo;
 import org.opencms.scheduler.jobs.CmsPublishScheduledJob;
 import org.opencms.security.CmsRole;
+import org.opencms.security.CmsRoleViolationException;
 import org.opencms.security.CmsSecurityException;
 import org.opencms.util.CmsDateUtil;
 import org.opencms.util.CmsFileUtil;
@@ -114,6 +116,9 @@ public class VideosService extends UploadService {
 	private String defaultVideoEmbeddedPath = "";
 	private String youTubeDataAPIKey = "";
 	private static  String moduleName = "videoUpload";
+	private String dateFormat = "";
+	private String timeFormat = "";
+	private String siteName = "";
 	
 	static private boolean createDateFolderDefault = false;
 	
@@ -190,26 +195,31 @@ public class VideosService extends UploadService {
 		this.loadProperties(siteName,publication);
 	}
 
-	public void loadProperties(String siteName, String publication) {
+	public void loadProperties(String _siteName, String publication) {
     	String module = getModuleName();
  		CPMConfig config = CmsMedios.getInstance().getCmsParaMediosConfiguration();
 		
-		youTubeKey = config.getParam(siteName, publication, module, "youTubeKey","");
-		youTubeClient = config.getParam(siteName, publication, module, "defaultVideoEmbeddedPath","");
+		youTubeKey = config.getParam(_siteName, publication, module, "youTubeKey","");
+		youTubeClient = config.getParam(_siteName, publication, module, "defaultVideoEmbeddedPath","");
 		
-		defaultVideoDownloadPath = config.getParam(siteName, publication, module, "defaultVideoDownloadPath","");
-		defaultVideoFlashPath = config.getParam(siteName, publication, module, "defaultVideoFlashPath","");
+		defaultVideoDownloadPath = config.getParam(_siteName, publication, module, "defaultVideoDownloadPath","");
+		defaultVideoFlashPath = config.getParam(_siteName, publication, module, "defaultVideoFlashPath","");
 		
-		defaultVideoEmbeddedPath = config.getParam(siteName, publication, module, "defaultVideoEmbeddedPath","");
-		defaultVideoYouTubePath = config.getParam(siteName, publication, module, "defaultVideoYouTubePath","");
+		defaultVideoEmbeddedPath = config.getParam(_siteName, publication, module, "defaultVideoEmbeddedPath","");
+		defaultVideoYouTubePath = config.getParam(_siteName, publication, module, "defaultVideoYouTubePath","");
 		
-		createDateFolderDefault = config.getBooleanParam(siteName, publication, module, "createDateFolderDefault",false);
+		createDateFolderDefault = config.getBooleanParam(_siteName, publication, module, "createDateFolderDefault",false);
 		
-		youTubeDataAPIKey = config.getParam(siteName, publication, module, "youTubeDataAPIKey");
+		youTubeDataAPIKey = config.getParam(_siteName, publication, module, "youTubeDataAPIKey");
 		
-		rfsSubFolderFormat = config.getParam(siteName, publication, module, "rfsSubFolderFormat",""); 
+		rfsSubFolderFormat = config.getParam(_siteName, publication, module, "rfsSubFolderFormat",""); 
 		
-		loadBaseProperties(siteName, publication);
+		dateFormat = config.getParam(_siteName, publication, "admin-settings", "dateFormat", "");
+		timeFormat = config.getParam(_siteName, publication, "admin-settings", "timeFormat", "");
+		
+		siteName = _siteName;
+		
+		loadBaseProperties(_siteName, publication);
 	}
 
 	public List<VideoEntry> searchYouTubeVideo(String query, YouTubeQuery.OrderBy orderBy) throws IOException, ServiceException {
@@ -1593,15 +1603,16 @@ public Object getYoutubeAPIData(String youtubeId){
 	        // get the request parameters for resource and publish scheduled date
 	        String userName = cmsObject.getRequestContext().currentUser().getName();
 	
+	        Date publishDate = new Date(Long.parseLong(publishScheduledDate));
 	        // get the java date format
-	        DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.ENGLISH);
-	        Date date = dateFormat.parse(publishScheduledDate);
-	
+	        // DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.ENGLISH);
+	        
 	        // check if the selected date is in the future
-	        if (date.getTime() < new Date().getTime()) {
-	            // the selected date in in the past, this is not possible
-	            throw new CmsException(Messages.get().container(Messages.ERR_PUBLISH_SCHEDULED_DATE_IN_PAST_1, date));
-	        }
+	        if (publishDate != null && (publishDate.getTime() < new Date().getTime())) {
+				// the selected date in in the past, this is not possible
+				throw new CmsException(
+						Messages.get().container(Messages.ERR_PUBLISH_SCHEDULED_DATE_IN_PAST_1, publishDate));
+			}
 	
 	        // make copies from the admin cmsobject and the user cmsobject
 	        // get the admin cms object
@@ -1615,12 +1626,38 @@ public Object getYoutubeAPIData(String youtubeId){
 	
 	        // create the temporary project, which is deleted after publishing
 	        // the publish scheduled date in project name
-	        String dateTime = CmsDateUtil.getDateTime(date, DateFormat.SHORT, Locale.ENGLISH);
+	        String dateTime = CmsDateUtil.getDateTime(publishDate, DateFormat.SHORT, Locale.ENGLISH);
 	        
 	        // the resource name to publish scheduled
-        	String resName = CmsResource.getName(resources[0]);
+	        String resName = resources[0]; //CmsResource.getName(resources[0]);
         
-	       String projectName = "publish videos: " + resName + " / " + dateTime.toString();
+	        String jobDte = "";
+			
+			System.out.println("Se solicito la publicacion de " + resources[0]);
+			
+			if (publishDate != null) {
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTime(publishDate);
+				jobDte = dateFormat.toLowerCase();
+				
+				LOG.debug("LOGPROGRAMAR publishDate del front: " + publishDate);
+				LOG.debug("LOGPROGRAMAR dateFormat configurada: " + dateFormat);
+				
+				jobDte = jobDte.replaceAll("dd", String.valueOf(calendar.get(Calendar.DAY_OF_MONTH)));
+				jobDte = jobDte.replaceAll("mm", String.valueOf(calendar.get(Calendar.MONTH) + 1));
+				jobDte = jobDte.replaceAll("yyyy", String.valueOf(calendar.get(Calendar.YEAR)));
+				
+				LOG.debug("LOGPROGRAMAR timeFormat configurado: " + timeFormat);
+				if (timeFormat.equals("12h"))
+					jobDte = jobDte + " on "+  String.valueOf(calendar.get(Calendar.HOUR)) +":"+ String.format("%02d",calendar.get(Calendar.MINUTE))  + String.valueOf(calendar.get(Calendar.AM_PM)); 
+				else
+					jobDte = jobDte + " on "+  String.valueOf(calendar.get(Calendar.HOUR_OF_DAY)) +":"+ String.format("%02d",calendar.get(Calendar.MINUTE)); 
+				
+			}
+			
+			// the resource name to publish scheduled
+			String projectName = "Publish " + resName + " at " + jobDte + " in " + siteName;
+			
 	        // the HTML encoding for slashes is necessary because of the slashes in english date time format
 	        // in project names slahes are not allowed, because these are separators for organizaional units
 	        projectName = projectName.replace("/", "&#47;");
@@ -1661,39 +1698,38 @@ public Object getYoutubeAPIData(String youtubeId){
 		        lock = cms.getLock(resources[i]);
 	        }
 	        
-	        // create a new scheduled job
-	        CmsScheduledJobInfo job = new CmsScheduledJobInfo();
-	        // the job name
-	        String jobName = projectName;
-	        // set the job parameters
-	        job.setJobName(jobName);
-	        job.setClassName("org.opencms.scheduler.jobs.CmsPublishScheduledJob");
-	        // create the cron expression
-	        Calendar calendar = Calendar.getInstance();
-	        calendar.setTime(date);
-	        String cronExpr = ""
-	            + calendar.get(Calendar.SECOND)
-	            + " "
-	            + calendar.get(Calendar.MINUTE)
-	            + " "
-	            + calendar.get(Calendar.HOUR_OF_DAY)
-	            + " "
-	            + calendar.get(Calendar.DAY_OF_MONTH)
-	            + " "
-	            + (calendar.get(Calendar.MONTH) + 1)
-	            + " "
-	            + "?"
-	            + " "
-	            + calendar.get(Calendar.YEAR);
-	        // set the cron expression
-	        job.setCronExpression(cronExpr);
-	        // set the job active
-	        job.setActive(true);
-	        // create the context info
-	        CmsContextInfo contextInfo = new CmsContextInfo();
-	        contextInfo.setProjectName(projectName);
-	        contextInfo.setUserName(cms.getRequestContext().currentUser().getName());
-	        //contextInfo.setUserName(cmsAdmin.getRequestContext().currentUser().getName());
+
+			// create a new scheduled job
+			CmsScheduledJobInfo job = new CmsScheduledJobInfo();
+			// the job name
+			String jobName = projectName;
+			// set the job parameters
+			job.setJobName(jobName);
+			job.setClassName("org.opencms.scheduler.jobs.CmsPublishScheduledJob");
+			// create and set the cron expression
+
+			LOG.debug("LOGPROGRAMAR publishDate : " + publishScheduledDate);
+			
+			if (publishDate != null) {
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTime(publishDate);
+				String cronExpr = "" + calendar.get(Calendar.SECOND) + " " + calendar.get(Calendar.MINUTE) + " "
+						+ calendar.get(Calendar.HOUR_OF_DAY) + " " + calendar.get(Calendar.DAY_OF_MONTH) + " "
+						+ (calendar.get(Calendar.MONTH) + 1) + " " + "?" + " " + calendar.get(Calendar.YEAR);
+				job.setCronExpression(cronExpr);
+				
+				LOG.debug("LOGPROGRAMAR cronExpr: " + cronExpr);
+				
+			} 
+			// set the job active
+			job.setActive(true);
+			// create the context info
+			CmsContextInfo contextInfo = new CmsContextInfo();
+			contextInfo.setProjectName(projectName);
+
+			contextInfo.setUserName(cms.getRequestContext().currentUser().getName());
+			// contextInfo.setUserName(cmsAdmin.getRequestContext().currentUser().getName());
+			
 	        // create the job schedule parameter
 	        SortedMap<String, String> params = new TreeMap<String, String>();
 	        // the user to send mail to
@@ -1712,6 +1748,60 @@ public Object getYoutubeAPIData(String youtubeId){
 	        
     }
 
+	public void cancelScheduledPublication(String path) throws Exception {
+		CmsObject cms = this.cmsObject;
+
+		CmsLock lockRel = cms.getLock(path);
+
+		
+		if (lockRel.isUnlocked())
+			throw new Exception("The resource is not currently scheduled: " + path);
+		
+		if (lockRel.isExclusive() && lockRel.getProject().getName().startsWith("Publish")) {
+			
+			//La noticia esta lockeada para publicacion y obtengo el nombre del proyecto temporal en el que esta.
+			String progProjectName = lockRel.getProject().getName();
+			
+			
+			//obtengo los recursos de esa noticia que se encuentran en el mismo proyecto para publicar
+			CmsProject currProj = cms.getRequestContext().currentProject();
+			cms.getRequestContext().setCurrentProject(cms.readProject(progProjectName));
+			CmsPublishList pList = OpenCms.getPublishManager().getPublishList(cms);
+			List<CmsResource> resourcesInProject = pList.getAllResources();
+			cms.getRequestContext().setCurrentProject(currProj);
+			
+			//quito los recursos relacionados de esa noticia del proyecto de publicacion
+			for (CmsResource res : resourcesInProject) {
+				com.tfsla.utils.CmsResourceUtils.unlockResource(cms, cms.getRequestContext().removeSiteRoot(res.getRootPath()), false);
+			}
+			
+			//Quito la noticia del proyecto de publicacion.
+			com.tfsla.utils.CmsResourceUtils.unlockResource(cms, path, false);
+
+			cms.lockResource(path);
+
+			//Elimino el scheduledjob para que no se ejecute.
+			unscheduleJob(progProjectName, cms);
+		}
+		else 
+			throw new Exception("The resource is not currently scheduled: " + path);
+	}
+
+	public void unscheduleJob(String jobName, CmsObject cms) throws CmsRoleViolationException {
+		CmsScheduledJobInfo job = this.getJobByName(jobName, cms);
+		if(job == null) return;
+		OpenCms.getScheduleManager().unscheduleJob(cms, job.getId());
+		OpenCms.writeConfiguration(CmsSchedulerConfiguration.class);
+	}
+	public CmsScheduledJobInfo getJobByName(String jobName, CmsObject cms) {
+		List jobs = OpenCms.getScheduleManager().getJobs();
+		for(Object job : jobs) {
+			CmsScheduledJobInfo jobInfo = (CmsScheduledJobInfo)job;
+			if(jobInfo.getJobName().equals(jobName)) return jobInfo;
+		}
+		return null;
+	}
+	
 	@Override
 	public JSONObject callbackUpload(JSONObject data) {
 		// TODO Falta implementar
