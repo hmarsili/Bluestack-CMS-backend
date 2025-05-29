@@ -29,7 +29,6 @@ import org.opencms.xml.content.CmsXmlContentErrorHandler;
 import org.opencms.xml.content.CmsXmlContentFactory;
 import org.opencms.xml.types.I_CmsXmlContentValue;
 
-import com.tfsla.diario.admin.jsp.TfsNewsAdminJson;
 import com.tfsla.diario.auditActions.resourceMonitor.I_ResourceMonitor;
 import com.tfsla.diario.auditActions.resourceMonitor.ResourceMonitorManager;
 import com.tfsla.diario.ediciones.services.FreshnessService;
@@ -42,7 +41,7 @@ import net.sf.json.JSONObject;
 
 public class TfsXmlContentSetter  extends A_TfsXmlContentProc {
 
-	protected static final Log LOG = CmsLog.getLog(TfsNewsAdminJson.class);
+	protected static final Log LOG = CmsLog.getLog(TfsXmlContentSetter.class);
 	
 	CmsXmlContentErrorHandler  m_validationHandler;
 	CPMConfig configura;
@@ -708,7 +707,9 @@ LOG.debug("jsonUnsafeLabels --->" + jsonUnsafeLabels);
 		JSONObject jsonFrescura = jsonRequest.getJSONObject("detail").getJSONObject("freshness");
 		jsonFrescura.put("siteName", jsonRequest.getJSONObject("authentication").getString("siteName"));
 		jsonFrescura.put("publication", jsonRequest.getJSONObject("authentication").getString("publication"));
-	
+		jsonFrescura.put("url", pathNew);
+		jsonFrescura.put("section", jsonRequest.getJSONObject("content").getJSONArray("seccion").get(0).toString());
+
 		int publicationID = jsonRequest.getJSONObject("authentication").getInt("publication");
 		String siteName =  jsonRequest.getJSONObject("authentication").getString("siteName");
 		
@@ -771,9 +772,25 @@ LOG.debug("jsonUnsafeLabels --->" + jsonUnsafeLabels);
 			}
 		} else {
 			
-			Freshness freshnessToUpdate = freshService.formatJsonToFreshness(jsonFrescura,pathNew);
+		//	Freshness freshnessToUpdate = freshService.formatJsonToFreshness(jsonFrescura,pathNew);
+			Freshness frestocreate = (Freshness)JSONObject.toBean(jsonFrescura,Freshness.class);
 			
-			freshService.createFreshness(freshnessToUpdate);
+			LOG.debug("jsonFrescura " + jsonFrescura);
+
+			
+			if (frestocreate.equals("RECURRENCE")) {
+				frestocreate.setDate(jsonFrescura.getLong("dateNew"));
+				frestocreate.setStartDate(jsonFrescura.getLong("dateNew"));
+			} else
+				frestocreate.setDate(jsonFrescura.getLong("dateNew"));
+			
+
+			LOG.debug("freshnessToUpdate section " + frestocreate.getSection());
+
+			
+			freshService.createFreshness(frestocreate);
+			
+			LOG.debug("jsonFrescura " + jsonFrescura);
 		}
 		
 		return true;
