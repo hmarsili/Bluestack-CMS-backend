@@ -36,6 +36,7 @@ public class AnalyticsServices {
 	private String publication;
 	private String siteName;
 	private String siteUrl;
+	private String useCredentialOfPublication ;
 	
 	private boolean updatedDateManual = false;
 	private int	updatedDateManualTime = 0;
@@ -59,9 +60,15 @@ public class AnalyticsServices {
 		updatedDateManualTime = configura.getIntegerParam(siteName, publication, moduleConfiguration, "updatedDateManualTime",30);
 		newsFromLastHoursPublish = configura.getIntegerParam(siteName, publication, moduleConfiguration, "newsFromLastHoursPublish", 72);
 		siteUrl = configura.getParam(siteName, publication, moduleConfiguration, "siteUrl", "");
+		useCredentialOfPublication = configura.getParam(siteName, publication, moduleConfiguration, "useCredentialOfPublication", "00");
 		
 		gservice = new SearchConsoleService();
-		gservice.initializeContext(siteName,publication);
+		if (useCredentialOfPublication != null && !useCredentialOfPublication.equals(publication) && !useCredentialOfPublication.equals("00"))
+			gservice.initializeContext(siteName,useCredentialOfPublication); 
+		else
+			gservice.initializeContext(siteName,publication);
+		
+		LOG.debug("useCredentialOfPublication " + useCredentialOfPublication);
 
 	}
 	
@@ -278,12 +285,14 @@ public class AnalyticsServices {
 							
 							if (analyticsDAO.getNewsData(siteName,Integer.parseInt(publication),canonical).getSitename() != null ) {
 								try {
+									LOG.debug("ENTRA A ACTALIZAR");
 									analyticsDAO.updateDataResources(newsToUpdated);
 								} catch (Exception e) {
 									e.printStackTrace();
 								}
 							}else{
 								try {
+									LOG.debug("ENTRA A CREAR");
 									analyticsDAO.insertNewsData(newsToUpdated);
 								} catch (Exception e) {
 									e.printStackTrace();
