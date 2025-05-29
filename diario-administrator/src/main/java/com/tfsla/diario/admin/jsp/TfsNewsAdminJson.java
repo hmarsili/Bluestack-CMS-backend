@@ -833,10 +833,10 @@ public class TfsNewsAdminJson  {
 		int countSelectedEntitiesFinal = Integer.parseInt(countSelectedEntitiesConfig) ;
 		int countSelectedEntitiesHiddenFinal = Integer.parseInt(countSelectedEntitiesHiddenConfig) ;
 		
-		LOG.debug("path:" + newPath );
-		LOG.debug("Score para mostrar las entidades en el campo claves:" + scoreDisplayEntitiesConfig );
-		LOG.debug("Score para mostrar las entidades en el campo claves Ocultas:" + scoreDisplayEntitiesHiddenConfig );
-		LOG.debug("entitiesFinals:" + entitiesFinals );
+		//LOG.debug("path:" + newPath );
+		//LOG.debug("Score para mostrar las entidades en el campo claves:" + scoreDisplayEntitiesConfig );
+		//LOG.debug("Score para mostrar las entidades en el campo claves Ocultas:" + scoreDisplayEntitiesHiddenConfig );
+		//LOG.debug("entitiesFinals:" + entitiesFinals );
 
 		
 		for (DocEntity entity: entitiesFinals) {
@@ -3987,13 +3987,13 @@ public class TfsNewsAdminJson  {
 				calendar.setTime(publishDate);
 				jobDte = dateFormat.toLowerCase();
 				
-				LOG.debug("LOGPROGRAMAR publishDate del front: " + publishDate);
-				LOG.debug("LOGPROGRAMAR dateFormat configurada: " + dateFormat);
+				//LOG.debug("LOGPROGRAMAR publishDate del front: " + publishDate);
+				//LOG.debug("LOGPROGRAMAR dateFormat configurada: " + dateFormat);
 				jobDte = jobDte.replaceAll("dd", String.valueOf(calendar.get(Calendar.DAY_OF_MONTH)));
 				jobDte = jobDte.replaceAll("mm", String.valueOf(calendar.get(Calendar.MONTH) + 1));
 				jobDte = jobDte.replaceAll("yyyy", String.valueOf(calendar.get(Calendar.YEAR)));
 				
-				LOG.debug("LOGPROGRAMAR timeFormat configurado: " + timeFormat);
+				//LOG.debug("LOGPROGRAMAR timeFormat configurado: " + timeFormat);
 				if (timeFormat.equals("12h"))
 					jobDte = jobDte + " on "+  String.valueOf(calendar.get(Calendar.HOUR)) +":"+ String.format("%02d",calendar.get(Calendar.MINUTE))  + String.valueOf(calendar.get(Calendar.AM_PM)); 
 				else
@@ -4031,13 +4031,21 @@ public class TfsNewsAdminJson  {
 			
 			//SETEAMOS LA PROPERTY PARA INDICAR QUE LA NOTA ESTA PROGRAMA.
 			CmsResourceUtils.forceLockResource(cms, path);
-			CmsProperty prop = new CmsProperty("isScheduled", null, "true", true);
+			
+			/** INI NAA-2704
+		 	CmsProperty prop = new CmsProperty("isScheduled", CmsProperty.DELETE_VALUE, "true", true);
+		 
 			cms.writePropertyObject(path, prop);
 			
 			//SETEAMOS el nobre del job por si hay que despublicarlo.
-			prop = new CmsProperty("isScheduledData", null, projectName, true);
+			prop = new CmsProperty("isScheduledData", CmsProperty.DELETE_VALUE, projectName, true);
 			cms.writePropertyObject(path, prop);
+		 	*/
+			cms.writePropertyObject(path, new CmsProperty("isScheduled","true",null));
+			cms.writePropertyObject(path, new CmsProperty("isScheduledData",projectName,null));
 
+			/** FIN NAA-2704 */
+			
 			// lock the resource in the current project
 			CmsLock lock = cms.getLock(path);
 			// prove is current lock from current but not in current project
@@ -4142,7 +4150,7 @@ public class TfsNewsAdminJson  {
 			job.setClassName("org.opencms.scheduler.jobs.CmsPublishScheduledJob");
 			// create and set the cron expression
 
-			LOG.debug("LOGPROGRAMAR publishDate : " + publishDate);
+			//LOG.debug("LOGPROGRAMAR publishDate : " + publishDate);
 			
 			if (publishDate != null && cronExpresion.equals("")) {
 				Calendar calendar = Calendar.getInstance();
@@ -4152,13 +4160,13 @@ public class TfsNewsAdminJson  {
 						+ (calendar.get(Calendar.MONTH) + 1) + " " + "?" + " " + calendar.get(Calendar.YEAR);
 				job.setCronExpression(cronExpr);
 				
-				LOG.debug("LOGPROGRAMAR cronExpr: " + cronExpr);
+				//LOG.debug("LOGPROGRAMAR cronExpr: " + cronExpr);
 				
 			} else {
 				// publicar recursivamente.
 				job.setCronExpression(cronExpresion);
 				
-				LOG.debug("LOGPROGRAMAR cronExpr : " + cronExpresion);
+				//LOG.debug("LOGPROGRAMAR cronExpr : " + cronExpresion);
 			}
 			// set the job active
 			job.setActive(true);
@@ -4271,52 +4279,87 @@ public class TfsNewsAdminJson  {
 			String urlFriendly = "";
 			String urlFriendlyAmp = "";
 			
+			LOG.debug("Armando de urlFriendly y urlFriendlyAmp");
+			
 			boolean isPublicUrlSet = (publicUrl.equals("")) ? false : true;
 			
-			if (isPublicUrlSet) {
+			//CMSM-3937: Se agrega contingencia, agregando nombre de la publicacion y se valida
+			// que tome primero el customDomain luego el publicUrl,  cuando, no es online-predeterminada (2).
+			boolean isCustomDomainSet = false;
+			
+			TipoEdicion tEdicion  = null;
+			TipoEdicionService tEService = new TipoEdicionService();
+			try {
+				tEdicion = tEService.obtenerTipoEdicion(cms,cms.getSitePath(resource));
+				if (!tEdicion.getCustomDomain().equals("") && tEdicion.getTipoPublicacion().equals("2")) {
+					isCustomDomainSet = true;
+				}
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+			
+			LOG.debug("isCustomDomainSet " + isCustomDomainSet + " dominio " + tEdicion.getCustomDomain());
+			LOG.debug("isPublicUrlSet: " + isPublicUrlSet  + " publicUrl " + publicUrl);
+
+			if (isPublicUrlSet && !isCustomDomainSet) {
 				urlFriendly = publicUrl + UrlLinkHelper.getUrlFriendlyLink(resource, cms, true, true);
 				if (!siteIsAmp){
 					urlFriendlyAmp = publicUrl + "/amp" + UrlLinkHelper.getUrlFriendlyLink(resource, cms, true, false);
 					
-					TipoEdicionService tEService = new TipoEdicionService();
-	   				TipoEdicion tEdicion = tEService.obtenerTipoEdicion(jsonRequest.getJSONObject("authentication").getInt("publication"));
+					// CMSM-3937: TipoEdicionService tEService = new TipoEdicionService();
+	   				// CMSM-3937: TipoEdicion tEdicion = tEService.obtenerTipoEdicion(jsonRequest.getJSONObject("authentication").getInt("publication"));
 					if (tEdicion.getTipoPublicacion().equals("2"))
 						urlFriendlyAmp = urlFriendlyAmp.replaceAll("/amp"+tEdicion.getBaseURL().replaceAll(siteName,""), "/amp/");
 
 				}
-				LOG.debug("CASO 1, tiene publicURL" );
-				LOG.debug("CASO 1, publicUrl: " + publicUrl );
-				LOG.debug("CASO 1, siteIsAmp: " + siteIsAmp );
+				LOG.debug("CASO 1, tiene publicURL - publicUrl: " + publicUrl + " - siteIsAmp: " + siteIsAmp );
 				LOG.debug("CASO 1, urlFriendly: " + urlFriendly );
 				LOG.debug("CASO 1, urlFriendlyAmp: " + urlFriendlyAmp );
+				
+				//CMSM-3937: Se agrega contingencia, agregando nombre de la publicacion cuando, no es online-predeterminada (2)
+				try {
+					if (tEdicion.getTipoPublicacion().equals("2")) {
+						urlFriendly = urlFriendly.replaceAll(publicUrl, publicUrl+"/"+tEdicion.getNombre());
+						urlFriendlyAmp = urlFriendlyAmp.replaceAll(publicUrl+"/amp", publicUrl+"/amp/"+tEdicion.getNombre());
+
+						LOG.debug("CMSM-3937, urlFriendly: " + urlFriendly );
+						LOG.debug("CMSM-3937, urlFriendlyAmp: " + urlFriendlyAmp );
+
+					}
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+				
 			} else {
 			
-
-				if (!UrlLinkHelper.getPublicationDomain(resource, cms).equals("")) {
+				if (isCustomDomainSet){
+				//Cambiamos if por CMSMS-3937 ya que la funcion del urllinkhelper trae la url del istio. 
+				//if (!UrlLinkHelper.getPublicationDomain(resource, cms).equals("")) {
 					urlFriendly = UrlLinkHelper.getPublicationDomain(resource, cms) + UrlLinkHelper.getUrlFriendlyLink(resource, cms, true, true);
 					if (!siteIsAmp){
 						urlFriendlyAmp = UrlLinkHelper.getPublicationDomain(resource, cms) + "/amp" + UrlLinkHelper.getUrlFriendlyLink(resource, cms, true, true);
 					}
-					LOG.debug("CASO 2, tiene customURl" );
-					LOG.debug("CASO 2, publicUrl: " + publicUrl );
-					LOG.debug("CASO 2, siteIsAmp: " + siteIsAmp );
+					
+					
+					LOG.debug("CASO 2, no tiene publicURL - si tiene publicationDomain - siteIsAmp: " + siteIsAmp );
 					LOG.debug("CASO 2, urlFriendly: " + urlFriendly );
 					LOG.debug("CASO 2, urlFriendlyAmp: " + urlFriendlyAmp );
+					
 				} else {
 					urlFriendly = UrlLinkHelper.getPublicationDomain(resource, cms) + UrlLinkHelper.getUrlFriendlyLink(resource, cms, true, false);
 					if (!siteIsAmp){
 						urlFriendlyAmp = UrlLinkHelper.getPublicationDomain(resource, cms) + "/amp" + UrlLinkHelper.getUrlFriendlyLink(resource, cms, true, false);
 					}
 					// valido si es 
-					LOG.debug("CASO 2, no tiene nada." );
-					LOG.debug("CASO 3, publicUrl: " + publicUrl );
-					LOG.debug("CASO 3, siteIsAmp: " + siteIsAmp );
+					LOG.debug("CASO 3, no tiene publicURL - no tiene publicationDomain - siteIsAmp: " + siteIsAmp );
 					LOG.debug("CASO 3, urlFriendly: " + urlFriendly );
 					LOG.debug("CASO 3, urlFriendlyAmp: " + urlFriendlyAmp );
 				}
-					
+				
+				
 			}
 
+			
 			
 			CmsProperty property = cms.readPropertyObject(resource, "public.url.cdn1", false);
 						
@@ -4330,7 +4373,7 @@ public class TfsNewsAdminJson  {
 					prop = new CmsProperty("public.url.cdn2", null, urlFriendlyAmp, true);
 					cms.writePropertyObject(path, prop);
 				}
-				
+				LOG.debug("Update de las properties - 1");
 			} else {
 				int index = 1;
 				boolean updateProp = true;
@@ -4360,13 +4403,18 @@ public class TfsNewsAdminJson  {
 						cms.writePropertyObject(path, prop);
 						updateProp =  true;
 					}
+				
+					LOG.debug("Update de las properties - 2");
 					
 				}
+				
 				//se agrega contingencia para saber en el republish hay que agregar la url amp, por error de rm072022 
 				if (!resource.getState().equals(CmsResourceState.STATE_NEW) &&
 					 !siteIsAmp && !lastProperty.getValue().equals(urlFriendlyAmp) && !updateProp) {
 					 CmsProperty prop = new CmsProperty("public.url.cdn" + (index + 2), null, urlFriendlyAmp, true);
 					 cms.writePropertyObject(path, prop);
+					
+					LOG.debug("Update de las properties - 3");
 				}
 			}
 			
@@ -4412,9 +4460,9 @@ public class TfsNewsAdminJson  {
 
 			cms.lockResource(path);
 			//Le quito a las noticias las properties de publicacion
-			CmsProperty prop = new CmsProperty("isScheduled", null, "false", true);
+			CmsProperty prop = new CmsProperty("isScheduled", CmsProperty.DELETE_VALUE, "false", true);
 			cms.writePropertyObject(path, prop);	
-			prop = new CmsProperty("isScheduledData", null, "", true);
+			prop = new CmsProperty("isScheduledData", CmsProperty.DELETE_VALUE, "", true);
 			cms.writePropertyObject(path, prop);	
 			cms.unlockResource(path);
 			
