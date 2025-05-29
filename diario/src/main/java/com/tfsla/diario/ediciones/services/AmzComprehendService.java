@@ -163,7 +163,7 @@ public class AmzComprehendService {
 					
 					pathNum = pathNum.replace("[x]", "[" + i + "]");
 					value = fileContent.getStringValue(cmsObject, pathNum, locale);
-					LOG.error(pathNum + ": " + value);
+					LOG.debug(pathNum + ": " + value);
 					if (value!=null) {
 						sBuilder.append(Jsoup.parse(value).text());
 						sBuilder.append("\\n ");
