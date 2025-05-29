@@ -1,8 +1,6 @@
 package com.tfsla.diario.ediciones.services;
 
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -16,9 +14,7 @@ import org.opencms.configuration.CPMConfig;
 import org.opencms.configuration.CmsMedios;
 import org.opencms.file.CmsObject;
 import org.opencms.main.CmsLog;
-import org.opencms.main.OpenCms;
 
-import com.tfsla.diario.ediciones.model.TipoEdicion;
 import com.tfsla.diario.productivityPlans.model.PlansUsers;
 import com.tfsla.diario.productivityPlans.model.ProductivitiyPlans;
 
@@ -221,7 +217,7 @@ public class ProductivityPlanAWS extends baseService {
 	 */
 	public void processUsersPlans(String newsPath, JSONArray usersToNew, JSONObject jsonFristPub, boolean isAutomaticPublish, String complianceData, CmsObject cObject) throws Exception {
 
-		LOG.debug("procesando los usuarios de la nota " + newsPath + " " );
+		LOG.debug("["+siteName + "-" + publication + "] procesando los usuarios de la nota " + newsPath + " " );
 		
 		cmsObj = cObject;
 				
@@ -233,6 +229,7 @@ public class ProductivityPlanAWS extends baseService {
 		jsonreq.put("authentication",jsonAuth);
 		
 		puService = new PlansUsersServices(cObject,jsonreq);
+		
 		for (int i=0; i < usersToNew.size(); i ++) {
 					
 			String userName = (String) usersToNew.get(i);
@@ -240,9 +237,14 @@ public class ProductivityPlanAWS extends baseService {
 			boolean isCreation =  !isSigning;
 			userName = userName.replaceAll("signing_", "");
 
+			LOG.debug("["+siteName + "-" + publication + "]  isSigning ? " +  isSigning + " -  isCreation? " + isCreation);
+
+			
 			boolean isSameUser =  (userName.indexOf("same_") >-1) ? true : false;
 			userName = userName.replaceAll("same_", "");
 			
+			LOG.debug("["+siteName + "-" + publication + "]  isSameUser ? " +  isSameUser ) ;
+
 			PlansUsers planForUser = puService.existPlanForUser(userName);
 			ppService = new ProductivityPlanServices(jsonRequest);
 			
@@ -265,9 +267,9 @@ public class ProductivityPlanAWS extends baseService {
 						 isSameUser){ 
 				
 					if (isSameUser) 
-						LOG.debug("2- El usuario "+userName+" pertenece a un plan y es el mismo que firma y crea: contabilizo a ese plan sin validar el tipo del mismo porque esta de ambas maneras");
+						LOG.debug("["+siteName + "-" + publication + "] 2- El usuario "+userName+" pertenece a un plan y es el mismo que firma y crea: contabilizo a ese plan sin validar el tipo del mismo porque esta de ambas maneras");
 					else
-						LOG.debug("1- El usuario "+userName+" pertenece a un plan y de la forma correcta: contabilizo en ese plan");
+						LOG.debug("["+siteName + "-" + publication + "] 1- El usuario "+userName+" pertenece a un plan y de la forma correcta: contabilizo en ese plan");
 					
 					JSONObject jsonbody = new JSONObject();
 				
@@ -381,9 +383,9 @@ public class ProductivityPlanAWS extends baseService {
 						
 						if (isSigning && generalTypePlan.equals("signing") || isCreation && generalTypePlan.equals("creation")) {
 							addToGeneralPlan(newsPath, userName, jsonFristPub, isAutomaticPublish, complianceData);
-							LOG.debug("3- El usuario "+userName+" pertenece a un plan pero de forma equivocada: va al general validando que sea del mismo tipo.");
+							LOG.debug("["+siteName + "-" + publication + "] 3- El usuario "+userName+" pertenece a un plan pero de forma equivocada: va al general validando que sea del mismo tipo.");
 						}else {
-							LOG.debug("7- El usuario "+userName+" pertenece a un plan, pero de forma equivocada y el tipo de plan general es distinto a como esta en la noticia: SE PIERDE");
+							LOG.debug("["+siteName + "-" + publication + "] 7- El usuario "+userName+" pertenece a un plan, pero de forma equivocada y el tipo de plan general es distinto a como esta en la noticia: SE PIERDE");
 						}
 					}
 					
@@ -395,11 +397,16 @@ public class ProductivityPlanAWS extends baseService {
 				// 6- El usuario no pertenece a un plan y el tipo plan del plan general es distinto a como esta en la noticia: SE PIERDE 
 				
 				ProductivitiyPlans planGeneral = ppService.getGeneralProductivitiyPlans();
+				LOG.debug("["+siteName + "-" + publication + "] "+ planGeneral.getId()  );	
+
 				if (planGeneral == null) {
 					LOG.error("Error procesando productividad para el usuario " + userName + " en noticia " + newsPath + ": No se encuentra el plan general para el sitio " + siteName + " y publicacion " + publication);
 				}
 				else {
-					String generalTypePlan  = planGeneral.getType();
+					String generalTypePlan  = planGeneral.getUsersType();
+					LOG.debug("["+siteName + "-" + publication + "] planGeneral.getUsersType" + planGeneral.getUsersType() );	
+					LOG.debug("["+siteName + "-" + publication + "] planGeneral.getType" + planGeneral.getType() );	
+
 					
 					if ( (generalTypePlan.equals("signing") && isSigning) || 
 					     (generalTypePlan.equals("creation") && isCreation) ||
@@ -407,12 +414,12 @@ public class ProductivityPlanAWS extends baseService {
 						
 							addToGeneralPlan(newsPath, userName, jsonFristPub, isAutomaticPublish, complianceData);
 							if (isSameUser)
-								LOG.debug("4- El usuario "+userName+" no pertenece a un plan y es el mismo: contabilizo en el general validando el tipo del plan" );	
+								LOG.debug("["+siteName + "-" + publication + "] 4- El usuario "+userName+" no pertenece a un plan y es el mismo: contabilizo en el general validando el tipo del plan" );	
 							else
-								LOG.debug("5- El usuario "+userName+" no pertenece a un plan y no es el mismo que firma y crea: contabilizo en el general valindando el tipo de plan.");
+								LOG.debug("["+siteName + "-" + publication + "] 5- El usuario "+userName+" no pertenece a un plan y no es el mismo que firma y crea: contabilizo en el general valindando el tipo de plan.");
 				
 					} else {
-						LOG.debug("6- El usuario "+userName+" no pertenece a un plan y el tipo plan del plan general es distinto a como esta en la noticia: SE PIERDE");
+						LOG.debug("["+siteName + "-" + publication + "] 6- El usuario "+userName+" no pertenece a un plan y el tipo plan del plan general es distinto a como esta en la noticia: SE PIERDE");
 	
 					}
 				}				
@@ -432,7 +439,7 @@ public class ProductivityPlanAWS extends baseService {
 	{
 
 		String sBody = jsonbody.toString(2);
-		// LOG.debug("informamos a AWS " + sBody + " endpoint "+ endpoint);
+		// LOG.debug("["+siteName + "-" + publication + "] informamos a AWS " + sBody + " endpoint "+ endpoint);
 		StringRequestEntity requestEntity = new StringRequestEntity(
 				sBody,
 				"application/json",
@@ -443,7 +450,7 @@ public class ProductivityPlanAWS extends baseService {
 
 		HttpClient httpClient = new HttpClient();
 		int statusCode = httpClient.executeMethod(postMethod);
-		LOG.debug("volvemos da AWS " + statusCode);
+		LOG.debug("["+siteName + "-" + publication + "] volvemos da AWS " + statusCode);
 		if (statusCode == HttpStatus.SC_OK) {
 			LOG.debug(postMethod.getResponseBodyAsString());
 			return postMethod.getResponseBodyAsString();
