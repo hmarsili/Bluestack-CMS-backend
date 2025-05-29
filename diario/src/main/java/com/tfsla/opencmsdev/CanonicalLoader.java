@@ -84,6 +84,8 @@ public class CanonicalLoader implements I_CmsEventListener {
 									if (validValue == false && !titulo.trim().equals("")) {
 										validValue = true;
 										canonical = titulo;
+										
+										LOG.debug("canonical en lower case " + titulo.toLowerCase());
 									}
 								}
 							
