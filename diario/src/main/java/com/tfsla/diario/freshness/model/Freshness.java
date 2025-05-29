@@ -1,22 +1,15 @@
 package com.tfsla.diario.freshness.model;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.opencms.main.CmsLog;
 
-import com.tfsla.diario.freshness.FreshnessDAO;
-
-import net.sf.json.JSONObject;
 
 public class Freshness {
 
 	protected static final Log LOG = CmsLog.getLog(Freshness.class);
 
-	private long date;
-	private long startDate;
+	private long date; //fecha a ejecutarse cuando es fecha exacta. 
+	private long startDate; //fecha que comienza la frescura cuando es recurrencia
 	private int publication; // 
 	private int priority;
 	private int recurrece; // 180 - 30 - 15 - 7
@@ -27,9 +20,12 @@ public class Freshness {
 	private String url;
 	private String userName;
 	private String zone;
+	private String section;
+	private String userCreation;
 	
 	private String TYPE_RECURRENCE =  "RECURRENCE";
 	private String REPUBLICATION_DATE_UPDATED = "DATE_UPDATED";
+	
 	
 	
 	public Long getDate() {
@@ -103,6 +99,18 @@ public class Freshness {
 	}
 	public void setZone(String zone) {
 		this.zone = zone;
+	}
+	public String getSection() {
+		return section;
+	}
+	public void setSection(String section) {
+		this.section = section;
+	}
+	public String getUserCreation() {
+		return userCreation;
+	}
+	public void setUserCreation(String userCreation) {
+		this.userCreation = userCreation;
 	}
 	
 	

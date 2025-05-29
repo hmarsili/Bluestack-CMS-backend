@@ -125,6 +125,7 @@ public class ProcesarFrescuras implements I_CmsScheduledJob {
 
 		FreshnessDAO freshDAO = new FreshnessDAO();
 		@SuppressWarnings("unchecked")
+		//List<Freshness> FreshnessList = freshDAO.getFreshness(publication, nowGMT.getTimeInMillis(), nextCal.getTimeInMillis());
 		ArrayList<Freshness> FreshnessList = freshDAO.getFreshness(publication, nowGMT.getTimeInMillis(), nextCal.getTimeInMillis());
 
 		LOG.info("Se encontraron " + FreshnessList.size() + " noticias a procesar");
@@ -137,7 +138,8 @@ public class ProcesarFrescuras implements I_CmsScheduledJob {
 			resource = cms.readResource(cms.getRequestContext().removeSiteRoot(FreshnessProcess.getUrl()),
 					CmsResourceFilter.ALL);
 
-			if (!resource.getState().equals(CmsResourceState.STATE_NEW)) {
+		// SE comenta por ticket NAA-2380
+			//if (!resource.getState().equals(CmsResourceState.STATE_NEW)) {
 
 				try {
 					uui = resource.getUserCreated();
@@ -262,15 +264,24 @@ public class ProcesarFrescuras implements I_CmsScheduledJob {
 					cmsAdmin.copyResourceToProject(path);
 					CmsResourceUtils.forceLockResource(cmsFressUser, path);
 					
-					CmsProperty prop = new CmsProperty("isScheduled", null, "true", true);
+					/** INI NAA-2704
+					 	CmsProperty prop = new CmsProperty("isScheduled", CmsProperty.DELETE_VALUE, "true");
+					 
 					cmsFressUser.writePropertyObject(path, prop);
 					
-					prop = new CmsProperty("isScheduledFresh", null, "true", true);
+					prop = new CmsProperty("isScheduledFresh", CmsProperty.DELETE_VALUE, "true");
 					cmsFressUser.writePropertyObject(path, prop);
 					
-					prop = new CmsProperty("isScheduledData", null, projectName, true);
+					prop = new CmsProperty("isScheduledData", CmsProperty.DELETE_VALUE, projectName);
 					cmsFressUser.writePropertyObject(path, prop);
+					*/
 					
+					cms.writePropertyObject(path, new CmsProperty("isScheduled","true",null));
+					cms.writePropertyObject(path, new CmsProperty("isScheduledFresh","true",null));
+					cms.writePropertyObject(path, new CmsProperty("isScheduledData",projectName,null));
+
+					/** FIN NAA-2704 */
+
 
 					LOG.info("Se programa el job para la frescura con el nombre " + projectName);
 
@@ -371,9 +382,12 @@ public class ProcesarFrescuras implements I_CmsScheduledJob {
 
 				}
 
-			} else {
+			/**
+			 * NAA-2380
+			  } else {
 				LOG.error("La noticia no esta publicada por ende no se procesa la frescura.");
 			}
+			*/
 
 		}	
 		return resultados;
@@ -531,4 +545,3 @@ public class ProcesarFrescuras implements I_CmsScheduledJob {
 
 	}
 }
-
