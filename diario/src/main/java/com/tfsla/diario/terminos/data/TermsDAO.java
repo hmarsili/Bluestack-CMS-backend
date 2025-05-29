@@ -509,7 +509,7 @@ public class TermsDAO extends baseDAO {
 					termino.setName(rs.getString("NAME"));
 					termino.setUrl(rs.getString("URL"));
 					termino.setSynonymous(rs.getString("synonymous")!= null? rs.getString("synonymous"):"");
-					SimpleDateFormat dFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+					SimpleDateFormat dFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");
 						try {
 						if (rs.getTimestamp("LASTMODIFIED")!=null) {
 							termino.setLastmodified(dFormat.format(rs.getTimestamp("LASTMODIFIED")));
@@ -715,7 +715,7 @@ public class TermsDAO extends baseDAO {
 		termino.setUrl(rs.getString("URL"));
 		termino.setImage(rs.getString("IMAGE"));
 		termino.setTemplate(rs.getString("TEMPLATE"));
-		SimpleDateFormat dFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+		SimpleDateFormat dFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");
 		try {
 			if (rs.getTimestamp("LASTMODIFIED")!=null) {
 				termino.setLastmodified(dFormat.format(rs.getTimestamp("LASTMODIFIED")));
@@ -1060,8 +1060,9 @@ public class TermsDAO extends baseDAO {
 
 			PreparedStatement stmt = conn.prepareStatement("SELECT name\n" + 
 					" FROM tfs_terms\n" + 
-					" WHERE MATCH(name) AGAINST('*"+ texto +"*' IN BOOLEAN MODE ) and type =? AND APPROVED = 1 limit 10;");
-			stmt.setLong(1,type);
+					" WHERE name = ? and type =? AND APPROVED = 1 limit 10;");
+			stmt.setString(1,texto);
+			stmt.setLong(2,type);
 			
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
