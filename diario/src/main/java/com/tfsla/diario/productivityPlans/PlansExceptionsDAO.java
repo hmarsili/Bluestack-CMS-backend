@@ -267,9 +267,12 @@ public class PlansExceptionsDAO extends baseDAO {
 			stmt.setLong(5,exception.getTo());
 			stmt.setString(6,exception.getComments());
 			stmt.setInt(7,exception.getNews());
-			stmt.setString(8,exception.getSiteName());
-			stmt.setInt(9,exception.getPublication());
+			stmt.setInt(8,exception.getPublication());
+			stmt.setString(9,exception.getSiteName());
 			stmt.setInt(10,exception.getId());
+			
+			LOG.debug(stmt);
+			LOG.debug(stmt.toString());
 			stmt.executeUpdate();
 
 			stmt.close();
