@@ -30,6 +30,9 @@
 	  <module>../ocee-replication</module>
 	  <module>../ocee-cache</module>
 	  <module>../ocee-ldap</module>
+	  <module>../ocee-base</module>
+	  <module>../ocee-cluster</module>
+	  <module>../ocee-vfsdoctor</module>
 	  <module>../templateManager</module>
 	  <module>../tfsUsers</module>
 	  <module>../tfsUsers-newsPublisher</module>

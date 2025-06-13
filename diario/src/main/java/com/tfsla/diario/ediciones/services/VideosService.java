@@ -20,6 +20,7 @@ import org.opencms.file.CmsProperty;
 import org.opencms.file.CmsPropertyDefinition;
 import org.opencms.file.CmsResource;
 import org.opencms.file.CmsResourceFilter;
+import org.opencms.file.types.CmsResourceTypeExternalImage;
 import org.opencms.file.types.CmsResourceTypeFolder;
 import org.opencms.file.types.CmsResourceTypeJsp;
 import org.opencms.file.types.CmsResourceTypePlain;
@@ -63,6 +64,7 @@ import com.tfsla.diario.videoConverter.VideoInfo;
 import com.tfsla.diario.videoConverter.VideoInfoExtractor;
 import com.tfsla.diario.videoConverter.VideoSize;
 import com.tfsla.opencms.dev.collector.DateFolder;
+import com.tfsla.utils.CmsObjectUtils;
 import com.tfsla.utils.CmsResourceUtils;
 import com.tfsla.workflow.QueryBuilder;
 
@@ -76,6 +78,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -113,6 +116,7 @@ public class VideosService extends UploadService {
 	private String defaultVideoYouTubePath = "";
 	private String defaultVideoEmbeddedPath = "";
 	private String youTubeDataAPIKey = "";
+	private String vfsLhsFolder = "";
 	private static  String moduleName = "videoUpload";
 	
 	static private boolean createDateFolderDefault = false;
@@ -147,6 +151,8 @@ public class VideosService extends UploadService {
     	}
     	
     	instance.cmsObject = cms;
+    	instance.siteName = siteName;
+    	instance.publication = publication;
     	
         return instance;
     }
@@ -208,6 +214,8 @@ public class VideosService extends UploadService {
 		youTubeDataAPIKey = config.getParam(siteName, publication, module, "youTubeDataAPIKey");
 		
 		rfsSubFolderFormat = config.getParam(siteName, publication, module, "rfsSubFolderFormat",""); 
+		
+		vfsLhsFolder = config.getParam(siteName, publication, module, "vfsHLSPath",""); 
 		
 		loadBaseProperties(siteName, publication);
 	}
@@ -1705,9 +1713,235 @@ public Object getYoutubeAPIData(String youtubeId){
     }
 
 	@Override
-	public JSONObject callbackUpload(JSONObject data) {
-		// TODO Falta implementar
-		throw new RuntimeException("Metodo no implementado!");
+	public synchronized JSONObject callbackUpload(JSONObject data) {
+JSONObject response = new JSONObject();
+		
+		LOG.error("callbackUpload videos");
+		LOG.error(data.toString());
+		// TODO Auto-generated method stub
+		String vfsurl = data.getString("vfsurl");
+		String site = data.getString("site");
+		String user = data.getString("user");
+		String publication = data.getString("publication");
+		
+		response.put("vfsurl", vfsurl);
+		response.put("site",site);
+		response.put("user",user);
+		response.put("publication",publication);
+		
+		CmsObject cmsObjectClone = CmsObjectUtils.getClone(cmsObject);
+		try {
+			cmsObjectClone.loginUser(user);
+			cmsObjectClone.getRequestContext().setSiteRoot(site);
+			cmsObjectClone.getRequestContext().setCurrentProject(cmsObject.readProject("Offline"));
+			
+			cmsObjectClone.lockResource(vfsurl);
+			CmsResource res = cmsObjectClone.readResource(vfsurl);
+			
+			res.setType(TfsResourceTypeVideoLink.getStaticTypeId());
+			
+			
+			
+			cmsObjectClone.writeResource(res);
+			List<CmsProperty> properties = new ArrayList<>();
+			
+			if (data.containsKey("ContentLength")) {
+				CmsProperty prop = new CmsProperty();
+				prop.setName("file-size");
+				prop.setAutoCreatePropertyDefinition(true);
+				prop.setStructureValue(data.getString("ContentLength"));
+				properties.add(prop);
+				
+			}
+			
+			if (data.containsKey("ContentType")) {
+				CmsProperty prop = new CmsProperty();
+				prop.setName("content-type");
+				prop.setAutoCreatePropertyDefinition(true);
+				prop.setStructureValue(data.getString("ContentType"));
+				properties.add(prop);
+				
+			}
+			
+			if (data.containsKey("thumbnails")) {
+				
+				String urlRegion = amzRegion.toLowerCase().replace("_", "-");
+				String amzUrlImage = String.format("https://%s.s3.dualstack.%s.amazonaws.com%s", amzBucket, urlRegion, data.getJSONArray("thumbnails").getString(0));
+				
+				String thumbnails = amzUrlImage;
+				for (int j=1;j<data.getJSONArray("thumbnails").size();j++) {
+					amzUrlImage = String.format("https://%s.s3.dualstack.%s.amazonaws.com%s", amzBucket, urlRegion, data.getJSONArray("thumbnails").getString(j));
+					thumbnails += "," + amzUrlImage;
+				}
+				
+				CmsProperty prop = new CmsProperty();
+				prop.setName("video-thumbnails");
+				prop.setAutoCreatePropertyDefinition(true);
+				prop.setStructureValue(thumbnails);
+				properties.add(prop);
+			}
+			
+			if (data.containsKey("labels")) {
+				String moderation = data.getJSONArray("labels").getString(0);
+				for (int j=1; j<data.getJSONArray("labels").size();j++) {
+					moderation += "," +  data.getJSONArray("labels").getString(j);
+				}
+				CmsProperty prop = new CmsProperty();
+				prop.setName("UnsafeLabels");
+				prop.setAutoCreatePropertyDefinition(true);
+				prop.setStructureValue(moderation);
+				properties.add(prop);
+			}
+			
+			if (data.containsKey("Celebrities")) {
+				
+				String celebrities = data.getJSONArray("Celebrities").getString(0);
+				for (int j=1; j<data.getJSONArray("Celebrities").size();j++) {
+					celebrities += "," +  data.getJSONArray("Celebrities").getString(j);
+				}
+				
+				CmsProperty prop = cmsObjectClone.readPropertyObject(vfsurl, "Keywords", false);
+				if (prop.equals(CmsProperty.getNullProperty())) {
+					prop = new CmsProperty();
+					prop.setName("Keywords");
+					prop.setAutoCreatePropertyDefinition(true);
+					prop.setStructureValue(celebrities);
+				}
+				else {
+					prop.setStructureValue(prop.getStructureValue()+","+celebrities);
+				}
+				properties.add(prop);
+			}
+			
+		
+			if (data.containsKey("duration")) {
+				CmsProperty prop = new CmsProperty();
+				prop = new CmsProperty();
+				prop.setName("video-duration");
+				prop.setAutoCreatePropertyDefinition(true);
+				prop.setStructureValue(data.getString("duration"));
+				properties.add(prop);
+			}
+			
+			if (data.containsKey("height") && data.containsKey("width")) {
+				CmsProperty prop = new CmsProperty();
+				prop.setName("video-size");
+				prop.setAutoCreatePropertyDefinition(true);
+				prop.setStructureValue(data.getString("width")+"x"+data.getString("height"));
+				properties.add(prop);
+			}
+			
+			if (data.containsKey("bitrate")) {
+				CmsProperty prop = new CmsProperty();
+				prop.setName("video-bitrate");
+				prop.setAutoCreatePropertyDefinition(true);
+				prop.setStructureValue(data.getString("bitrate"));
+				properties.add(prop);
+			}
+
+			if (data.containsKey("framerate")) {
+				CmsProperty prop = new CmsProperty();
+				prop.setName("video-bitrate");
+				prop.setAutoCreatePropertyDefinition(true);
+				prop.setStructureValue(data.getString("framerate"));
+				properties.add(prop);
+			}
+			
+			if (data.containsKey("Clip")) {
+				CmsProperty prop = new CmsProperty();
+				prop.setName("video-clip");
+				prop.setAutoCreatePropertyDefinition(true);
+				
+				String urlRegion = amzRegion.toLowerCase().replace("_", "-");
+				String amzUrl = String.format("https://%s.s3.dualstack.%s.amazonaws.com%s", amzBucket, urlRegion, data.getString("Clip"));
+				prop.setStructureValue(amzUrl);
+				properties.add(prop);
+			}
+			
+			//TODO: Agregar los videos hls y otros formatos....
+			if (data.containsKey("hls")) {
+				
+				LOG.error("Llego hls con valor " + data.getString("hls"));
+				CmsProperty prop = cmsObjectClone.readPropertyObject(vfsurl, "video-formats", false);
+				if (prop.equals(CmsProperty.getNullProperty())) {
+					prop = new CmsProperty();
+					prop.setName("video-formats");
+					prop.setAutoCreatePropertyDefinition(true);
+					prop.setStructureValue("hls");
+				}
+				else {
+					prop.setStructureValue(prop.getStructureValue()+",hls");
+				}
+				properties.add(prop);
+				
+				
+				String vfsHlsFolder = vfsurl.substring(0,vfsurl.lastIndexOf("/"));
+				String vfsHlsFile = data.getString("hls").substring(data.getString("hls").lastIndexOf("/")+1);
+				
+				LOG.error("carpeta " + vfsHlsFolder);
+				LOG.error("archivo " + vfsHlsFile);
+				
+				LOG.error("se reemplazara " + defaultVideoFlashPath + " por " + vfsLhsFolder);
+				//vfsHlsFolder = vfsHlsFolder.replaceFirst(Pattern.quote(vfsSubFolderFormat), vfsLhsFolder);
+				vfsHlsFolder = vfsHlsFolder.replaceFirst(defaultVideoFlashPath, vfsLhsFolder);
+				String vfsHlsPath = vfsHlsFolder + "/" + vfsHlsFile;
+				LOG.error("se creara video hls en vfs en " + vfsHlsPath);
+				try {
+					
+					if (!cmsObject.existsResource(vfsHlsPath)) {
+						LOG.error("actualmente no existe " + vfsHlsPath);
+						
+						createAndPublishVFSSubfolders(cmsObjectClone,vfsHlsFolder,getVfsFolderType());
+						
+						int type = OpenCms.getResourceManager().getResourceType("video-link").getTypeId();
+						
+						List<CmsProperty> HLSProperties = new ArrayList<CmsProperty>(4);
+						
+						prop = new CmsProperty();
+						prop.setName("video-format");
+						prop.setAutoCreatePropertyDefinition(true);
+						prop.setStructureValue("hls");
+						HLSProperties.add(prop);
+						
+						String urlRegion = amzRegion.toLowerCase().replace("_", "-");
+						String amzUrl = String.format("https://%s.s3.dualstack.%s.amazonaws.com%s", amzBucket, urlRegion, data.getString("hls"));
+						cmsObjectClone.createResource(vfsHlsPath, type,amzUrl.getBytes(), HLSProperties);
+						
+						cmsObjectClone.addRelationToResource( vfsurl, vfsHlsPath, "videoFormats");
+					}
+				} catch (Exception e) {
+					LOG.error("Error creando el video link hls del video " + vfsurl, e);
+					e.printStackTrace();
+				}
+				
+			}
+			
+			if (properties.size()>0)
+				cmsObjectClone.writePropertyObjects(vfsurl, properties);
+			
+			
+			cmsObjectClone.unlockResource(vfsurl);
+			
+			
+			String msg = "{ url: " + vfsurl + ", " +
+				", status: ok" +
+				", site: " + site +
+				", publication: " + publication + " }";
+			
+			SSEService.getInstance().addEvent("videoUpload", msg, user);
+			
+		} catch (CmsException e) {
+			LOG.error("Error al recibir callback de alta de video",e);
+			
+			String msg = "{ url: " + vfsurl + ", " +
+					", status: error" +
+					", site: " + site +
+					", publication: " + publication + " }";
+				
+			SSEService.getInstance().addEvent("videoUpload", msg, user);
+		}
+		
+		return response;
 	}
 	
 	@Override

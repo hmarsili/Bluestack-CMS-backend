@@ -146,7 +146,10 @@ public class OpenCmsServlet extends HttpServlet implements I_CmsRequestHandler {
         }
 
         String path = OpenCmsCore.getInstance().getPathInfo(req);
+        LOG.debug("Page requested " + path);
         if (path.startsWith(HANDLE_PATH)) {
+            LOG.debug("Page requested " + path);
+
             // this is a request to an OpenCms handler URI
             invokeHandler(req, res);
         } else {

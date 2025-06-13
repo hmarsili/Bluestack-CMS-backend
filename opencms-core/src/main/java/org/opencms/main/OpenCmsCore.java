@@ -1611,6 +1611,8 @@ public final class OpenCmsCore {
             // user is initialized, now deliver the requested resource
             CmsResource resource = initResource(cms, cms.getRequestContext().getUri(), req, res);
             if (resource != null) {
+                LOG.debug("Resource found " + resource.getRootPath());
+
                 // a file was read, go on process it
                 m_resourceManager.loadResource(cms, resource, req, res);
                 m_sessionManager.updateSessionInfo(cms, req);

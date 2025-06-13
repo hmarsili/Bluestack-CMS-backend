@@ -27,8 +27,10 @@ import org.apache.commons.validator.routines.UrlValidator;
 import org.opencms.configuration.CPMConfig;
 import org.opencms.configuration.CmsMedios;
 import org.opencms.db.CmsDbSqlException;
+import org.opencms.file.CmsFile;
 import org.opencms.file.CmsObject;
 import org.opencms.file.CmsResource;
+import org.opencms.file.CmsResource.CmsResourceDeleteMode;
 import org.opencms.file.types.CmsResourceTypePlain;
 import org.opencms.loader.CmsLoaderException;
 import org.opencms.main.CmsException;
@@ -44,12 +46,25 @@ import software.amazon.awssdk.core.async.AsyncRequestBody;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.AbortMultipartUploadRequest;
+import software.amazon.awssdk.services.s3.model.CompleteMultipartUploadRequest;
+import software.amazon.awssdk.services.s3.model.CompletedMultipartUpload;
+import software.amazon.awssdk.services.s3.model.CompletedPart;
+import software.amazon.awssdk.services.s3.model.CreateMultipartUploadRequest;
+import software.amazon.awssdk.services.s3.model.CreateMultipartUploadResponse;
+import software.amazon.awssdk.services.s3.model.ListPartsRequest;
+import software.amazon.awssdk.services.s3.model.ListPartsResponse;
 import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
+import software.amazon.awssdk.services.s3.model.Part;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest.Builder;
+import software.amazon.awssdk.services.s3.model.S3Exception;
+import software.amazon.awssdk.services.s3.model.UploadPartRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.UploadPartPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedUploadPartRequest;
 import software.amazon.awssdk.transfer.s3.S3TransferManager;
 import software.amazon.awssdk.transfer.s3.model.CompletedUpload;
 import software.amazon.awssdk.transfer.s3.model.Upload;
@@ -103,6 +118,8 @@ public abstract class UploadService {
 	protected boolean amzUploadEnabled;
 	protected String defaultUploadDestination = "server";
 	protected String videoType = "";
+	protected int maxPartsNumber = 10000;
+	protected int defaultPartSize = 5242880; //5Mibs 		| 1 MiB to byte = 1048576 byte
 	
 
 	protected String processPath(String path, String fileName) {
@@ -392,6 +409,68 @@ public abstract class UploadService {
 		}
 	}
 		
+	
+	public class preMultiUploadResponse {
+		List<String> presignedUrls;
+		String vfsPath;
+		String site;
+		String user;
+		String publication;
+		String lang;
+		String uploadId;
+		int numberOfParts;
+		int partsSize;
+		
+		public preMultiUploadResponse(List<String> presignedUrls, String uploadId, int numberOfParts, int partsSize, String vfsPath, String site, String user, String publication, String lang) {
+			this.presignedUrls = presignedUrls;
+			this.vfsPath = vfsPath;
+			this.site = site;
+			this.user = user;
+			this.publication = publication;
+			this.lang = lang;
+			this.uploadId = uploadId;
+			this.numberOfParts = numberOfParts;
+			this.partsSize = partsSize;
+		}
+		
+		public String getUploadId() {
+			return uploadId;
+		}
+
+		public List<String> getPresignedUrl() {
+			return presignedUrls;
+		}
+
+		public String getVfsPath() {
+			return vfsPath;
+		}
+
+		public final int getNumberOfParts() {
+			return numberOfParts;
+		}
+		
+		public final int getPartsSize() {
+			return partsSize;
+		}
+
+		public String getSite() {
+			return site;
+		}
+
+		public String getUser() {
+			return user;
+		}
+
+		public String getPublication() {
+			return publication;
+		}
+
+		public String getLang() {
+			return lang;
+		}
+
+	}
+	
 	public class preUploadResponse {
 		String presignedUrl;
 		String vfsPath;
@@ -443,7 +522,317 @@ public abstract class UploadService {
 
 	}
 	
+	protected void abortMultiPartUpload(String fileName, String uploadId ) {
+
+		AwsBasicCredentials awsCreds = AwsBasicCredentials.create(amzAccessID, amzAccessKey);
+
+		S3Client s3 = null;
+		
+		if(amzRegion != null && !amzRegion.equals("")) {
+			
+			s3 = S3Client.builder()
+				.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+				.region(Region.of(amzRegion))
+				.build();
+		}else {
+			
+			s3 = S3Client.builder()
+					.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+					.build();
+		}
+		
+        try {
+            
+            AbortMultipartUploadRequest abortMultipartUploadRequest;
+           
+            abortMultipartUploadRequest = AbortMultipartUploadRequest.builder()
+                    .bucket(amzBucket)
+                    .key(fileName)
+                    .uploadId(uploadId)
+                    .build();
+
+            s3.abortMultipartUpload(abortMultipartUploadRequest);
+
+        } 
+        
+        catch (S3Exception e) {
+        	LOG.error("Error al intentar abortar un multipart upload a S3 del archivo " + fileName,e);
+			throw e;
+        }
+    }
+	
+	public List<Part> listMultiPartUploadsParts(String bucketName, String filename, String uploadID) {
+        
+		AwsBasicCredentials awsCreds = AwsBasicCredentials.create(amzAccessID, amzAccessKey);
+
+		S3Client s3 = null;
+		
+		if(amzRegion != null && !amzRegion.equals("")) {
+			
+			s3 = S3Client.builder()
+				.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+				.region(Region.of(amzRegion))
+				.build();
+		}else {
+			
+			s3 = S3Client.builder()
+					.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+					.build();
+		}
+        try {
+            ListPartsRequest listPartsRequest = ListPartsRequest.builder()
+                .bucket(bucketName)
+                .uploadId(uploadID)
+                .key(filename)
+                .build();
+
+            ListPartsResponse response = s3.listParts(listPartsRequest);
+            List<Part> parts = response.parts();
+            
+            return parts;
+            
+        } 
+        
+        catch (S3Exception e) {
+            System.err.println(e.getMessage());
+            System.exit(1);
+        }
+        return null;
+        
+    }
+	
+	protected void completeMultipartUpload(String filename, String uploadId) {
+        
+		AwsBasicCredentials awsCreds = AwsBasicCredentials.create(amzAccessID, amzAccessKey);
+
+		S3Client s3 = null;
+		
+		if(amzRegion != null && !amzRegion.equals("")) {
+			
+			s3 = S3Client.builder()
+				.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+				.region(Region.of(amzRegion))
+				.build();
+		}else {
+			
+			s3 = S3Client.builder()
+					.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+					.build();
+		}
+		
+		List<Part> parts = listMultiPartUploadsParts(amzBucket, filename, uploadId);
+		
+		List<CompletedPart> completedParts = new ArrayList<>();
+
+		for (int i = 0; i < parts.size(); i++) {
+            Part part = parts.get(i);
+            completedParts.add(CompletedPart.builder().eTag(part.eTag()).partNumber(part.partNumber()).build());
+        }
+	
+		CompletedMultipartUpload completedMultipartUpload = CompletedMultipartUpload.builder()
+                .parts(completedParts)
+                .build();
+
+        CompleteMultipartUploadRequest completeMultipartUploadRequest =
+                CompleteMultipartUploadRequest.builder()
+                        .bucket(amzBucket)
+                        .key(filename)
+                        .uploadId(uploadId)
+                        .multipartUpload(completedMultipartUpload)
+                        .build();
+
+        s3.completeMultipartUpload(completeMultipartUploadRequest);
+    }
+	
+	protected String createPresignedMultipartUploadPart(String bucketName, String filename, String uploadId, int partNumber) {
+		
+		AwsBasicCredentials awsCreds = AwsBasicCredentials.create(amzAccessID, amzAccessKey);
+
+    	try (S3Presigner presigner = S3Presigner.builder()
+    			.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+    			.build()
+    		) {
+
+    	    // Create a UploadPartRequest to be pre-signed
+    	     UploadPartRequest uploadPartRequest = UploadPartRequest
+    	    		 .builder()
+    	    		 .bucket(bucketName)
+    	    		 .uploadId(uploadId)
+    	    		 .key(filename)
+    	    		 .partNumber(partNumber)
+    	    		 .build();
+
+    	     // Create a UploadPartPresignRequest to specify the signature duration
+    	     UploadPartPresignRequest uploadPartPresignRequest =
+    	         UploadPartPresignRequest.builder()
+    	                                 .signatureDuration(Duration.ofDays(1))
+    	                                 .uploadPartRequest(uploadPartRequest)
+    	                                 .build();
+
+    	     // Generate the presigned request
+    	     PresignedUploadPartRequest presignedUploadPartRequest =
+    	         presigner.presignUploadPart(uploadPartPresignRequest);
+    		
+    	     
+    	     return presignedUploadPartRequest.url().toString();
+    	     
+    	}
+	}
+	
+	protected String createMultipartUpload(String bucketName, String fileName, String contentType, Map<String, String> metadata ) {
+		
+		AwsBasicCredentials awsCreds = AwsBasicCredentials.create(amzAccessID, amzAccessKey);
+
+		S3Client s3 = null;
+		
+		if(amzRegion != null && !amzRegion.equals("")) {
+			
+			s3 = S3Client.builder()
+				.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+				.region(Region.of(amzRegion))
+				.build();
+		}else {
+			
+			s3 = S3Client.builder()
+					.credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+					.build();
+		}
+		
+		CreateMultipartUploadRequest createMultipartUploadRequest = CreateMultipartUploadRequest.builder() 
+				.bucket(bucketName)
+				.key(fileName)
+				.contentType(contentType)
+				.metadata(metadata)
+				.build();
+             
+		String uploadId = null;
+     
+		try {
+			CreateMultipartUploadResponse response = s3.createMultipartUpload(createMultipartUploadRequest);
+			uploadId = response.uploadId();
+		}
+		catch (S3Exception e) {
+			LOG.error("Error al intentar crear un multipart upload a S3 del archivo " + fileName,e);
+			throw e;
+		}
+		return uploadId;
+	}
+	
 	protected abstract void addPreloadParameters(Map<String, String> metadata);
+	
+	public void completeUploadAmzMultiPartsFile(CmsObject cmsObject, String vfspath, String UploadId) throws Exception {
+
+		CmsFile file = cmsObject.readFile(vfspath);
+		String amzUrl = new String(file.getContents());
+		amzUrl = amzUrl.replace("https://", "");
+		amzUrl = amzUrl.substring(amzUrl.indexOf("/")+1);
+		
+		LOG.debug("Se solicita completar el upload en aws el archivo : " + amzUrl + " con upload Id: " + UploadId);
+		completeMultipartUpload(amzUrl, UploadId);
+		
+	}
+	
+	public void cancelUploadAmzMultiPartsFile(CmsObject cmsObject, String vfspath, String UploadId) throws Exception {
+
+		CmsFile file = cmsObject.readFile(vfspath);
+		String amzUrl = new String(file.getContents());
+		amzUrl = amzUrl.replace("https://", "");
+		amzUrl = amzUrl.substring(amzUrl.indexOf("/")+1);
+		
+		LOG.debug("Se solicita eliminar en aws el archivo : " + amzUrl + " con upload Id: " + UploadId);
+		abortMultiPartUpload(amzUrl, UploadId);
+		
+		cmsObject.lockResource(vfspath);
+		cmsObject.deleteResource(amzUrl,CmsResource.DELETE_REMOVE_SIBLINGS);	
+	}
+
+	public void finalizeUploadAmzMultiPartsFile(CmsObject cmsObject, String vfspath, String UploadId) throws Exception {
+
+		CmsFile file = cmsObject.readFile(vfspath);
+		String amzUrl = new String(file.getContents());
+		amzUrl = amzUrl.replace("https://", "");
+		amzUrl = amzUrl.substring(amzUrl.indexOf("/")+1);
+		
+		LOG.debug("Se solicita completar en aws el archivo : " + amzUrl + " con upload Id: " + UploadId);
+		completeMultipartUpload(amzUrl, UploadId);
+		
+		
+	}
+	
+	
+	public preMultiUploadResponse preUploadAmzMultiPartsFile(CmsObject cmsObject, String path, String fileName, String contentType, int fileSize, Map<String,String> parameters, List properties) throws Exception {
+		fileName = getValidFileName(fileName);
+		fileName = checkFileName(path,fileName);
+		TipoEdicionService tService = new TipoEdicionService();
+		TipoEdicion tEdicion = tService.obtenerTipoEdicion(Integer.parseInt(publication));
+		String lang = tEdicion.getLanguage();
+		
+		LOG.debug("Nombre corregido del archivo a subir al s3 de amazon: " + fileName);
+		String subFolderRFSPath = getRFSSubFolderPath(vfsSubFolderFormat, parameters);
+		LOG.debug("subcarpeta: " + subFolderRFSPath);
+
+		String dir = amzDirectory + "/" + subFolderRFSPath;
+		if(!dir.endsWith("/")) {
+			dir += "/";
+		}
+		
+		String fullPath = dir + fileName;
+		String urlRegion = amzRegion.toLowerCase().replace("_", "-");
+		String amzUrl = String.format("https://%s.s3.dualstack.%s.amazonaws.com/%s", amzBucket, urlRegion, fullPath);
+		LOG.debug("S3 url: " + amzUrl);
+
+		try {
+			String linkName = path + fileName;
+			LOG.debug("creando link a S3 en vfs: " + linkName + " en " + cmsObject.getRequestContext().getSiteRoot() + " (" + cmsObject.getRequestContext().currentProject().getName()  + "|" + cmsObject.getRequestContext().currentUser().getFullName() + " )");
+			int type = TfsResourceTypeUploadProcessing.getStaticTypeId();
+			
+			cmsObject.createResource(linkName, 
+					type,
+					amzUrl.getBytes(),
+					properties);
+
+			cmsObject.unlockResource(linkName);
+			
+			Map<String, String> metadata = new HashMap<String,String>();
+			metadata.put("vfsUrl", linkName);
+			metadata.put("site", cmsObject.getRequestContext().getSiteRoot());
+			metadata.put("user", cmsObject.getRequestContext().currentUser().getName());
+			metadata.put("publication", publication);
+			metadata.put("lang", lang);
+			addPreloadParameters(metadata);
+			
+			int partSize = defaultPartSize; 
+			int parts = (int)Math.ceil((double)fileSize / (double)defaultPartSize);
+			if ((parts)> maxPartsNumber) {
+				parts = maxPartsNumber;
+				partSize = (int)Math.ceil((double)fileSize / (double)maxPartsNumber);
+			}
+			
+			String uploadId = createMultipartUpload(amzBucket.replace("/", ""),fullPath,contentType, metadata);
+			List<String> partsUrls = new ArrayList<>();
+			for (int i=0; i<parts;i++) {
+				String presignedUrl = createPresignedMultipartUploadPart(amzBucket.replace("/", ""), fullPath, uploadId, i+1);
+				partsUrls.add(presignedUrl);
+			}
+			
+			preMultiUploadResponse response = new preMultiUploadResponse(
+					partsUrls, 
+					uploadId, 
+					parts, 
+					partSize, 
+					linkName,
+					cmsObject.getRequestContext().getSiteRoot(),
+					cmsObject.getRequestContext().currentUser().getName(),
+					publication, 
+					lang);
+			
+			return response;
+			
+		} catch (CmsException e) {
+			LOG.error("Error al intentar subir a S3 el archivo " + fullPath,e);
+			throw e;
+		}
+	}
 	
 	public preUploadResponse preUploadAmzFile(CmsObject cmsObject, String path, String fileName, Map<String,String> parameters, List properties) throws Exception {
 		fileName = getValidFileName(fileName);
@@ -824,6 +1213,10 @@ public abstract class UploadService {
 		amzUploadEnabled = config.getBooleanParam(siteName, publication, module, "amzUploadEnabled",false);
 		
 		defaultUploadDestination = config.getParam(siteName, publication, module, "defaultUploadDestination","server");
+		
+		maxPartsNumber = config.getIntegerParam(siteName, publication, module, "amzMaxPartsNumber",10000);
+		defaultPartSize = config.getIntegerParam(siteName, publication, module, "amzDefaultPartSize",5242880);
+        
 	}
 	
 	protected int getPointerType() throws CmsLoaderException {
@@ -869,6 +1262,28 @@ public abstract class UploadService {
 
 		return subFolder;
 	}
+	
+	protected void createAndPublishVFSSubfolders(CmsObject cms,String subFolder, int folderType) throws Exception {
+		
+		String[] parts = subFolder.split("/");
+		
+		String firstFolderCreated  = "";
+		String partialFolder = "";
+		for (String part : parts) {
+			
+			partialFolder += part;
+			
+			if (!cms.existsResource(partialFolder)) {
+				cms.createResource(partialFolder, folderType);
+				if (firstFolderCreated.equals(""))
+					firstFolderCreated  = partialFolder;
+			}
+			partialFolder += "/";
+		}
+		if (!firstFolderCreated.equals("")) {
+			OpenCms.getPublishManager().publishResource(cms, firstFolderCreated);
+		}
+	} 
 
 	public String getVFSSubFolderPath(String parentPath, int folderType, String subFolderFormat, Map<String,String> parameters) throws Exception {
 		Date now = null;
