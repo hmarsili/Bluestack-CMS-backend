@@ -342,7 +342,7 @@ public class CmsVfsIndexer implements I_CmsIndexer {
     protected void updateResource(IndexWriter writer, CmsIndexingThreadManager threadManager, CmsResource resource)
     throws CmsIndexException {
 
-        if (resource.isInternal() || resource.isFolder() || (resource.getDateExpired() <= System.currentTimeMillis() && !m_index.isIndexingExpiredContent() )) {
+    	if (resource.isInternal() || resource.isFolder() || (resource.getDateExpired() <= System.currentTimeMillis() && !m_index.isIndexingExpiredContent() )) {
             // don't index internal resources or folders or resources with expire date in the past
             return;
         }

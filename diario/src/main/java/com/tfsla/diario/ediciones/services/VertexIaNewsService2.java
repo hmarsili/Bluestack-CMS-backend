@@ -5,9 +5,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
 import org.opencms.configuration.CmsMedios;
 import org.opencms.file.CmsObject;
+
+import org.apache.commons.logging.Log;
 import org.opencms.main.CmsLog;
 
 import com.google.auth.oauth2.GoogleCredentials;
@@ -23,9 +24,8 @@ import com.google.cloud.vertexai.generativeai.ResponseHandler;
 import com.google.cloud.vertexai.api.SafetySetting;
 import com.google.cloud.vertexai.generativeai.ResponseStream;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
-public class VertexIaNewsService {
+public class VertexIaNewsService2 {
 
 	protected CmsObject cmsObject = null;
 	protected String siteName;
@@ -47,18 +47,20 @@ public class VertexIaNewsService {
 	
 	protected String prompt = null;
 	protected String basePrompt = null;
+	protected String replacePrompt = null;
+	protected String custom1Prompt = null;
+	protected String custom2Prompt = null;
+	protected String custom3Prompt = null;
+	protected String custom4Prompt = null;
 	
+	private static final Log LOG = CmsLog.getLog(VertexIaNewsService2.class);
 
-	private static final Log LOG = CmsLog.getLog(VertexIaNewsService.class);
-	public VertexIaNewsService(String site, String publication) {
-		this.siteName = site;
+	public VertexIaNewsService2(String siteName, String publication) {
+		this.siteName = siteName;
 		this.publication = publication;
 	}
-
-
-	public VertexIaNewsService() {
-	}
-
+	
+	public VertexIaNewsService2() {}
 	
 	public JsonObject generateNews(String prompt) throws IOException {
         GoogleCredentials credentials = null;
@@ -86,8 +88,20 @@ public class VertexIaNewsService {
  
       //String prompt = "Escribe un noticia en español latinoamericano según el contenido de la siguiente noticia: https://www.tv7israelnews.com/us-israel-tiff-over-judicial-reform/. La noticia debe tener el formato {\"titulo\":\"\", \"bajada\":\"\" y \"cuerpo\":\"\"} en formato json válido con solo esos campos";
      String fullPrompt = prompt + " \n" + getBasePrompt();
-      
-     //System.out.print(fullPrompt);
+     
+     if (getCustom1Prompt() != null)
+    	 fullPrompt += " "+getCustom1Prompt() + " \n" ;
+     
+     if (getCustom2Prompt() != null)
+    	 fullPrompt += " "+getCustom2Prompt() + " \n" ;
+     
+     if (getCustom3Prompt() != null)
+    	 fullPrompt += " "+getCustom3Prompt() + " \n" ;
+     
+     if (getCustom4Prompt() != null)
+    	 fullPrompt += " "+getCustom4Prompt() + "." ;
+     
+     LOG.debug(fullPrompt);
      
       List<Content> contents = new ArrayList<>();
       contents.add(Content.newBuilder().setRole("user").addParts(Part.newBuilder().setText(fullPrompt)).build());
@@ -99,24 +113,19 @@ public class VertexIaNewsService {
 
       //System.out.print(responseText);
       //JsonObject jsonObject = JsonParser.parseString(responseText).getAsJsonObject();
-     //System.out.print(jsonObject);
+      //System.out.print(jsonObject);
       
       return jsonObject;
     }  
      
 	}
-
+	
 	private JsonObject extractedNews(ResponseStream<GenerateContentResponse> responseStream) {
 		String responseText = "";
 		  for (GenerateContentResponse responsePart: responseStream) {
 			  responseText += ResponseHandler.getText(responsePart).replaceAll("```json", "").replaceAll("```", "");
 			}
 		
-		  LOG.error("respuesta de VertexIaNewsService: ");
-		  LOG.error(responseText);
-		  
-		  LOG.error("--------------------------------------------------------");
-		  
 		  String[] parte = responseText.split("\\n");
 		  
 		  JsonObject jsonObject = new JsonObject();
@@ -124,8 +133,7 @@ public class VertexIaNewsService {
 		  int campo = 0;
 		  String cuerpo="";
 		  for (String p : parte) {
-			  //p = p.replaceFirst("\\**[tT][ií]tulo:\\**\\s", "").replaceFirst("\\**[Bb]ajada:\\**\\s", "").replaceFirst("\\**[Cc]uerpo:\\**[\\s\\n]", "");
-			  p = p.replaceFirst("[tT][ií]tulo:\\s*", "").replaceFirst("[Bb]ajada:\\s*", "").replaceFirst("[Cc]uerpo:\\s*", "");
+			  p = p.replaceFirst("\\**[tT][ií]tulo:\\**\\s", "").replaceFirst("\\**[Bb]ajada:\\**\\s", "").replaceFirst("\\**[Cc]uerpo:\\**[\\s\\n]", "");
 			  
 			  if (campo<2 && p.replaceAll("\\n", "").trim().length()==0)
 				  continue;
@@ -133,7 +141,7 @@ public class VertexIaNewsService {
 			  if (campo==0)
 				  jsonObject.addProperty("titulo",  p.replaceAll("\\*\\*", "").trim());
 			  else if (campo==1)
-			      jsonObject.addProperty("bajada",  p.replaceAll("\\*\\*", "").trim());
+				  jsonObject.addProperty("bajada",  p.replaceAll("\\*\\*", "").trim());
 			  else {
 				  p = p.replaceAll("<br>", "").replaceAll("</br>", "").replaceAll("<br/>", "");
 				  if (p.trim().length()>0)
@@ -185,75 +193,11 @@ public class VertexIaNewsService {
 
       //System.out.print(responseText);
       //JsonObject jsonObject = JsonParser.parseString(responseText).getAsJsonObject();
-    //  System.out.print(jsonObject);
+     // System.out.print(jsonObject);
       
       return jsonObject;
     }  
      
-	}
-	
-	public JsonObject assistance(String customPrompt, String assistanceType, String option, String content) throws IOException {
-        GoogleCredentials credentials = null;
-		
-	    try {
-			credentials = getCredentials();
-		} catch (Exception e1) {
-			e1.printStackTrace();
-			return null;
-		}
-		
-	    try (VertexAI vertexAi = new VertexAI(getProject(), getLocation(),null,credentials); ){
-	    	
-	      GenerationConfig generationConfig = GenerationConfig.newBuilder()
-	              .setMaxOutputTokens(Integer.parseInt(getMaxOutputTokens()))
-	              .setTemperature(Float.parseFloat(getTemperature()))
-	              .setTopP(Float.parseFloat(getTopP()))
-	              .build();
-	      GenerativeModel model = new GenerativeModel(getModel(), generationConfig, vertexAi);
-	      
-	      List<SafetySetting> safetySettings = setSafetySettings();
-	 
-	      String fullPrompt = "";
-	      
-	      if(customPrompt!=null) {
-	    	  
-	    	  fullPrompt = customPrompt;
-	    	  fullPrompt += "\n"+content;
-	    	  
-	      }else{
-		      String prompt =  getPromptByType(assistanceType);
-		    		
-		      fullPrompt =  prompt.replaceAll("%1",content);
-		      
-		      if(option != null)
-		    	  fullPrompt =  fullPrompt.replaceAll("%2",option);
-		  }
-		      
-	      fullPrompt += "\nLa respuesta debe indicarse como responseAI";
-	     
-	      List<Content> contents = new ArrayList<>();
-	      contents.add(Content.newBuilder().setRole("user").addParts(Part.newBuilder().setText(fullPrompt)).build());
-	
-	      ResponseStream<GenerateContentResponse> responseStream = model.generateContentStream(contents, safetySettings);
-	      
-	      JsonObject jsonObject = extracteResponse(responseStream);
-	
-	      
-	      return jsonObject;
-	    }  
-	}
-	
-	private JsonObject extracteResponse(ResponseStream<GenerateContentResponse> responseStream) {
-		String responseText = "";
-		  for (GenerateContentResponse responsePart: responseStream) {
-			  responseText += ResponseHandler.getText(responsePart).replaceAll("```json", "").replaceAll("```", "");
-			}
-		  
-		  JsonObject jsonObject = new JsonObject();
-		  
-		  jsonObject.addProperty("responseAI",  responseText.replaceAll("responseAI:", "").replaceAll("\\*\\*", "").trim());
-		  
-		return jsonObject;
 	}
 
 	private List<SafetySetting> setSafetySettings() {
@@ -308,6 +252,23 @@ public class VertexIaNewsService {
 	public boolean isAIEnabled() {
 		return CmsMedios.getInstance().getCmsParaMediosConfiguration().getBooleanParam(siteName, publication, getModuleName(), "AIEnabled", false);
 	}
+	
+	public String getReplacePromptParagraph() {
+		return CmsMedios.getInstance().getCmsParaMediosConfiguration().getParam(siteName, publication, getModuleName(), "paragraphPromptReplace", "");
+	} 
+
+
+	public String getReplacePromptLanguage() {
+		return CmsMedios.getInstance().getCmsParaMediosConfiguration().getParam(siteName, publication, getModuleName(), "languagePromptReplace", "");
+	} 
+	
+	public String getReplacePromptTone() {
+		return CmsMedios.getInstance().getCmsParaMediosConfiguration().getParam(siteName, publication, getModuleName(), "tonePromptReplace", "");
+	} 
+
+	public String getReplacePromptTranscribe() {
+		return CmsMedios.getInstance().getCmsParaMediosConfiguration().getParam(siteName, publication, getModuleName(), "transcribePromptReplace", "");
+	} 
 
 	protected String getClientId() {
 		return (client_id!=null ? client_id : 
@@ -362,22 +323,36 @@ public class VertexIaNewsService {
 			CmsMedios.getInstance().getCmsParaMediosConfiguration().getParam(siteName, publication, getModuleName(), "location", "us-central1"));
 	}
 	
-	
 	protected String getPrompt() {
 		return (prompt!=null ? prompt : 
 			CmsMedios.getInstance().getCmsParaMediosConfiguration().getParam(siteName, publication, getModuleName(), "defaultPrompt", ""));
 	}
 	
-	
 	protected String getBasePrompt() {
 		return (basePrompt!=null ? basePrompt : 
 			CmsMedios.getInstance().getCmsParaMediosConfiguration().getParam(siteName, publication, getModuleName(), "basePrompt", ""));
-	}
+	} 
 	
-	protected String getPromptByType(String group) {
-		return (prompt = 
-			CmsMedios.getInstance().getCmsParaMediosConfiguration().getItemGroupParam(siteName, publication, getModuleName(), group, "prompt"));
-	}
+
+	protected String getCustom1Prompt() {
+		return (custom1Prompt!=null ? custom1Prompt : 
+			CmsMedios.getInstance().getCmsParaMediosConfiguration().getParam(siteName, publication, getModuleName(), "custom1Prompt", ""));
+	} 
+	
+	protected String getCustom2Prompt() {
+		return (custom2Prompt!=null ? custom2Prompt : 
+			CmsMedios.getInstance().getCmsParaMediosConfiguration().getParam(siteName, publication, getModuleName(), "custom2Prompt", ""));
+	} 
+	
+	protected String getCustom3Prompt() {
+		return (custom3Prompt!=null ? custom3Prompt : 
+			CmsMedios.getInstance().getCmsParaMediosConfiguration().getParam(siteName, publication, getModuleName(), "custom3Prompt", ""));
+	} 
+	
+	protected String getCustom4Prompt() {
+		return (custom4Prompt!=null ? custom4Prompt : 
+			CmsMedios.getInstance().getCmsParaMediosConfiguration().getParam(siteName, publication, getModuleName(), "custom4Prompt", ""));
+	} 
 	
 	protected String getModel() {
 		return (modelName = 

@@ -437,6 +437,39 @@ public class TfsEnconderQueue {
 		return source;
 	}
 	
+	public int getQueueStatusByPath(String path){
+		
+		int flag = -1;
+		
+		QueryBuilder<Integer> queryBuilder = new QueryBuilder<Integer>(m_cms);
+		queryBuilder.setSQLQuery("SELECT "+DB_FLAG+" from "+TFS_ENCODER_QUEUE+" WHERE "+DB_SOURCE+"=? ");
+		queryBuilder.addParameter(path);
+		
+		ResultSetProcessor<Integer> proc = new ResultSetProcessor<Integer>() {
+
+			private int flag = -1;
+
+			public void processTuple(ResultSet rs) {
+
+				try {
+					this.flag = rs.getInt(DB_FLAG);
+				}
+				catch (SQLException e) {
+					throw ProgramException.wrap(
+							"error al intentar recuperar el estado del video en cola de la base", e);
+				}
+			}
+
+			public Integer getResult() {
+				return this.flag;
+			}
+		};
+        
+		flag = queryBuilder.execute(proc);
+		
+		return flag;
+	}
+	
 	private void deleteFromQueueDB(String id){
 		QueryBuilder queryBuilder = new QueryBuilder(m_cms);
 		queryBuilder.setSQLQuery("DELETE FROM "+TFS_ENCODER_QUEUE+" WHERE "+DB_ID+"=? ");

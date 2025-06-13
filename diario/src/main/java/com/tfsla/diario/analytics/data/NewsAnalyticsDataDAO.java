@@ -11,7 +11,6 @@ import java.util.Map;
 
 import com.tfsla.data.baseDAO;
 import com.tfsla.diario.analytics.model.NewsAnalyticsData;
-import com.tfsla.diario.analytics.model.NewsAnalyticsData;
 
 public class NewsAnalyticsDataDAO extends baseDAO {
 
@@ -212,15 +211,15 @@ public class NewsAnalyticsDataDAO extends baseDAO {
 
 			PreparedStatement stmt;
 
-			stmt = conn.prepareStatement("update TFS_NEWS_ANALYTICS SET CTR = ? AND CLICKS=? AND POSITION=? AND PRINTS=? AND UPDATED_DATE =? WHERE SITENAME=? and PUBLICATION=? and PAGE = ?");
-			stmt.setString(4, newsAnalyticsData.getCtr());
-			stmt.setString(5, newsAnalyticsData.getClicks());
-			stmt.setString(6, newsAnalyticsData.getPosition());
-			stmt.setString(7, newsAnalyticsData.getPrints());
-			stmt.setLong(8, newsAnalyticsData.getUpdatedDate());
-			stmt.setString(1, newsAnalyticsData.getSitename());
-			stmt.setInt(2, newsAnalyticsData.getPublication());
-			stmt.setString(3, newsAnalyticsData.getPage());
+			stmt = conn.prepareStatement("update TFS_NEWS_ANALYTICS SET CTR = ? , CLICKS=? , POSITION=? , PRINTS=? , UPDATED_DATE =? WHERE SITENAME=? AND PUBLICATION=? AND PAGE = ?");
+			stmt.setString(1, newsAnalyticsData.getCtr());
+			stmt.setString(2, newsAnalyticsData.getClicks());
+			stmt.setString(3, newsAnalyticsData.getPosition());
+			stmt.setString(4, newsAnalyticsData.getPrints());
+			stmt.setLong(5, newsAnalyticsData.getUpdatedDate());
+			stmt.setString(6, newsAnalyticsData.getSitename());
+			stmt.setInt(7, newsAnalyticsData.getPublication());
+			stmt.setString(8, newsAnalyticsData.getPage());
 			stmt.executeUpdate();
 
 			stmt.close();

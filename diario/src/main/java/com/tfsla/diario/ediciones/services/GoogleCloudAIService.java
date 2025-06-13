@@ -250,8 +250,13 @@ public class GoogleCloudAIService {
     	return reponse;
     }
     
+    //NAA-3314. Se modifica la clase agregando una validacion para buscar todos los componentes ó solo lo pedido desde el front.
     public JSONObject getSuggestionAI(String newsPath) throws Exception{
-    	
+        return getSuggestionAI(newsPath, "ALL");
+    }
+    
+    public JSONObject getSuggestionAI(String newsPath, String seachComponent) throws Exception{
+    
     	JSONObject JsonResult =  new JSONObject();
 
     	CmsFile file = getCmsFile(newsPath);
@@ -261,44 +266,52 @@ public class GoogleCloudAIService {
     	String newsTitle = extractConntent(fileContent,new String[]{"titulo"});
     	String newsSubTitle = extractConntent(fileContent,new String[]{"copete"});
     	
-    	List<String> titulos = getPredictList(newsContent, "titles");
-    			  
-    	List<String> titulosRedes = getPredictList(newsContent, "titlesSocialNetworks");
-    	
-    	JsonResult.put("titulos",titulos);
-    	JsonResult.put("titulosRedes",titulosRedes);
-    	
-    	String context = getPromptGeneralContexts();
-    	List <String> listPrompts = getPromptsAssistance();
-    	
-    	JSONArray groupsJsonArray = new JSONArray();
-   
-    	for (int i = 0; i < listPrompts.size(); i++) {
-    	    String group = listPrompts.get(i);
-    	    
-    	    String groupTitle =  CmsMedios.getInstance().getCmsParaMediosConfiguration().getItemGroupParam(siteName, publication, getModuleName(), group, "titulo", "");
-    	  
-    	    String contextGroup = CmsMedios.getInstance().getCmsParaMediosConfiguration().getItemGroupParam(siteName, publication, getModuleName(), group, "contexto", "");
-    		
-    	    if(contextGroup!=null && !contextGroup.trim().equals(""))
-    	    	context = contextGroup;
-    	    
-    	    String promptAssistance =  CmsMedios.getInstance().getCmsParaMediosConfiguration().getItemGroupParam(siteName, publication, getModuleName(), group, "consulta", "");
-    	  
-    	    JSONArray assistance = getPredictList(newsTitle,newsSubTitle,newsContent, context,promptAssistance);
-        	 
-    	    JSONObject groupInfoJson = new JSONObject();
-    	    groupInfoJson.put("titulo",groupTitle); 
-    	    groupInfoJson.put("items",assistance); 
-    	    
-    	    groupsJsonArray.add(groupInfoJson);
+    	boolean searchAll = (seachComponent.equals("ALL"))? true : false; //NAA-3314
+    	 
+    	if (searchAll || seachComponent.equals("TITULO")) { //NAA-3314
+	    	List<String> titulos = getPredictList(newsContent, "titles");
+	    			  
+	    	List<String> titulosRedes = getPredictList(newsContent, "titlesSocialNetworks");
+	    	
+	    	JsonResult.put("titulos",titulos);
+	    	JsonResult.put("titulosRedes",titulosRedes);
     	}
     	
-    	JSONObject groupJson = new JSONObject();
-	    groupJson.put("grupo",groupsJsonArray); 
-    	
-	    JsonResult.put("asistencia",groupJson);
-	    
+    	if (searchAll || !seachComponent.equals("TITULO")) { //NAA-3314 
+	    	List <String> listPrompts = getPromptsAssistance();
+	    	
+	    	JSONArray groupsJsonArray = new JSONArray();
+	   
+	    	for (int i = 0; i < listPrompts.size(); i++) {
+		    	String context = getPromptGeneralContexts(); //NAA-3395
+
+	    	    String group = listPrompts.get(i);
+	    	    
+	    	    if (searchAll || seachComponent.equals(group.toUpperCase())) { //NAA-3314
+		    	    String groupTitle =  CmsMedios.getInstance().getCmsParaMediosConfiguration().getItemGroupParam(siteName, publication, getModuleName(), group, "titulo", "");
+		    	  
+		    	    String contextGroup = CmsMedios.getInstance().getCmsParaMediosConfiguration().getItemGroupParam(siteName, publication, getModuleName(), group, "contexto", "");
+		    		
+		    	    if(contextGroup!=null && !contextGroup.trim().equals(""))
+		    	    	context = contextGroup;
+		    	    
+		    	    String promptAssistance =  CmsMedios.getInstance().getCmsParaMediosConfiguration().getItemGroupParam(siteName, publication, getModuleName(), group, "consulta", "");
+		    	  
+		    	    JSONArray assistance = getPredictList(newsTitle,newsSubTitle,newsContent, context,promptAssistance);
+		        	 
+		    	    JSONObject groupInfoJson = new JSONObject();
+		    	    groupInfoJson.put("titulo",groupTitle); 
+		    	    groupInfoJson.put("items",assistance); 
+		    	    
+		    	    groupsJsonArray.add(groupInfoJson);
+	    	    }
+	    	}
+	    	
+	    	JSONObject groupJson = new JSONObject();
+		    groupJson.put("grupo",groupsJsonArray); 
+	    	
+		    JsonResult.put("asistencia",groupJson);
+    	}
     	return JsonResult;
     }
     
@@ -319,17 +332,35 @@ public class GoogleCloudAIService {
     	    	
     	String newsSubTitleFixed = newsSubTitle.replaceAll("\"", "'"); 
     	String newsContentFixed = newsContent.replaceAll("\"", "'"); 
-    	    	
-    	JSONArray jsonResponse = new JSONArray();
-    		    		
-    	String content = context + "\n" + prompt;
-    		   content += "\n Título: "+ newsTitle
-    				   + "\n Subtítulo: "+ newsSubTitleFixed
-    				   + "\n Cuerpo: "+ newsContentFixed;
     	
+    	String contentResponse = "";
+    	JSONArray jsonResponse = new JSONArray();
+    
+    	String dataArticle = "\n Título: "+ newsTitle
+				   + "\n Subtítulo: "+ newsSubTitleFixed
+				   + "\n Cuerpo: "+ newsContentFixed;
+ 	
+    	String content = context.replaceAll("%1", dataArticle) + "\n" + prompt.replaceAll("%1", dataArticle);
+ 		
     	try {
 			String response = predictTextPrompt(content);
-
+			
+			if (!response.contains( " \"sugerencias\": ")) {
+		    	
+				String textPrompt = prompt.replaceAll("%1",content);
+		    	String textFixed = textPrompt.replaceAll("\"", "'"); 
+		    	
+		    	String resumen = getPredictText(textFixed);
+		    	
+		    	JSONObject jsonsub = new JSONObject();
+		    	jsonsub.put("sugerencia", resumen);
+		    	
+				jsonResponse.add(jsonsub);
+				
+				LOG.debug("textCompleto");
+			
+			}else {
+				
 			JsonElement jsonObject = JsonParser.parseString(response);
 			
 			String respuesjson = "[ ";
@@ -367,13 +398,16 @@ public class GoogleCloudAIService {
 			JsonElement jsonElement = JsonParser.parseString(respuesjson);
 			
 			if(jsonElement.isJsonArray())
-				jsonResponse = JSONArray.fromObject(respuesjson);
-				
+				jsonResponse = JSONArray.fromObject(respuesjson);		
+			
+			LOG.debug("SE VA POR ACA 2 ");
+			}
 			
     	}catch(JsonSyntaxException e){
 			e.printStackTrace();
 			String jsonString = "[{\"sugerencia\": \"Error\", \"justificacion\": \"No se pudo procesar correctamente la solicitud\"}]";
 			jsonResponse = JSONArray.fromObject(jsonString);
+			
     	}catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -383,13 +417,17 @@ public class GoogleCloudAIService {
     
     public List<String> getPredictList(String text, String type) {
    
-    	String textFixed = text.replaceAll("\"", "'"); 
+    	String textFixed = "";
+    			
+    	if(text != null)
+    	textFixed =	text.replaceAll("\"", "'"); 
     	 	
     	List <String> listResult = new ArrayList <String>();
     	
     	String textPrompt = "";
     	
     	if(type.equals("corrections")){
+    		promptSugestions = getPromptSugestions(); //NAA-3395
     		if(promptSugestions!=null)
     			textPrompt = promptSugestions.replaceAll("%1",textFixed);
     		else
@@ -405,7 +443,8 @@ public class GoogleCloudAIService {
     	}
     	
     	if(type.equals("titles")) {
-    		if(promptTitles != null)
+    		promptTitles = getPromptTitles(); //NAA-3395
+    		if(promptTitles != null )
     			textPrompt = promptTitles.replaceAll("%1",textFixed);
     		else
     			textPrompt = "\"Sugerir 5 títulos alternativos con mayor impacto para el artículo"
@@ -415,6 +454,7 @@ public class GoogleCloudAIService {
     	}
     			
     	if(type.equals("titlesSocialNetworks")) {
+    		promptTitlesSocial = getPromptTitlesSocial();
     		if(promptTitlesSocial!=null)
     			textPrompt = promptTitlesSocial.replaceAll("%1",textFixed);
     		else

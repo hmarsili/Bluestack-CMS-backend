@@ -18,7 +18,7 @@ public class AnalyticsDateAutomaticDAO extends baseDAO {
 
 			PreparedStatement stmt;
 
-			stmt = conn.prepareStatement("update TFS_NEWS_ANALYTICS_UPDATEDDATE set AUTOMATIC_UPDATED_DATE=? where SITENAME=? and PUBLICATION=?)",Statement.RETURN_GENERATED_KEYS);
+			stmt = conn.prepareStatement("update TFS_NEWS_ANALYTICS_UPDATEDDATE set AUTOMATIC_UPDATED_DATE=? where SITENAME=? and PUBLICATION=?");
 			stmt.setLong(1, dataUpdated.getDateUpdated());
 			stmt.setString(2, dataUpdated.getSitename());
 			stmt.setInt(3, dataUpdated.getPublication());

@@ -11,7 +11,6 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
-import org.opencms.configuration.CPMConfig;
 import org.opencms.configuration.CmsMedios;
 import org.opencms.db.CmsPublishList;
 import org.opencms.file.CmsFile;
@@ -48,10 +47,6 @@ public class NewsOnPublishEvents  implements I_CmsEventListener {
 	public void cmsEvent(CmsEvent event) {
 		int noticiaType;
 		try {
-			
-			CPMConfig config = CmsMedios.getInstance().getCmsParaMediosConfiguration();
-			boolean fastPublication = config.getBooleanParam("", "", "fastPublication", "enabled",false);
-			
 			noticiaType = OpenCms.getResourceManager().getResourceType("noticia").getTypeId();
 			if (event.getType()==I_CmsEventListener.EVENT_BEFORE_PUBLISH_PROJECT) {
 				
@@ -84,23 +79,36 @@ public class NewsOnPublishEvents  implements I_CmsEventListener {
 							
 							String url = CmsResourceUtils.getLink(resource);
 							
-							CmsXmlContent content = null;
-							Locale locale = null;
+							CmsXmlContent content;
 							try {
+								content = getXmlContent(cmsObject, url);
 								
-								if (!fastPublication) {
-									content = getXmlContent(cmsObject, url);
-									locale = getContentLocale(cmsObject, url, content);
-								}
+								Locale locale = getContentLocale(cmsObject, url, content);
+								
+								/*** INI NAA-2704
 								
 								//seteo que la noticia no esta mas programada en caso de estarlo
 								CmsProperty isShedule = new CmsProperty();
 								isShedule.setName("isScheduled");
 								isShedule.setAutoCreatePropertyDefinition(false);
-								isShedule.setStructureValue("false");
-								
+								isShedule.setResourceValue("false");
+								isShedule.setStructureValue(CmsProperty.DELETE_VALUE);
+								isShedule.setResourceValue(null);
 								properties.add(isShedule);
-
+								*/
+								
+								/** INI NAA-3080
+								cmsObject.writePropertyObject(url, new CmsProperty("isScheduled","false",null));
+								*/
+								CmsProperty isScheduled = new CmsProperty();
+								isScheduled.setName("isScheduled");
+								isScheduled.setAutoCreatePropertyDefinition(true);
+								isScheduled.setStructureValue("false");
+								
+								properties.add(isScheduled);
+								
+								LOG.debug("Se actuliza property NAA-2704");
+								/** FIN NAA-2704 y NAA-3080*/
 								
 								//Guardo la fecha de la primera publicacion
 								if(resource.getState().equals(CmsResource.STATE_NEW)){
@@ -177,43 +185,37 @@ public class NewsOnPublishEvents  implements I_CmsEventListener {
 						            }
 								}
 
-								if (!fastPublication) {
-									//Establezco el cannonical
-									boolean contentChanged = setCannonical(url, content, locale, cmsObject);
-									
-									boolean urlflriendlyChanged = setUrlFriendly(url, resource, cmsObject, site, content, locale);
+								//Establezco el cannonical
+								boolean contentChanged = setCannonical(url, content, locale, cmsObject);
 								
-									if(urlflriendlyChanged)
-										contentChanged = urlflriendlyChanged;
-									
-									//Establezco la url bittly.
-									CmsProperty bitlyUrl = setBitlyUrl(url, resource, cmsObject, site);
-									if (bitlyUrl!=null)
-										properties.add(bitlyUrl);
-									
-									//Cambio el estado
-									if (!url.contains("~") && !isPost(cmsObject, resource) && !content.getValue("estado", locale).getStringValue(cmsObject).equals(PlanillaFormConstants.PUBLICADA_VALUE)) {
-										content.getValue("estado", locale).setStringValue(cmsObject, PlanillaFormConstants.PUBLICADA_VALUE);
-										contentChanged = true;
-									}
-									
-									try {
-										ejecuteAction (contentChanged, url, content, properties, cmsObject);
-									}  catch (CmsSecurityException ex) {
-										CmsLog.getLog(this).info("El usuario no tiene suficientes permisos. Usuario: " + 
-												cmsObject.getRequestContext().currentUser().getName());
-										//ejecuto la accion con el cmsObject tfs-Admin si falla por un tema de permisos
-										cmsObject = CmsObjectUtils.loginAsAdmin();	
-										if (cmsObject!=null) {
-											cmsObject.getRequestContext().setCurrentProject(cmsObject.readProject("Offline"));
-											cmsObject.getRequestContext().setSiteRoot(site.getSiteRoot());
-											ejecuteAction (contentChanged, url, content, properties, cmsObject);
-										}
-									}
+								boolean urlflriendlyChanged = setUrlFriendly(url, resource, cmsObject, site, content, locale);
+							
+								if(urlflriendlyChanged)
+									contentChanged = urlflriendlyChanged;
+								
+								//Establezco la url bittly.
+								CmsProperty bitlyUrl = setBitlyUrl(url, resource, cmsObject, site);
+								if (bitlyUrl!=null)
+									properties.add(bitlyUrl);
+								
+								//Cambio el estado
+								if (!url.contains("~") && !isPost(cmsObject, resource) && !content.getValue("estado", locale).getStringValue(cmsObject).equals(PlanillaFormConstants.PUBLICADA_VALUE)) {
+									content.getValue("estado", locale).setStringValue(cmsObject, PlanillaFormConstants.PUBLICADA_VALUE);
+									contentChanged = true;
 								}
-								else {
-									 if (properties.size()>0)
-											writeProperties(url,properties,cmsObject);
+								
+								try {
+									ejecuteAction (contentChanged, url, content, properties, cmsObject);
+								}  catch (CmsSecurityException ex) {
+									CmsLog.getLog(this).info("El usuario no tiene suficientes permisos. Usuario: " + 
+											cmsObject.getRequestContext().currentUser().getName());
+									//ejecuto la accion con el cmsObject tfs-Admin si falla por un tema de permisos
+									cmsObject = CmsObjectUtils.loginAsAdmin();	
+									if (cmsObject!=null) {
+										cmsObject.getRequestContext().setCurrentProject(cmsObject.readProject("Offline"));
+										cmsObject.getRequestContext().setSiteRoot(site.getSiteRoot());
+										ejecuteAction (contentChanged, url, content, properties, cmsObject);
+									}
 								}
 							} catch (CmsXmlException e) {
 								CmsLog.getLog(this).error("Error al intentar modificar la noticia en la publicacion " + url,e);
@@ -298,7 +300,7 @@ public class NewsOnPublishEvents  implements I_CmsEventListener {
 						String titulo = tituloContent.getStringValue(cmsObject);
 						if (validValue == false && !titulo.trim().equals("")) {
 							validValue = true;
-							urlFriendly = titulo;
+							urlFriendly = titulo.toLowerCase();
 						}
 					}
 				
@@ -336,7 +338,7 @@ public class NewsOnPublishEvents  implements I_CmsEventListener {
 				String titulo = tituloContent.getStringValue(cmsObject);
 				if (validValue == false && !titulo.trim().equals("")) {
 					validValue = true;
-					canonical = titulo;
+					canonical = titulo.toLowerCase();
 				}
 			}
 		

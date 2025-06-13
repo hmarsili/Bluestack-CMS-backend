@@ -10,8 +10,10 @@ import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
+import org.apache.commons.logging.Log;
 import org.opencms.file.CmsFile;
 import org.opencms.file.CmsObject;
+import org.opencms.main.CmsLog;
 import org.opencms.xml.content.CmsXmlContent;
 import org.opencms.xml.types.I_CmsXmlContentValue;
 
@@ -28,6 +30,8 @@ public abstract class NewsManagerService extends OfflineProjectService {
 	protected boolean processFields = false;
 	protected Date folderDate = null; 
 	
+	private static final Log LOG = CmsLog.getLog(NewsManagerService.class);
+
 	public NewsManagerService(HttpServletRequest request) throws Throwable {
 		super(request);
 		String stringRequest = ServiceHelper.getRequestAsString(request);
@@ -102,45 +106,93 @@ public abstract class NewsManagerService extends OfflineProjectService {
 					JSONObject itemNoticia = null;
 					resourceName = "";
 					
-					
+					//LOG.info("xmlContent " + xmlContent);
+
 					//Setear todas las properties del contenido en base a elementos en el array del request
 					for(int index=0; index<noticia.size(); index++) {
 						itemNoticia = noticia.getJSONObject(index);
 						for(Object key : itemNoticia.keySet()) {
+							
 							String keyString = key.toString();
+							
+							LOG.debug("clave a procesar:" + keyString);
 							if(skipParameters != null) {
 								//Saltear este parámetro (para url en edición, no setear en XML)
 								if(skipParameters.contains(keyString)) continue;
 							}
+
 							I_CmsXmlContentValue value = xmlContent.getValue(keyString, locale);
-							
+							LOG.debug("campo xsd a de la clave: " + value);
+
 							if(value != null) {
 								String content = itemNoticia.getString(keyString);
-								
+
 								if (this.processFields) {
 									
 									content = impManager.executeRules(keyString, content);
 									report += impManager.getReport();
 								}
 								value.setStringValue(cmsClone, content);
+								
+								LOG.debug("se guarda el contenido en el campo: " + content);
+
 							} else {
 								String elementName = keyString.contains("[") ? keyString.substring(0, keyString.indexOf("[")) : keyString;
+								LOG.debug("se debe generar el sub valor: " + elementName);
+
 								xmlContent.addValue(cmsClone, elementName, locale, xmlContent.getIndexCount(elementName, locale));
-								value = xmlContent.getValue(keyString, locale);
+								LOG.debug("se agrega al xsd el contenido:" + elementName);
 								
+								value = xmlContent.getValue(keyString, locale);
+								LOG.debug("campo xsd a de la clave: " + keyString);
+
 								String content = itemNoticia.getString(keyString);
-								System.out.println("processFields " + processFields);
+
 								if (this.processFields) {
-									System.out.println("elementName " + elementName);
-									
 									content = impManager.executeRules(elementName, content);
 									report += impManager.getReport();
+
 								}
-								value.setStringValue(cmsClone, content);
-							}
+
+								// ini NAA-3251 remplazamos por si hay un subnivel
+								//value.setStringValue(cmsClone, content);
+
+								if(value != null) {
+									
+									value.setStringValue(cmsClone, content);
+									LOG.debug("se comenta  el contenido en el campo: " + content);
+									
+								} else {
+									String elementNameSpl[] = keyString.split("/");
+									LOG.debug("Tercer subnivel split: " + elementNameSpl.length);
+									
+									String elementNameSubNivel = elementNameSpl[1].contains("[") ? elementNameSpl[1].substring(0, elementNameSpl[1].indexOf("[")) : elementNameSpl[1];
+									LOG.debug("se debe generar el sub valor: " + elementNameSubNivel);
+									
+									String path = elementNameSpl[0]+"/"+elementNameSpl[1];
+									LOG.debug("bajo el path " + path);
+
+									xmlContent.addValue(cmsClone, path, locale, xmlContent.getIndexCount(path, locale));
+									LOG.debug("se agrega al xsd el contenido: " + path);
+									
+									value = xmlContent.getValue(keyString, locale);
+									LOG.debug("campo xsd de la clave: " + keyString);
+
+									content = itemNoticia.getString(keyString);
+
+									if (this.processFields) {
+										content = impManager.executeRules(elementName, content);
+										report += impManager.getReport();
+
+									}
+									
+									value.setStringValue(cmsClone, content);
+								}
+								
+								// fin NAA-3251 
 						}
 					}
-
+					}
 					resourceName = cmsClone.getSitePath(cmsFile);
 					cmsFile.setContents(xmlContent.marshal());
 					cmsClone.writeFile(cmsFile);
