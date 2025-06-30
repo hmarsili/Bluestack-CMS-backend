@@ -3,7 +3,9 @@ package com.tfsla.diario.webservices;
 import java.io.IOException;
 
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -245,6 +247,68 @@ public class VideosAddWebService extends FilesAddWebService implements IVideosAd
 			String filename) {
 		HashMap<String, String> parameters = new HashMap<String, String>();
 		parameters.put("section", this.section);
+		
+		List properties = new ArrayList(1);
+		CmsProperty titleProp = new CmsProperty();
+		titleProp.setName("classification");
+		if (OpenCms.getWorkplaceManager().isDefaultPropertiesOnStructure()) {
+			titleProp.setStructureValue("videoflash");
+		} else {
+			titleProp.setResourceValue("videoflash");
+		}
+		properties.add(titleProp);
+		
+		String path = this.getVFSDirectory();
+		String fileNameVFS = "";
+		String type = "";
+		
+		try {
+			if( VideosService.getInstance(cms).getDefaultUploadDestination().equals("vfs")) {
+				VideosService.getInstance(cms).uploadVFSFile(path,cms.getRequestContext().getFileTranslator().translateResource(filename.toLowerCase()),fileStream,properties);
+				type = "VFS";
+			} else if( ImagenService.getInstance(cms).getDefaultUploadDestination().equals("ftp")){
+				fileNameVFS = VideosService.getInstance(cms).uploadFTPFile(path,filename,parameters,fileStream,properties); 
+				type = "FTP";
+			}else if( VideosService.getInstance(cms).getDefaultUploadDestination().equals("server")){
+				fileNameVFS = VideosService.getInstance(cms).uploadRFSFile(path,filename,parameters,fileStream,properties);
+				type = "RFS";
+			}else if( VideosService.getInstance(cms).getDefaultUploadDestination().equals("amz")){
+				fileNameVFS = VideosService.getInstance(cms).uploadAmzFile(path,filename,parameters,fileStream,properties);
+				type = "AMZ";
+			}
+			
+			String formatsGenerated = "";
+			
+			String formats = getConfiguredFormats();
+			
+			TfsVideosAdmin videoAdmin = new TfsVideosAdmin(cms,sitename, publication);
+			
+			boolean existsFormatsInQueue = videoAdmin.existsFormatsInQueue( fileNameVFS,formats);
+		  	
+			if(!existsFormatsInQueue && formats!=null ) {  	
+			   formatsGenerated = queueConvert( fileNameVFS, formats, type );
+			} 
+			
+		} catch (CmsException e) {
+			LOG.error("Error en crecion de imagen - webservice: " + e.getMessage());
+		} catch (IOException e) {
+			LOG.error("Error en crecion de imagen - webservice: " + e.getMessage());
+		} catch (Exception e) {
+			LOG.error("Error en crecion de imagen - webservice: " + e.getMessage());
+		}
+		return fileNameVFS;
+
+	}
+	
+	protected String uploadFile(CmsObject cms, InputStream fileStream, String filename, Date folderdate) {
+		HashMap<String, String> parameters = new HashMap<String, String>();
+		parameters.put("section", this.section);
+		
+		if (folderdate!=null)
+		{
+			SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy"); 
+			parameters.put("date",sdf.format(folderdate));
+		}
 		
 		List properties = new ArrayList(1);
 		CmsProperty titleProp = new CmsProperty();

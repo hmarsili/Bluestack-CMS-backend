@@ -59,11 +59,23 @@ public abstract class FilesAddWebService extends OfflineProjectService {
 		else
 			this.publish = true;
 		
+		Date folderDate = null;
+		
+		if( this.getPostRequestParam("folderdate")!=null) {
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd"); 
+            folderDate = dateFormat.parse(this.getPostRequestParam("folderdate").toString());
+		}
+		
 		JSONArray jsonResponse = new JSONArray();
 		Hashtable<String, Object> params = new Hashtable<String, Object>();
 		try {
 			this.switchToOfflineSession();
 			int itemsCount = this.processItemsRequest(params, encoding);
+			
+			if(folderDate !=null){
+				SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy"); 
+				params.put("date",sdf.format(folderDate));
+			}
 		
 			LOG.debug("AddWebServices - Items a agregar: " + itemsCount);
 			
@@ -89,7 +101,13 @@ public abstract class FilesAddWebService extends OfflineProjectService {
 					
 					if (cms.getRequestContext().currentUser().isWebuser()) {
 						String site = cms.getRequestContext().getSiteRoot();
-						fileNameVFS = this.uploadFile(SessionManager.getAdminCmsObject(site), fileStream, filename);
+
+						if(folderDate ==null)
+							fileNameVFS = this.uploadFile(SessionManager.getAdminCmsObject(site), fileStream, filename);
+						else
+							fileNameVFS = this.uploadFile(SessionManager.getAdminCmsObject(site), fileStream, filename, folderDate);
+						
+
 						this.setCommonProperties(properties, params, fileIndex);
 						
 						saveProperties(properties,fileNameVFS, SessionManager.getAdminCmsObject(site));
@@ -102,7 +120,12 @@ public abstract class FilesAddWebService extends OfflineProjectService {
 							// Un problema encontrado es que si este webservice es llamado en corto tiempo por algun motivo el cmsobject pasa al online.
 							CmsObject cmsClone = CmsObjectUtils.getClone(cms);
 							SessionManager.switchToProject(cmsClone, SessionManager.PROJECT_OFFLINE);
-							fileNameVFS = this.uploadFile(cmsClone, fileStream, filename);
+							
+							if(folderDate ==null)
+								fileNameVFS = this.uploadFile(cmsClone, fileStream, filename);
+							else
+								fileNameVFS = this.uploadFile(cmsClone, fileStream, filename, folderDate);
+							
 							this.setCommonProperties(properties, params, fileIndex);
 							
 							saveProperties(properties,fileNameVFS, cmsClone);
@@ -270,6 +293,8 @@ public abstract class FilesAddWebService extends OfflineProjectService {
 	protected abstract String getSubFolderPath();
 	
 	protected abstract String uploadFile(CmsObject cms,InputStream fileStream, String filename) throws Exception;
+	
+	protected abstract String uploadFile(CmsObject cms,InputStream fileStream, String filename, Date folderdate ) throws Exception;
 	
 	protected int getPointerType() throws CmsLoaderException {
 		return CmsResourceTypeExternalImage.getStaticTypeId();

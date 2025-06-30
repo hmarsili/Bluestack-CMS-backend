@@ -163,6 +163,7 @@ public class ImagesAddWebService extends FilesAddWebService implements IImagesAd
 		parameters.put("section", this.section);
 		String path = this.getVFSDirectory();
 		String fileNameVFS = "";
+		
 		try {
 			if( ImagenService.getInstance(cms).getDefaultUploadDestination().equals("vfs")) {
 				ImagenService.getInstance(cms).uploadVFSFile(path,cms.getRequestContext().getFileTranslator().translateResource(filename.toLowerCase()),fileStream);
