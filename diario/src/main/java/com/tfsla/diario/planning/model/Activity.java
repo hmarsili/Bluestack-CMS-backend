@@ -12,7 +12,7 @@ public class Activity {
 	private int publication;  // se obtiene del json authentication
 	private int id;  // Autoincrementable, devuelve el back al insertar una actividad. 
 	private String title; //OBLIGATORIO
-	private String descripcion;
+	private String description;
 	private String userName; //OBLIGATORIO usuario que se selecciona en el combo. (username)
 	private String userCreation; //OBLIGATORIO usuario logueado en el sistema (username)
 	private String color;
@@ -20,7 +20,7 @@ public class Activity {
 	private String type_recurrence; // OBLIGATORIO. Las opciones son: RECURRENCE -  DATE_EXACT - PERSONAL;
 	private int personal_days; //dias  --> cuado es RECURRENCE 1 = diaria y 7 = semanal // PERSONAL cada 1, 2 ó 3 dias. 
 	private String repeat_type; //--> cuando type_recurrence = PERSONAL, las opciones son: D (days) - W (week) - M (mount) - Y (year)
-	private int repeat_day; // --> cuando type_recurrence = PERSONAL, las opciones son: 1(domingo), 2 (lunes), 3(martes), 4(miercoles), 5(Jueves), 6(Viernes), 7(sábado)
+	private String repeat_day; // --> cuando type_recurrence = PERSONAL, las opciones son: 1(domingo), 2 (lunes), 3(martes), 4(miercoles), 5(Jueves), 6(Viernes), 7(sábado)
 	private int repeat_end; // --> cuando type_recurrence = PERSONAL, las opciones son: 0 (never), 1 (date), 2(latter)
 	private long start_date ; //cuando type_recurrence = DATE_EXACT ó type_recurrence = RECURRENCE ó type_recurrence = PERSONAL && repeart_end != 0.
 	private int repeat_end_days; // --> cuando type_recurrence = PERSONAL, Cantidad de dias que elimian la recurrencia.
@@ -53,11 +53,11 @@ public class Activity {
 	public void setTitle(String title) {
 		this.title = title;
 	}
-	public String getDescripcion() {
-		return descripcion;
+	public String getDescription() {
+		return description;
 	}
-	public void setDescripcion(String descripcion) {
-		this.descripcion = descripcion;
+	public void setDescription(String description) {
+		this.description = description;
 	}
 	public String getUserName() {
 		return userName;
@@ -95,10 +95,10 @@ public class Activity {
 	public void setRepeat_type(String repeat_type) {
 		this.repeat_type = repeat_type;
 	}
-	public int getRepeat_day() {
+	public String getRepeat_day() {
 		return repeat_day;
 	}
-	public void setRepeat_day(int repeart_day) {
+	public void setRepeat_day(String repeart_day) {
 		this.repeat_day = repeart_day;
 	}
 	public int getRepeat_end() {
