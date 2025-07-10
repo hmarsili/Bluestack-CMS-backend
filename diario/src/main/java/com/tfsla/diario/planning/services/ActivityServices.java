@@ -69,6 +69,8 @@ public class ActivityServices {
 		
 		ActivityDAO activityDAO = new ActivityDAO();
 		try {
+			activity.setSiteName(siteName);
+			activity.setPublication(publication);
 			activityDAO.updateActivity(activity);
 		} catch (Exception e) {
 			e.printStackTrace();

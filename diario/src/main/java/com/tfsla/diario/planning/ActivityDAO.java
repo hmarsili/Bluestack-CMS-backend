@@ -144,7 +144,7 @@ public class ActivityDAO extends baseDAO {
 
 			PreparedStatement stmt;
 
-			stmt = conn.prepareStatement("Select * from TFS_PLANNING where PUBLICATION=? and SITE=? and ID=?");
+			stmt = conn.prepareStatement("Select * from TFS_PLANNING where PUBLICATION=? and SITENAME=? and ID=?");
 			
 			stmt.setInt(1, publication);
 			stmt.setString(2, sitename);
@@ -178,7 +178,7 @@ public class ActivityDAO extends baseDAO {
 
 			PreparedStatement stmt;
 
-			stmt = conn.prepareStatement("Select * from TFS_PLANNING where PUBLICATION=? and SITE=?");
+			stmt = conn.prepareStatement("Select * from TFS_PLANNING where PUBLICATION=? and SITENAME=?");
 
 			stmt.setInt(1, publication);
 			stmt.setString(2, sitename);
@@ -280,7 +280,7 @@ public class ActivityDAO extends baseDAO {
 					+ "DESCRIPTION=?, USERNAME=?, COLOR=?, TYPE_RECURRENCE=?, PERSONAL_DAYS=?, "
 					+ "REPEAT_TYPE=?,REPEAT_DAY=?, REPEAT_END=?, REPEAT_END_DAYS=?, DATE_END=?, "
 					+ "TYPE_OF_MONTH=?, WEEK_POSITION=? "
-					+ "where PUBLICATION=? AND SITE=? AND ID=?");
+					+ "where PUBLICATION=? AND SITENAME=? AND ID=?");
 			stmt.setLong(1, Activity.getStart_date());
 			stmt.setString(2, Activity.getTitle());
 			stmt.setString(3, Activity.getDescription());
@@ -318,7 +318,7 @@ public class ActivityDAO extends baseDAO {
 
 			PreparedStatement stmt;
 
-			stmt = conn.prepareStatement("delete from TFS_PLANNING where PUBLICATION=? AND SITE=? AND ID=?");
+			stmt = conn.prepareStatement("delete from TFS_PLANNING where PUBLICATION=? AND SITENAME=? AND ID=?");
 			stmt.setInt(1, publication);
 			stmt.setString(2, sitename);
 			stmt.setInt(3, id);
