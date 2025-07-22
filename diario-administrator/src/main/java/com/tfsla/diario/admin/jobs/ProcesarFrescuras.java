@@ -39,6 +39,7 @@ import org.opencms.workplace.CmsWorkplaceAction;
 import org.opencms.workplace.commons.Messages;
 import org.opencms.xml.content.CmsXmlContent;
 import org.opencms.xml.content.CmsXmlContentFactory;
+import com.tfsla.planilla.herramientas.PlanillaFormConstants;
 
 import com.tfsla.diario.admin.jsp.TfsNewsAdminJson;
 import com.tfsla.diario.ediciones.model.TipoEdicion;
@@ -104,9 +105,12 @@ public class ProcesarFrescuras implements I_CmsScheduledJob {
 		resultados += "Lanzando ejecucion de noticias  con frescura entre la/s ultima/s " + hoursAfter + " hora/s " + 
 				" de la _publication "+ _publication + " en _sitename " + _sitename ;
 
+
+		String timeZoneRedaction = "GMT"+configxsml.getParam(_sitename, _publication, "admin-settings", "gmtRedaction");
 		
 		Calendar nowGMT = Calendar.getInstance();
-		nowGMT.setTimeZone(TimeZone.getTimeZone("GMT-0"));
+		//nowGMT.setTimeZone(TimeZone.getTimeZone("GMT-0"));
+		nowGMT.setTimeZone(TimeZone.getTimeZone(timeZoneRedaction));
 		nowGMT.add(Calendar.HOUR, 1);
 		nowGMT.set(Calendar.MILLISECOND, 0);
 		nowGMT.set(Calendar.SECOND, 0);
@@ -114,7 +118,8 @@ public class ProcesarFrescuras implements I_CmsScheduledJob {
 		
 
 		Calendar nextCal = Calendar.getInstance();
-		nextCal.setTimeZone(TimeZone.getTimeZone("GMT-0"));
+		//nextCal.setTimeZone(TimeZone.getTimeZone("GMT-0"));
+		nextCal.setTimeZone(TimeZone.getTimeZone(timeZoneRedaction));
 		nextCal.add(Calendar.HOUR, hoursAfter + 1);
 		nextCal.set(Calendar.MILLISECOND, 0);
 		nextCal.set(Calendar.SECOND, 0);
@@ -214,6 +219,11 @@ public class ProcesarFrescuras implements I_CmsScheduledJob {
 						updateLastModDate();	    				
 					}
 
+					//NAA-3486 seteamos el estado pendiente de publicarion
+					if (resource.getState().equals(CmsResourceState.STATE_NEW)) {
+						setPendingPublicationStatus();
+					}
+					
 					CmsWorkplaceAction action = CmsWorkplaceAction.getInstance();
 					CmsObject cmsAdmin = action.getCmsAdminObject();
 					cmsAdmin.getRequestContext().setSiteRoot(cms.getRequestContext().getSiteRoot());
@@ -507,6 +517,34 @@ public class ProcesarFrescuras implements I_CmsScheduledJob {
 				resultados += "Se agrego correctamente la noticia como Pin" + newPin.getResource() + " - " +  newPin.getPublication() + " - " +  newPin.getUser();
 
 			}
+		}
+
+	}
+	
+	private void setPendingPublicationStatus() {
+
+		try {		
+			CmsResourceUtils.forceLockResource(cms,path);
+			CmsFile fileNew = cms.readFile(path,CmsResourceFilter.ALL);
+
+			CmsXmlContent contentNew = CmsXmlContentFactory.unmarshal(cms, fileNew);
+			contentNew.setAutoCorrectionEnabled(true);
+			contentNew.correctXmlStructure(cms);
+			if (!contentNew.getValue("estado", Locale.ENGLISH).getStringValue(cms).equals(PlanillaFormConstants.PUBLICADA_VALUE))
+				contentNew.getValue("estado", Locale.ENGLISH).setStringValue(cms, PlanillaFormConstants.PENDIENTE_PUBLICACION_VALUE);
+
+			String fileEncoding = cms.readPropertyObject(cms.getRequestContext().removeSiteRoot(fileNew.getRootPath()), CmsPropertyDefinition.PROPERTY_CONTENT_ENCODING, true).getValue(OpenCms.getSystemInfo().getDefaultEncoding());
+
+			String decodedContent = contentNew.toString();
+			decodedContent = decodedContent.replaceAll("(?!\\n)[\\p{C}]", "");
+
+			fileNew.setContents(decodedContent.getBytes(fileEncoding));
+
+			cms.writeFile(fileNew);							
+			cms.unlockResource(path);
+
+		} catch (Exception ex) {
+			CmsLog.getLog(this).error ("Error al intentar modificar la noticia con la fecha de ultima modificacion - Publica la nota", ex  );
 		}
 
 	}
