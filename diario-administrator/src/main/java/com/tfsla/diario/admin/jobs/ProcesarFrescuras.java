@@ -106,11 +106,13 @@ public class ProcesarFrescuras implements I_CmsScheduledJob {
 				" de la _publication "+ _publication + " en _sitename " + _sitename ;
 
 
-		String timeZoneRedaction = "GMT"+configxsml.getParam(_sitename, _publication, "admin-settings", "gmtRedaction");
+		//NAA-3552 Desde el front se guarda hora redaccion. Desde el back levantamos igual, pero por alguna razon desde el front se levanta 
+		// con -1 hora entonces desde el back, lo levantamos asi. 
+		int timeZoneRedaction = Integer.parseInt(configxsml.getParam(_sitename, _publication, "admin-settings", "gmtRedaction").replaceFirst("-", ""))+1;		
+		String timeZoneRedactionGMT = "GMT-"+timeZoneRedaction;
 		
-		Calendar nowGMT = Calendar.getInstance();
-		//nowGMT.setTimeZone(TimeZone.getTimeZone("GMT-0"));
-		nowGMT.setTimeZone(TimeZone.getTimeZone(timeZoneRedaction));
+		Calendar nowGMT = Calendar.getInstance();		
+		nowGMT.setTimeZone(TimeZone.getTimeZone(timeZoneRedactionGMT));
 		nowGMT.add(Calendar.HOUR, 1);
 		nowGMT.set(Calendar.MILLISECOND, 0);
 		nowGMT.set(Calendar.SECOND, 0);
@@ -118,8 +120,7 @@ public class ProcesarFrescuras implements I_CmsScheduledJob {
 		
 
 		Calendar nextCal = Calendar.getInstance();
-		//nextCal.setTimeZone(TimeZone.getTimeZone("GMT-0"));
-		nextCal.setTimeZone(TimeZone.getTimeZone(timeZoneRedaction));
+		nextCal.setTimeZone(TimeZone.getTimeZone(timeZoneRedactionGMT));
 		nextCal.add(Calendar.HOUR, hoursAfter + 1);
 		nextCal.set(Calendar.MILLISECOND, 0);
 		nextCal.set(Calendar.SECOND, 0);
