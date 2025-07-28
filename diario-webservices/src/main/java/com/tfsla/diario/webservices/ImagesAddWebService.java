@@ -2,10 +2,12 @@ package com.tfsla.diario.webservices;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
 import javax.swing.ImageIcon;
@@ -16,6 +18,7 @@ import org.opencms.file.CmsProperty;
 import org.opencms.file.CmsPropertyDefinition;
 import org.opencms.main.CmsException;
 import org.opencms.main.CmsLog;
+import org.opencms.main.OpenCms;
 
 import com.tfsla.diario.ediciones.services.ImageMetadataPropertiesService;
 import com.tfsla.diario.ediciones.services.ImagenService;
@@ -70,6 +73,7 @@ public class ImagesAddWebService extends FilesAddWebService implements IImagesAd
 		String vfsSubFolderFormat = config.getParam(sitename, publication, "imageUpload", "vfsSubFolderFormat","");
 		
 		String vfsPath = config.getParam(sitename, publication, "imageUpload", "vfsPath","");
+		
 		try {
 			HashMap<String, String> parameters = new HashMap<String, String>();
 			parameters.put("section", this.section);
@@ -82,6 +86,16 @@ public class ImagesAddWebService extends FilesAddWebService implements IImagesAd
 			LOG.error("Error al obtener subfolderPath: " + vfsPath);
 			e.printStackTrace();
 		}
+		
+		if (!vfsPath.endsWith("/")) {
+			try {
+				vfsPath = getVFSSubFolderPath(service.getFolderType(), this.folderFallback);
+			} catch (Exception e) {
+				LOG.error("Error al crear la subfolderPath: " + vfsPath);
+				e.printStackTrace();
+			}
+		}
+		
 		return vfsPath;
 		
 	}
@@ -91,16 +105,27 @@ public class ImagesAddWebService extends FilesAddWebService implements IImagesAd
 		String vfsSubFolderFormat = config.getParam(sitename, publication, "imageUpload", "vfsSubFolderFormat","");
 		
 		String vfsPath = config.getParam(sitename, publication, "imageUpload", "vfsPath","");
+		
 		try {
 			
 			LOG.debug("va a buscar el vfsPath - siteName: " + sitename + " - publication: " + publication + " - vfsPath: " + vfsPath);
-			vfsPath += "/" + service.getVFSSubFolderPath(vfsPath, service.getFolderType(), vfsSubFolderFormat, parameters);
+			vfsPath += "/" + this.getVFSSubFolderPath(vfsPath, service.getFolderType(), vfsSubFolderFormat, parameters);
 			LOG.debug("- vfsPath: " + vfsPath);
 			
 		} catch (Exception e) {
 			LOG.error("Error al obtener subfolderPath: " + vfsPath);
 			e.printStackTrace();
 		}
+		
+		if (!vfsPath.endsWith("/")) {
+			try {
+				vfsPath = getVFSSubFolderPath(service.getFolderType(), this.folderFallback);
+			} catch (Exception e) {
+				LOG.error("Error al crear la subfolderPath: " + vfsPath);
+				e.printStackTrace();
+			}
+		}
+		
 		return vfsPath;
 		
 	}
@@ -185,6 +210,85 @@ public class ImagesAddWebService extends FilesAddWebService implements IImagesAd
 		}
 		return fileNameVFS;
 
+	}
+	
+	public String getVFSSubFolderPath(String parentPath, int folderType, String subFolderFormat, Map<String,String> parameters) throws Exception {
+		Date now = null;
+		String date = parameters.get("date");
+		if (date == null) {
+			now = new Date();
+		} else {
+			try {
+				SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy"); 
+				now = sdf.parse(date);
+			}
+			catch (ParseException ex) {
+				LOG.error(ex);
+				now = new Date();
+			}
+		}
+		
+		String subFolder = "";
+		if (subFolderFormat.trim().equals(""))
+			return "";
+		
+		String partialFolder = parentPath + "/";
+		String firstFolderCreated  = "";
+		String[] parts = subFolderFormat.split("/");
+		
+		for (String part : parts) {
+			String subfolderName = "";
+			if (parameters.get(part)!=null) {
+				subfolderName = parameters.get(part);
+			} else {
+				SimpleDateFormat sdf = new SimpleDateFormat(part);
+				subfolderName = sdf.format(now);
+			}
+			partialFolder += subfolderName;
+			subFolder += subfolderName;
+			
+			if (!cms.existsResource(partialFolder)) {
+				cms.createResource(partialFolder, folderType);
+				if (firstFolderCreated.equals(""))
+					firstFolderCreated  = partialFolder;
+			}
+			partialFolder += "/";
+			subFolder += "/";
+		}
+		
+		if (!firstFolderCreated.equals("") && this.publishFolders) 
+			OpenCms.getPublishManager().publishResource(cms, firstFolderCreated);
+		
+		return subFolder;
+	}
+	
+	public String getVFSSubFolderPath( int folderType, String subFolderFormat) throws Exception {
+		
+		String subFolder = "";
+		if (subFolderFormat.trim().equals(""))
+			return "";
+		
+		String partialFolder = "/";
+		String firstFolderCreated  = "";
+		String[] parts = subFolderFormat.split("/");
+		
+		for (String part : parts) {
+			partialFolder += part;
+			subFolder += part;
+			
+			if (!cms.existsResource(partialFolder)) {
+				cms.createResource(partialFolder, folderType);
+				if (firstFolderCreated.equals(""))
+					firstFolderCreated  = partialFolder;
+			}
+			partialFolder += "/";
+			subFolder += "/";
+		}
+		
+		if (!firstFolderCreated.equals("") && this.publishFolders) 
+			OpenCms.getPublishManager().publishResource(cms, firstFolderCreated);
+		
+		return subFolder;
 	}
 
 	}

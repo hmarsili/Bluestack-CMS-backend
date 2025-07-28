@@ -59,11 +59,23 @@ public abstract class FilesAddWebService extends OfflineProjectService {
 		else
 			this.publish = true;
 		
+		Object publishF = this.getPostRequestParam("publishFolders");
+		if(publishF != null && publishF.toString().trim().equals("false")) {
+			this.publishFolders = false;
+		}else
+			this.publishFolders = true;
+		
 		Date folderDate = null;
 		
 		if( this.getPostRequestParam("folderdate")!=null) {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd"); 
             folderDate = dateFormat.parse(this.getPostRequestParam("folderdate").toString());
+		}
+		
+		if(this.getPostRequestParam("folderFallback")!=null) {
+			folderFallback = this.getPostRequestParam("folderFallback").toString();
+		}else {
+			folderFallback = "img";
 		}
 		
 		JSONArray jsonResponse = new JSONArray();
@@ -319,5 +331,7 @@ public abstract class FilesAddWebService extends OfflineProjectService {
 	protected String publication;
 	
 	protected boolean publish;
+	protected String folderFallback;
+	protected boolean publishFolders;
 	
 }
